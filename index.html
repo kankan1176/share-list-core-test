@@ -2913,6 +2913,10 @@ body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
 .sl-dock-actions button{min-width:28px!important;width:29px!important;height:29px!important;padding:0!important;font-size:16px!important;display:inline-flex;align-items:center;justify-content:center}
 @media(max-width:820px){.sl-dock-song{grid-template-columns:16px minmax(0,1fr) auto!important}}
 
+
+/* Phase 2: Firebase更新が未完了の行は再操作を防止する */
+.sl-dock-song.sl-dock-pending{opacity:.62;cursor:progress}
+.sl-dock-song.sl-dock-pending button{cursor:wait;pointer-events:none}
 </style>
 </head>
 <body>
@@ -9070,6 +9074,7 @@ html, body { background: transparent !important; color: ${text} !important; }
   let slDockUndoTimer=null;
   let slDockFeedbackTimer=null;
   let slReorderBusy=false;
+  const slDockPendingIds=new Set();
   function slDockFeedback(message,error=false){
     const box=slById('slDockFeedback');
     if(!box)return;
@@ -9081,35 +9086,50 @@ html, body { background: transparent !important; color: ${text} !important; }
   }
 
   async function slDockChangeStatus(qId,newStatus){
-    if(!slHasRoom() || !Object.hasOwn(roomQueue,qId))return;
+    if(!slHasRoom() || !Object.hasOwn(roomQueue,qId) || slDockPendingIds.has(qId))return;
     if(typeof isSafeQueueId==='function'&&!isSafeQueueId(qId))return;
+    if(!['reserved','confirmed','completed'].includes(newStatus))return;
     const old=roomQueue[qId];
+    const expectedStatus=old?.status;
+    if(!expectedStatus || expectedStatus===newStatus)return;
     const label=old?.songId&&typeof queueSongDataById==='function'
       ?(queueSongDataById(old.songId)?.['曲名']||'楽曲'):'楽曲';
+    const roomId=currentRoomId;
+    if(!roomId)return;
+    slDockPendingIds.add(qId);
+    slRenderRoomDock();
     try{
-      // Use the same status/order format as the original changeStatus implementation.
-      const roomId=currentRoomId;
-      if(!roomId)throw new Error('ルームがありません');
-      await db.ref('rooms/'+roomId+'/queue/'+qId).update({
-        status:newStatus,
-        order:firebase.database.ServerValue.TIMESTAMP
-      });
-      // 操作後もユーザーが選択している右メニューのタブを維持する。
-      slDockFeedback('「'+label+'」を'+({reserved:'予約',confirmed:'演奏確定',completed:'完了'}[newStatus]||newStatus)+'へ移動しました');
+      // 他の参加者が先に状態を変えた場合は、古い画面からの操作を上書きしない。
+      const ref=db.ref('rooms/'+roomId+'/queue/'+qId);
+      const result=await ref.transaction(current=>{
+        if(!current || current.status!==expectedStatus)return;
+        return {...current,status:newStatus,order:Date.now()};
+      },undefined,false);
+      if(!result.committed){
+        slDockFeedback('他の参加者が先に変更しました。最新の状態をご確認ください。',true);
+        return;
+      }
+      // 状態変更では選択中のタブを変更しない。
+      slDockFeedback('「'+label+'」を'+({reserved:'予約',confirmed:'演奏確定',completed:'完了'}[newStatus])+'へ移動しました');
     }catch(err){
       console.error('進行状態変更エラー',err);
       slDockFeedback('状態を変更できませんでした。通信状態をご確認ください。',true);
+    }finally{
+      slDockPendingIds.delete(qId);
+      slRenderRoomDock();
     }
   }
 
   async function slDockRemove(qId){
-    if(!slHasRoom()||!Object.hasOwn(roomQueue,qId))return;
+    if(!slHasRoom()||!Object.hasOwn(roomQueue,qId)||slDockPendingIds.has(qId))return;
     if(typeof isSafeQueueId==='function'&&!isSafeQueueId(qId))return;
     const roomId=currentRoomId;
     if(!roomId)return;
     const record={...roomQueue[qId]};
     const song=typeof queueSongDataById==='function'?queueSongDataById(record.songId):null;
     const name=String(song?.['曲名']||'楽曲');
+    slDockPendingIds.add(qId);
+    slRenderRoomDock();
     try{
       // Removal occurs immediately; the user can explicitly restore it for 8 seconds.
       await db.ref('rooms/'+roomId+'/queue/'+qId).remove();
@@ -9126,12 +9146,15 @@ html, body { background: transparent !important; color: ${text} !important; }
     }catch(err){
       console.error('予約削除エラー',err);
       slDockFeedback('削除できませんでした。通信状態をご確認ください。',true);
+    }finally{
+      slDockPendingIds.delete(qId);
+      slRenderRoomDock();
     }
   }
 
   window.slUndoLastRemoval=async function(){
     const pending=slDockUndoEntry;
-    if(!pending)return;
+    if(!pending || slDockPendingIds.has(pending.qId))return;
     if(currentRoomId!==pending.roomId){
       slDockFeedback('別のルームでは復元できません。',true);
       return;
@@ -9143,9 +9166,11 @@ html, body { background: transparent !important; color: ${text} !important; }
       const ref=db.ref('rooms/'+pending.roomId+'/queue/'+pending.qId);
       const result=await ref.transaction(current=>current===null?pending.record:undefined,undefined,false);
       if(!result.committed)throw new Error('対象IDはすでに使用されています');
-      slDockUndoEntry=null;
-      clearTimeout(slDockUndoTimer);
-      const box=slById('slDockUndo');if(box)box.hidden=true;
+      if(slDockUndoEntry===pending){
+        slDockUndoEntry=null;
+        clearTimeout(slDockUndoTimer);
+        const box=slById('slDockUndo');if(box)box.hidden=true;
+      }
       // 復元時もタブを自動切り替えしない。
       slDockFeedback('「'+pending.name+'」を元に戻しました');
     }catch(err){
@@ -9155,7 +9180,7 @@ html, body { background: transparent !important; color: ${text} !important; }
   };
 
   async function slDockSwap(qIdA,qIdB){
-    if(slReorderBusy||!slHasRoom()||!currentRoomId)return;
+    if(slReorderBusy||!slHasRoom()||!currentRoomId||slDockPendingIds.has(qIdA)||slDockPendingIds.has(qIdB))return;
     const a=roomQueue[qIdA],b=roomQueue[qIdB];
     if(!a||!b||a.status!==b.status)return;
     if(typeof isSafeQueueId==='function'&&(!isSafeQueueId(qIdA)||!isSafeQueueId(qIdB)))return;
@@ -9249,8 +9274,12 @@ html, body { background: transparent !important; color: ${text} !important; }
         actions.append(slActionButton('🔙','演奏確定へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'confirmed')));
       }
 
+      if(slDockPendingIds.has(item.qId)){
+        row.classList.add('sl-dock-pending');
+        actions.querySelectorAll('button').forEach(button=>button.disabled=true);
+      }
       row.append(no,main,actions);
-      slDockReorderDrag(row,item,status);
+      if(!slDockPendingIds.has(item.qId))slDockReorderDrag(row,item,status);
       list.appendChild(row);
     });
   }
