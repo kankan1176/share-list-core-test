@@ -2902,12 +2902,8 @@ body.sl-redesign #friendsModal .sl-friends-workspace{
 /* 2026-10-09: genre buttons, dock collapsed backdrop and compact drag controls */
 #slGenreHost .genre-btn{pointer-events:auto!important;touch-action:manipulation;cursor:pointer!important}
 #slGenreHost .genre-btn:active{filter:brightness(1.15)}
-body.sl-redesign.in-room.sl-room-dock-collapsed::after{
- content:"";position:fixed;top:0;bottom:0;right:0;width:var(--sl-dock);
- background:linear-gradient(180deg,#0a172c,#081321);z-index:1850;
- pointer-events:none;
- border-left:1px solid rgba(104,137,214,.24);
-}
+/* 格納時は背面を覆わず、現在のページを表示する */
+body.sl-redesign.in-room.sl-room-dock-collapsed::after{content:none!important;display:none!important}
 body.in-room.sl-room-dock-collapsed #slRoomDock{z-index:2200!important}
 body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
 .sl-dock-song{grid-template-columns:18px minmax(0,1fr) auto!important;cursor:grab}
@@ -6521,11 +6517,16 @@ html, body { background: transparent !important; color: ${text} !important; }
 
     // Apps Script を「ウェブアプリ」としてデプロイして /exec URL をここに設定。
     // 公開CSVのURLは書き込みに使えません。
-    function openAddSongModal() {
+    let slAddSongOpenVersion = 0;
+    function openAddSongModal(resumeVersion) {
+        const requestVersion = resumeVersion === undefined ? ++slAddSongOpenVersion : resumeVersion;
+        if (requestVersion !== slAddSongOpenVersion) return;
         document.body.classList.add('sl-add-song-open');
         if (typeof slSyncUi === 'function') slSyncUi();
         if (serverPagedMasterMode && !masterLoaded) {
-            void promoteServerPageToFullMaster('新規楽曲追加').then(() => openAddSongModal());
+            void promoteServerPageToFullMaster('新規楽曲追加')
+                .then(() => { if (requestVersion === slAddSongOpenVersion && document.body.classList.contains('sl-add-song-open')) openAddSongModal(requestVersion); })
+                .catch(error => { if (requestVersion === slAddSongOpenVersion) console.warn('楽曲追加用データ取得に失敗:',error); });
             return;
         }
         const genres = new Set();
@@ -7938,6 +7939,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         else history.replaceState(state, '', location.pathname + location.search + location.hash);
     }
     window.addEventListener('popstate', async event => {
+        if (typeof window.slHandleHistoryPop === 'function' && window.slHandleHistoryPop(event)) return;
         if (currentRoomId) return;
         const view=event.state?.[APP_HISTORY_KEY];
         closeMobileMenu();
@@ -8711,6 +8713,40 @@ html, body { background: transparent !important; color: ${text} !important; }
   // Single view coordinator. Firebase, room and auth functions remain in their original handlers.
   let slNavSerial=0;
   let slOpenOverlayId=null;
+  const slHistoryKey='slViewOverlayStage1';
+  const slHistoryOverlayIds=new Set(['slHelpModal','settingsModal','friendsModal','myPageModal','slTermsModal','slPrivacyModal','addSongModal','roomCreateModal']);
+  let slHistoryRestoring=false;
+  let slLastManagedOverlay=null;
+  function slTrackOverlay(id){
+    if(slHistoryRestoring || !slHistoryOverlayIds.has(id))return;
+    const current=history.state||{};
+    if(current[slHistoryKey]===id){slLastManagedOverlay=id;return;}
+    history.pushState({...current,[slHistoryKey]:id},'',location.href);
+    slLastManagedOverlay=id;
+  }
+  window.slHandleHistoryPop=function(event){
+    const target=event.state?.[slHistoryKey]||null;
+    if(!slLastManagedOverlay&&!target)return false;
+    slHistoryRestoring=true;
+    try{
+      if(!slCloseVisibleModals(''))return true;
+      if(target){
+        const modal=slById(target);
+        if(modal){
+          if(target==='addSongModal'){
+            document.body.classList.add('sl-add-song-open');
+            // 入力値を保つためフォーム初期化を行わず再表示
+          }
+          if(target==='roomCreateModal')document.body.classList.add('sl-room-create-open');
+          modal.style.display='flex';
+        }
+      }
+      slLastManagedOverlay=target;
+      slRefreshNavigation();
+    }finally{slHistoryRestoring=false;}
+    return true;
+  };
+
   const slMenuModalIds=new Set([
     'slHelpModal','settingsModal','friendsModal','myPageModal',
     'slTermsModal','slPrivacyModal','addSongModal','roomCreateModal'
@@ -8771,7 +8807,7 @@ html, body { background: transparent !important; color: ${text} !important; }
   window.slNavigate=async function(destination){
     const serial=++slNavSerial;
     // Always close the previous UI before transitioning.
-    slCloseVisibleModals('');
+    if(!slCloseVisibleModals('')) return;
     document.body.classList.remove('sl-add-song-open','sl-room-create-open','sl-overlay-page-open');
     try{
       switch(destination){
@@ -8809,7 +8845,7 @@ html, body { background: transparent !important; color: ${text} !important; }
       const overlayByRoute={help:'slHelpModal',settings:'settingsModal',friends:'friendsModal',
         add:'addSongModal',room:'roomCreateModal',terms:'slTermsModal',privacy:'slPrivacyModal'};
       const overlay=overlayByRoute[destination];
-      if(overlay && slVisible(overlay))slRecordOverlay(overlay);
+      if(overlay && slVisible(overlay))slTrackOverlay(overlay);
     }catch(error){
       console.error('ナビゲーションエラー',error);
     }finally{
@@ -8822,7 +8858,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     try{
       // 左メニューから別画面・別モーダルを開く時は、
       // 現在表示中のモーダル/専用ページを必ず先に閉じる。
-      slCloseVisibleModals('');
+      if(!slCloseVisibleModals(''))return;
       document.body.classList.remove('sl-add-song-open');
       if(typeof action==='function') action();
     }finally{
@@ -8831,6 +8867,8 @@ html, body { background: transparent !important; color: ${text} !important; }
   };
 
   function slCloseVisibleModals(exceptId=''){
+    if(typeof roomCreationBusy!=='undefined' && roomCreationBusy && slVisible('roomCreateModal') && exceptId!=='roomCreateModal')return false;
+    if(exceptId!=='addSongModal' && typeof slAddSongOpenVersion!=='undefined') ++slAddSongOpenVersion;
     document.querySelectorAll('.modal-overlay').forEach(overlay=>{
       if(!overlay.id || overlay.id===exceptId) return;
       if(getComputedStyle(overlay).display==='none') return;
@@ -8854,24 +8892,26 @@ html, body { background: transparent !important; color: ${text} !important; }
       }catch(_){
         overlay.style.display='none';
       }
-      // Some original close handlers only reset inner panels: guarantee overlay hidden.
-      if(overlay.id!==exceptId) overlay.style.display='none';
+      // 専用closeハンドラーの結果を尊重する。強制終了で保存処理を壊さない。
+      if(overlay.id!==exceptId && getComputedStyle(overlay).display!=='none' && overlay.id!=='roomCreateModal') overlay.style.display='none';
     });
     if(!exceptId){
       document.body.classList.remove('sl-room-create-open','sl-add-song-open','sl-overlay-page-open');
     }
+    return true;
   }
   window.slOpenExclusive=function(id){slCloseVisibleModals(id);if(typeof openModal==='function')openModal(id);}
   window.slOpenExclusiveAction=function(action){slCloseVisibleModals('');if(typeof action==='function')action();}
 
   window.slOpenAddSongPage=function(){
-    slCloseVisibleModals('addSongModal');
+    if(!slCloseVisibleModals('addSongModal'))return;
     document.body.classList.add('sl-add-song-open');
     if(typeof openAddSongModal==='function') openAddSongModal();
     slSyncUi();
   };
 
   window.slCloseAddSongPage=function(){
+    if(typeof slAddSongOpenVersion!=='undefined')++slAddSongOpenVersion;
     try{
       if(typeof closeModal==='function') closeModal(null,'addSongModal');
       else{
@@ -9409,8 +9449,9 @@ html, body { background: transparent !important; color: ${text} !important; }
   if(typeof openModal==='function'){
     const slOriginalOpenModal=openModal;
     openModal=function(id){
-      if(slMenuModalIds.has(id))slCloseVisibleModals(id);
+      if(slMenuModalIds.has(id) && !slCloseVisibleModals(id))return;
       const result=slOriginalOpenModal.apply(this,arguments);
+      if(slMenuModalIds.has(id))slTrackOverlay(id);
       slApplyActiveMenu();
       return result;
     };
@@ -9419,6 +9460,11 @@ html, body { background: transparent !important; color: ${text} !important; }
     const slOriginalCloseModal=closeModal;
     closeModal=function(){
       const result=slOriginalCloseModal.apply(this,arguments);
+      const id=arguments[1];
+      if(id && slHistoryOverlayIds.has(id) && !slVisible(id) && history.state?.[slHistoryKey]===id && !slHistoryRestoring){
+        history.replaceState({...history.state,[slHistoryKey]:null},'',location.href);
+        slLastManagedOverlay=null;
+      }
       requestAnimationFrame(slApplyActiveMenu);
       return result;
     };
@@ -9480,6 +9526,7 @@ html, body { background: transparent !important; color: ${text} !important; }
       const r=originalCloseRoomCreateModal.apply(this,arguments);
       const modal=slById('roomCreateModal');
       if(!modal||getComputedStyle(modal).display==='none'){
+        if(history.state?.[slHistoryKey]==='roomCreateModal' && !slHistoryRestoring){history.replaceState({...history.state,[slHistoryKey]:null},'',location.href);slLastManagedOverlay=null;}
         document.body.classList.remove('sl-room-create-open');
         slSyncUi();
       }
