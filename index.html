@@ -1974,6 +1974,608 @@ html.entry-home body.sl-redesign .home-copyright{
   }
 }
 
+
+/* ルーム作成画面の右上「×」は使用しない */
+#roomCreateModal .sl-room-create-close{
+  display:none!important;
+}
+
+
+/* =========================================================
+   NEW SONG ADD PAGE
+   新規楽曲追加をモーダルではなく専用ページとして表示
+========================================================= */
+
+body.sl-add-song-open #slTopbar,
+body.sl-add-song-open #slFilterbar,
+body.sl-add-song-open .container,
+body.sl-add-song-open #homeLanding{
+  display:none!important;
+}
+
+#addSongModal.sl-add-song-page-overlay{
+  position:fixed!important;
+  z-index:1950!important;
+  left:var(--sl-side)!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:auto!important;
+  height:auto!important;
+  box-sizing:border-box!important;
+  padding:24px 28px!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  overflow:auto!important;
+  background:
+    radial-gradient(circle at 84% 12%,rgba(91,72,255,.17),transparent 27%),
+    radial-gradient(circle at 20% 90%,rgba(37,122,255,.10),transparent 30%),
+    linear-gradient(145deg,#061126 0%,#07162e 52%,#08182f 100%)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+.sl-add-song-page{
+  width:min(1080px,100%);
+  min-height:0;
+  margin:auto;
+  padding:4px 0 24px;
+  color:var(--sl-text);
+}
+
+.sl-add-song-heading{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:3px 7px 17px;
+}
+
+.sl-add-song-heading-icon{
+  font-size:38px;
+  line-height:1;
+  filter:drop-shadow(0 8px 18px rgba(81,110,255,.27));
+}
+
+.sl-add-song-heading h2{
+  margin:0!important;
+  padding:0!important;
+  color:#fff!important;
+  font-size:32px!important;
+  line-height:1.1!important;
+  font-weight:950!important;
+}
+
+.sl-add-song-heading p{
+  margin:7px 0 0!important;
+  color:#9baaca!important;
+  font-size:12.5px!important;
+  line-height:1.5!important;
+}
+
+.sl-add-song-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);
+  gap:14px;
+}
+
+.sl-add-song-card{
+  min-width:0;
+  border:1px solid rgba(102,142,228,.34);
+  border-radius:16px;
+  background:
+    linear-gradient(180deg,rgba(14,31,59,.92),rgba(9,23,44,.92));
+  box-shadow:0 18px 45px rgba(0,0,0,.16);
+}
+
+.sl-add-song-form-card{
+  padding:20px;
+}
+
+.sl-add-song-guide-card{
+  padding:18px;
+}
+
+.sl-add-song-section-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 0 14px;
+  margin-bottom:3px;
+  border-bottom:1px solid var(--sl-border-soft);
+}
+
+.sl-add-song-section-title>span{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  background:#173058;
+  font-size:19px;
+}
+
+.sl-add-song-section-title strong{
+  display:block;
+  color:#f1f6ff;
+  font-size:14px;
+}
+
+.sl-add-song-section-title small{
+  display:block;
+  margin-top:3px;
+  color:#899bbb;
+  font-size:9.5px;
+}
+
+.sl-add-form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:2px 12px;
+  padding-top:9px;
+}
+
+.sl-add-field{
+  margin:0!important;
+  padding:8px 0!important;
+}
+
+.sl-add-field-wide{
+  grid-column:1/-1;
+}
+
+.sl-add-field label{
+  display:flex!important;
+  align-items:center;
+  gap:6px;
+  margin-bottom:6px!important;
+  color:#dce7f8!important;
+  font-size:12.5px!important;
+  font-weight:850!important;
+}
+
+.sl-required,
+.sl-optional{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:2px 6px;
+  border-radius:999px;
+  font-size:8.5px;
+  line-height:1;
+  font-weight:900;
+}
+
+.sl-required{
+  color:#ffacb4;
+  background:rgba(240,75,95,.14);
+  border:1px solid rgba(245,92,109,.25);
+}
+
+.sl-optional{
+  color:#8fa1c1;
+  background:rgba(112,137,184,.10);
+  border:1px solid rgba(112,137,184,.16);
+}
+
+.sl-add-field input,
+.sl-add-field select{
+  width:100%!important;
+  min-height:43px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:8px 11px!important;
+  border-radius:10px!important;
+  background:#08162a!important;
+  color:#eaf1ff!important;
+  border:1px solid rgba(99,139,214,.40)!important;
+  font-size:12.5px!important;
+}
+
+.sl-add-field input:focus,
+.sl-add-field select:focus{
+  outline:none!important;
+  border-color:#4e89ff!important;
+  box-shadow:0 0 0 3px rgba(68,112,255,.12)!important;
+}
+
+.sl-add-field input::placeholder{
+  color:#627596;
+}
+
+.sl-add-inline-status{
+  min-height:17px;
+  margin:5px 1px 0!important;
+  font-size:10px!important;
+  line-height:1.4!important;
+}
+
+.sl-add-submit-area{
+  margin-top:12px;
+  padding-top:14px;
+  border-top:1px solid var(--sl-border-soft);
+}
+
+#addSongFeedback{
+  min-height:20px;
+  margin:0 0 9px!important;
+  color:#78caff;
+  font-size:11px!important;
+  line-height:1.5!important;
+}
+
+.sl-add-submit-buttons{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.sl-add-submit-buttons button{
+  min-height:42px!important;
+  padding:7px 14px!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+  font-weight:850!important;
+}
+
+.sl-add-back-btn{
+  min-width:100px;
+}
+
+.sl-add-submit-btn{
+  min-width:210px;
+  background:linear-gradient(90deg,#2b87f2,#6b4eea)!important;
+  border-color:#6380ff!important;
+  color:#fff!important;
+}
+
+.sl-add-guide-list{
+  display:grid;
+  gap:8px;
+  padding-top:10px;
+}
+
+.sl-add-guide-list article{
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  gap:9px;
+  align-items:start;
+  padding:10px;
+  border:1px solid var(--sl-border-soft);
+  border-radius:11px;
+  background:#0e1f3a;
+}
+
+.sl-add-guide-list article>span{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#18325a;
+  font-size:17px;
+}
+
+.sl-add-guide-list strong{
+  display:block;
+  color:#eaf1ff;
+  font-size:11.5px;
+}
+
+.sl-add-guide-list p{
+  margin:3px 0 0!important;
+  color:#8fa0bf!important;
+  font-size:9.5px!important;
+  line-height:1.5!important;
+}
+
+.sl-add-flow-box{
+  margin-top:10px;
+  padding:11px;
+  border:1px solid var(--sl-border-soft);
+  border-radius:11px;
+  background:#09192f;
+}
+
+.sl-add-flow-box>strong{
+  font-size:11px;
+  color:#dce8fb;
+}
+
+.sl-add-flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  flex-wrap:wrap;
+  margin-top:9px;
+}
+
+.sl-add-flow span{
+  padding:6px 7px;
+  border-radius:8px;
+  background:#132a4a;
+  color:#c9d7ec;
+  font-size:9px;
+  font-weight:750;
+}
+
+.sl-add-flow b{
+  color:#478cff;
+  font-size:10px;
+}
+
+.sl-add-note{
+  margin-top:9px;
+  padding:10px 11px;
+  border-radius:10px;
+  border:1px solid rgba(255,189,74,.20);
+  background:rgba(255,189,74,.06);
+}
+
+.sl-add-note strong{
+  color:#ffd27a;
+  font-size:10.5px;
+}
+
+.sl-add-note p{
+  margin:3px 0 0!important;
+  color:#9ca9bf!important;
+  font-size:9px!important;
+  line-height:1.45!important;
+}
+
+/* ルーム中に新規楽曲追加を開いた場合は右進行バーを確保 */
+@media(min-width:1281px){
+  body.in-room:not(.sl-room-dock-collapsed).sl-add-song-open #addSongModal.sl-add-song-page-overlay{
+    right:var(--sl-dock)!important;
+  }
+}
+
+@media(max-height:760px) and (min-width:821px){
+  #addSongModal.sl-add-song-page-overlay{
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+  }
+  .sl-add-song-heading{
+    padding-bottom:10px;
+  }
+  .sl-add-song-heading-icon{
+    font-size:28px;
+  }
+  .sl-add-song-heading h2{
+    font-size:25px!important;
+  }
+  .sl-add-song-heading p{
+    font-size:10.5px!important;
+    margin-top:4px!important;
+  }
+  .sl-add-song-form-card,
+  .sl-add-song-guide-card{
+    padding:13px;
+  }
+  .sl-add-field{
+    padding:5px 0!important;
+  }
+  .sl-add-field input,
+  .sl-add-field select{
+    min-height:37px!important;
+  }
+  .sl-add-guide-list{
+    gap:5px;
+    padding-top:7px;
+  }
+  .sl-add-guide-list article{
+    padding:7px;
+  }
+}
+
+@media(max-width:820px){
+  #addSongModal.sl-add-song-page-overlay{
+    left:0!important;
+    right:0!important;
+    padding:12px 9px!important;
+  }
+
+  .sl-add-song-page{
+    width:100%;
+    padding-bottom:16px;
+  }
+
+  .sl-add-song-heading{
+    padding:2px 3px 11px;
+    gap:9px;
+  }
+
+  .sl-add-song-heading-icon{
+    font-size:27px;
+  }
+
+  .sl-add-song-heading h2{
+    font-size:22px!important;
+  }
+
+  .sl-add-song-heading p{
+    font-size:10px!important;
+    margin-top:4px!important;
+  }
+
+  .sl-add-song-grid{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+
+  .sl-add-song-form-card,
+  .sl-add-song-guide-card{
+    padding:12px;
+    border-radius:13px;
+  }
+
+  .sl-add-form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .sl-add-field-wide{
+    grid-column:auto;
+  }
+
+  .sl-add-song-guide-card{
+    display:none;
+  }
+
+  .sl-add-submit-buttons{
+    display:grid;
+    grid-template-columns:.7fr 1.3fr;
+  }
+
+  .sl-add-submit-buttons button{
+    min-width:0!important;
+    padding-left:6px!important;
+    padding-right:6px!important;
+    font-size:10.5px!important;
+  }
+}
+
+
+/* =========================================================
+   GENRE DRAG SCROLL + BOTTOM SONG COUNT
+========================================================= */
+
+/* ジャンルバー：スクロールバーを見せず、ドラッグで横移動 */
+#slGenreHost{
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+  cursor:grab;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:pan-y pinch-zoom;
+  scroll-behavior:auto;
+}
+
+#slGenreHost::-webkit-scrollbar{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}
+
+#slGenreHost.sl-dragging{
+  cursor:grabbing!important;
+}
+
+#slGenreHost.sl-dragging,
+#slGenreHost.sl-dragging *{
+  user-select:none!important;
+  -webkit-user-select:none!important;
+}
+
+#slGenreHost .genre-btn{
+  cursor:pointer;
+}
+
+/* 上部には件数を置かない。artistFilterIndicator専用にする */
+#slListMeta{
+  max-width:34%!important;
+}
+
+#slListMeta #artistFilterIndicator{
+  max-width:100%!important;
+}
+
+/* 下部ページャー */
+#songPagination{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+  gap:10px!important;
+  min-height:52px!important;
+  padding:7px 12px!important;
+  background:#0a172a!important;
+  border-top:1px solid var(--sl-border-soft)!important;
+}
+
+.sl-pagination-main{
+  grid-column:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  min-width:0;
+}
+
+#slBottomMetaHost{
+  grid-column:3;
+  min-width:0;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  overflow:hidden;
+}
+
+#slBottomMetaHost #songCountDisplay{
+  margin:0!important;
+  padding:5px 8px;
+  border-radius:8px;
+  background:rgba(18,38,70,.58);
+  border:1px solid rgba(99,137,210,.16);
+  color:#68c8ff!important;
+  font-size:11px!important;
+  line-height:1.35;
+  font-weight:750;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* 画面幅が狭い時はページャー下段へ件数を回す */
+@media(max-width:1180px){
+  #songPagination{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto;
+    gap:4px!important;
+    padding-top:6px!important;
+    padding-bottom:6px!important;
+  }
+
+  .sl-pagination-main{
+    grid-column:1!important;
+    grid-row:1;
+  }
+
+  #slBottomMetaHost{
+    grid-column:1!important;
+    grid-row:2;
+    justify-content:center!important;
+  }
+
+  #slBottomMetaHost #songCountDisplay{
+    max-width:95%;
+    font-size:10px!important;
+    padding:3px 7px;
+    background:transparent;
+    border-color:transparent;
+  }
+}
+
+@media(max-width:600px){
+  .sl-pagination-main{
+    gap:6px!important;
+    width:100%;
+  }
+
+  .sl-pagination-main #songPageStatus{
+    flex:1;
+    min-width:0;
+    text-align:center;
+  }
+
+  #slBottomMetaHost #songCountDisplay{
+    font-size:9.5px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2004,7 +2606,7 @@ html.entry-home body.sl-redesign .home-copyright{
     <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slRunNav(()=>createRoom())"><span>➕</span><b>ルーム作成</b></button>
     <button type="button" id="slNavCommon" class="sl-nav-common" onclick="slRunNav(()=>slOpenCommonSongs())"><span>🤝</span><b>共通曲</b></button>
     <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slRunNav(()=>slOpenExclusiveAction(openFriendsModal))"><span>👥</span><b>フレンド</b></button>
-    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slRunNav(()=>slOpenExclusiveAction(openAddSongModal))"><span>📄＋</span><b>新規楽曲追加</b></button>
+    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slRunNav(()=>slOpenAddSongPage())"><span>📄＋</span><b>新規楽曲追加</b></button>
 
     <div class="sl-nav-divider"></div>
 
@@ -2354,9 +2956,7 @@ html.entry-home body.sl-redesign .home-copyright{
 <!-- ルーム作成：既存の自動ルームID発行機能を、新UIの専用画面として表示 -->
 <div class="modal-overlay sl-room-create-overlay" id="roomCreateModal" style="z-index:1600;" onclick="closeRoomCreateModal(event)" role="dialog" aria-modal="true" aria-labelledby="roomCreateHeading">
   <div class="modal sl-room-create-page" onclick="event.stopPropagation()">
-    <button type="button" class="sl-room-create-close" id="cancelRoomCreation" onclick="closeRoomCreateModal()" aria-label="ルーム作成を閉じる">×</button>
-
-    <div class="sl-room-create-heading">
+<div class="sl-room-create-heading">
       <span class="sl-room-create-icon" aria-hidden="true">👥＋</span>
       <div>
         <h2 id="roomCreateHeading">ルーム作成</h2>
@@ -2595,9 +3195,12 @@ html.entry-home body.sl-redesign .home-copyright{
             </table>
         </div>
         <nav id="songPagination" aria-label="楽曲一覧のページ切り替え">
-            <button id="songPrevPageBtn" type="button" onclick="changeSongPage(-1)" disabled>◀ 前へ</button>
-            <span id="songPageStatus" role="status" aria-live="polite">0 / 0曲</span>
-            <button id="songNextPageBtn" type="button" onclick="changeSongPage(1)" disabled>次へ ▶</button>
+            <div class="sl-pagination-main">
+                <button id="songPrevPageBtn" type="button" onclick="changeSongPage(-1)" disabled>◀ 前へ</button>
+                <span id="songPageStatus" role="status" aria-live="polite">0 / 0曲</span>
+                <button id="songNextPageBtn" type="button" onclick="changeSongPage(1)" disabled>次へ ▶</button>
+            </div>
+            <div id="slBottomMetaHost" aria-label="楽曲件数"></div>
         </nav>
     </div>
 </div>
@@ -2782,30 +3385,143 @@ html.entry-home body.sl-redesign .home-copyright{
     </div>
 </div>
 
-<!-- 楽曲追加フォーム：Firebaseの管理者承認待ち申請へ保存 -->
-<div class="modal-overlay" id="addSongModal" onclick="closeModal(event, 'addSongModal')">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width:520px;">
-        <span class="modal-close" onclick="closeModal(null, 'addSongModal')">&times;</span>
-        <h2>➕ 楽曲を追加</h2>
-        <p style="font-size:12px;line-height:1.5;opacity:.8;">登録申請を管理者へ送信します。承認されるまで公開マスターは変更されません。</p>
-        <form id="addSongForm" onsubmit="submitNewSong(event)">
-            <div class="setting-group"><label for="newTitle">曲名（必須）</label><input class="setting-input" id="newTitle" name="title" maxlength="150" required autocomplete="off"></div>
-            <div class="setting-group"><label for="newArtist">アーティスト名（必須）</label><input class="setting-input" id="newArtist" name="artist" maxlength="150" required autocomplete="off"></div>
-            <div class="setting-group"><label for="newCodeUrl">コードwikiURL（必須）</label><input class="setting-input" id="newCodeUrl" name="codeUrl" type="url" placeholder="https://ja.chordwiki.org/wiki/..." maxlength="500" required><p id="newCodeUrlCheck" role="status" aria-live="polite" style="font-size:12px;line-height:1.4;margin:5px 0 0;"></p></div>
-            <div class="setting-group"><label for="newBpm">BPM（任意）</label><input class="setting-input" id="newBpm" name="bpm" type="number" min="1" max="400" step="1" placeholder="未入力でもOK"></div>
-            <div class="setting-group"><label for="newGenre1">ジャンル（任意）</label><select id="newGenre1" name="genre1"></select></div>
-            <div class="setting-group"><label for="newTieup">タイアップ（任意）</label><input class="setting-input" id="newTieup" name="tieup" maxlength="240" placeholder="作品名・番組名など"></div>
-            <!-- Bot対策のハニーポット。通常は非表示 -->
-            <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;"><label for="newWebsite">Website</label><input id="newWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-            <p id="addSongFeedback" role="status" aria-live="polite" style="font-size:12px;line-height:1.5;min-height:18px;"></p>
-            <div style="display:flex;justify-content:flex-end;gap:8px;">
-                <button type="button" onclick="closeModal(null,'addSongModal')">キャンセル</button>
-                <button type="submit" id="addSongSubmit" class="primary-btn">管理者へ登録申請</button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- 新規楽曲追加ページ：Firebaseの管理者承認待ち申請へ保存 -->
+<div class="modal-overlay sl-add-song-page-overlay" id="addSongModal" onclick="event.stopPropagation()">
+  <div class="sl-add-song-page" role="main" aria-labelledby="slAddSongPageTitle">
 
+    <header class="sl-add-song-heading">
+      <span class="sl-add-song-heading-icon" aria-hidden="true">📄＋</span>
+      <div>
+        <h2 id="slAddSongPageTitle">新規楽曲追加</h2>
+        <p>シェアリスコアに未登録の楽曲を、管理者へ登録申請できます。</p>
+      </div>
+    </header>
+
+    <div class="sl-add-song-grid">
+
+      <section class="sl-add-song-card sl-add-song-form-card">
+        <div class="sl-add-song-section-title">
+          <span>✏️</span>
+          <div>
+            <strong>楽曲情報を入力</strong>
+            <small>必須項目を入力して登録申請を送信してください。</small>
+          </div>
+        </div>
+
+        <form id="addSongForm" onsubmit="submitNewSong(event)">
+          <div class="sl-add-form-grid">
+
+            <div class="setting-group sl-add-field sl-add-field-wide">
+              <label for="newTitle">曲名 <span class="sl-required">必須</span></label>
+              <input class="setting-input" id="newTitle" name="title" maxlength="150" required autocomplete="off" placeholder="例：Pretender">
+            </div>
+
+            <div class="setting-group sl-add-field sl-add-field-wide">
+              <label for="newArtist">アーティスト名 <span class="sl-required">必須</span></label>
+              <input class="setting-input" id="newArtist" name="artist" maxlength="150" required autocomplete="off" placeholder="例：Official髭男dism">
+            </div>
+
+            <div class="setting-group sl-add-field sl-add-field-wide">
+              <label for="newCodeUrl">ChordWiki URL <span class="sl-required">必須</span></label>
+              <input class="setting-input" id="newCodeUrl" name="codeUrl" type="url" placeholder="https://ja.chordwiki.org/wiki/..." maxlength="500" required>
+              <p id="newCodeUrlCheck" role="status" aria-live="polite" class="sl-add-inline-status"></p>
+            </div>
+
+            <div class="setting-group sl-add-field">
+              <label for="newBpm">BPM <span class="sl-optional">任意</span></label>
+              <input class="setting-input" id="newBpm" name="bpm" type="number" min="1" max="400" step="1" placeholder="未入力でもOK">
+            </div>
+
+            <div class="setting-group sl-add-field">
+              <label for="newGenre1">ジャンル <span class="sl-optional">任意</span></label>
+              <select id="newGenre1" name="genre1"></select>
+            </div>
+
+            <div class="setting-group sl-add-field sl-add-field-wide">
+              <label for="newTieup">タイアップ <span class="sl-optional">任意</span></label>
+              <input class="setting-input" id="newTieup" name="tieup" maxlength="240" placeholder="アニメ・ゲーム・ドラマ・番組・作品名など">
+            </div>
+
+          </div>
+
+          <!-- Bot対策のハニーポット。通常は非表示 -->
+          <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+            <label for="newWebsite">Website</label>
+            <input id="newWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="sl-add-submit-area">
+            <p id="addSongFeedback" role="status" aria-live="polite"></p>
+            <div class="sl-add-submit-buttons">
+              <button type="button" class="sl-add-back-btn" onclick="slCloseAddSongPage()">← 戻る</button>
+              <button type="submit" id="addSongSubmit" class="primary-btn sl-add-submit-btn">📨 管理者へ登録申請</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <aside class="sl-add-song-card sl-add-song-guide-card">
+        <div class="sl-add-song-section-title">
+          <span>💡</span>
+          <div>
+            <strong>登録申請について</strong>
+            <small>申請前にご確認ください。</small>
+          </div>
+        </div>
+
+        <div class="sl-add-guide-list">
+          <article>
+            <span>🔎</span>
+            <div>
+              <strong>登録済みの曲を確認</strong>
+              <p>同じ曲名・アーティストの組み合わせがすでに登録されている場合は申請できません。</p>
+            </div>
+          </article>
+
+          <article>
+            <span>🔗</span>
+            <div>
+              <strong>ChordWiki URL</strong>
+              <p>原曲ページのURLを入力してください。シェアリスコアのKey変更機能で利用します。</p>
+            </div>
+          </article>
+
+          <article>
+            <span>🛡️</span>
+            <div>
+              <strong>管理者による確認</strong>
+              <p>申請内容はすぐに公開されず、管理者の確認・承認後に全曲一覧へ反映されます。</p>
+            </div>
+          </article>
+
+          <article>
+            <span>✏️</span>
+            <div>
+              <strong>登録後の修正</strong>
+              <p>公開後に誤りを見つけた場合は、Googleログイン中の楽曲編集機能から修正できます。</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="sl-add-flow-box">
+          <strong>登録までの流れ</strong>
+          <div class="sl-add-flow">
+            <span>📝 入力</span><b>→</b>
+            <span>📨 申請</span><b>→</b>
+            <span>🛡️ 確認</span><b>→</b>
+            <span>🎵 公開</span>
+          </div>
+        </div>
+
+        <div class="sl-add-note">
+          <strong>お願い</strong>
+          <p>曲名・アーティスト名は、できるだけ正式な表記で入力してください。</p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>
 
 <!-- Clipboard import may additionally submit an artist-fill review request; it never changes the public master directly. -->
 <div class="modal-overlay" id="clipboardImportModal" onclick="closeModal(event,'clipboardImportModal')">
@@ -5447,6 +6163,8 @@ html, body { background: transparent !important; color: ${text} !important; }
     // Apps Script を「ウェブアプリ」としてデプロイして /exec URL をここに設定。
     // 公開CSVのURLは書き込みに使えません。
     function openAddSongModal() {
+        document.body.classList.add('sl-add-song-open');
+        if (typeof slSyncUi === 'function') slSyncUi();
         if (serverPagedMasterMode && !masterLoaded) {
             void promoteServerPageToFullMaster('新規楽曲追加').then(() => openAddSongModal());
             return;
@@ -5511,6 +6229,8 @@ html, body { background: transparent !important; color: ${text} !important; }
             document.getElementById('newCodeUrlCheck').textContent = '';
             feedback.textContent = '申請を受け付けました。管理者の承認後に全曲一覧へ反映されます。';
             closeModal(null, 'addSongModal');
+            document.body.classList.remove('sl-add-song-open');
+            if (typeof slSyncUi === 'function') slSyncUi();
             document.getElementById('addSongModal').style.zIndex = '';
         } catch (error) {
             console.error('楽曲追加申請の失敗',error);
@@ -7632,8 +8352,9 @@ html, body { background: transparent !important; color: ${text} !important; }
   window.slRunNav=function(action){
     try{
       // 左メニューから別画面・別モーダルを開く時は、
-      // 現在表示中のモーダルを必ず先に閉じる。
+      // 現在表示中のモーダル/専用ページを必ず先に閉じる。
       slCloseVisibleModals('');
+      document.body.classList.remove('sl-add-song-open');
       if(typeof action==='function') action();
     }finally{
       if(window.innerWidth<=820) slToggleSidebar(false);
@@ -7650,6 +8371,10 @@ html, body { background: transparent !important; color: ${text} !important; }
           if(typeof closeRoomCreateModal==='function') closeRoomCreateModal();
           else overlay.style.display='none';
           document.body.classList.remove('sl-room-create-open');
+        }else if(overlay.id==='addSongModal'){
+          if(typeof closeModal==='function') closeModal(null,'addSongModal');
+          else overlay.style.display='none';
+          document.body.classList.remove('sl-add-song-open');
         }else if(overlay.id==='friendSharedModal' && typeof closeFriendSharedList==='function'){
           closeFriendSharedList();
         }else if(typeof closeModal==='function'){
@@ -7664,6 +8389,29 @@ html, body { background: transparent !important; color: ${text} !important; }
   }
   window.slOpenExclusive=function(id){slCloseVisibleModals(id);if(typeof openModal==='function')openModal(id);}
   window.slOpenExclusiveAction=function(action){slCloseVisibleModals('');if(typeof action==='function')action();}
+
+  window.slOpenAddSongPage=function(){
+    slCloseVisibleModals('addSongModal');
+    document.body.classList.add('sl-add-song-open');
+    if(typeof openAddSongModal==='function') openAddSongModal();
+    slSyncUi();
+  };
+
+  window.slCloseAddSongPage=function(){
+    try{
+      if(typeof closeModal==='function') closeModal(null,'addSongModal');
+      else{
+        const modal=slById('addSongModal');
+        if(modal) modal.style.display='none';
+      }
+    }catch(_){}
+    document.body.classList.remove('sl-add-song-open');
+    slSyncUi();
+
+    // 開く前がマイリストならマイリストへ、その他は全曲一覧へ戻る。
+    // 現在の一覧状態そのものは変更しない。
+  };
+
 
   window.slOpenCommonSongs=function(){
     if(!document.body.classList.contains('in-room')){
@@ -7798,6 +8546,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     const home=document.documentElement.classList.contains('entry-home');
     const inRoom=document.body.classList.contains('in-room');
     const roomCreate=document.body.classList.contains('sl-room-create-open');
+    const addSong=document.body.classList.contains('sl-add-song-open');
     const my=!!document.body.classList.contains('my-list-mode');
 
     const title=slById('slPageTitle'),sub=slById('slPageSubtitle');
@@ -7815,10 +8564,11 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
 
     const states={
-      slNavHome:home&&!roomCreate,
-      slNavAll:!home&&!my&&!roomCreate,
-      slNavMy:!home&&my&&!roomCreate,
-      slNavRoom:roomCreate
+      slNavHome:home&&!roomCreate&&!addSong,
+      slNavAll:!home&&!my&&!roomCreate&&!addSong,
+      slNavMy:!home&&my&&!roomCreate&&!addSong,
+      slNavRoom:roomCreate&&!addSong,
+      slNavAdd:addSong
     };
     Object.entries(states).forEach(([id,on])=>slById(id)?.classList.toggle('active',!!on));
 
@@ -7835,12 +8585,99 @@ html, body { background: transparent !important; color: ${text} !important; }
     slRenderRoomDock();
   };
 
+  function slEnableGenreDrag(){
+    const host=slById('slGenreHost');
+    if(!host || host.dataset.slDragReady==='1') return;
+    host.dataset.slDragReady='1';
+
+    let active=false;
+    let pointerId=null;
+    let startX=0;
+    let startScrollLeft=0;
+    let moved=false;
+    let suppressClick=false;
+
+    const finishDrag=(event)=>{
+      if(!active) return;
+      if(event && pointerId!==null && event.pointerId!==pointerId) return;
+
+      active=false;
+      host.classList.remove('sl-dragging');
+
+      if(moved) suppressClick=true;
+
+      try{
+        if(pointerId!==null && host.hasPointerCapture?.(pointerId)){
+          host.releasePointerCapture(pointerId);
+        }
+      }catch(_){}
+
+      pointerId=null;
+    };
+
+    host.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse' && event.button!==0) return;
+
+      active=true;
+      moved=false;
+      pointerId=event.pointerId;
+      startX=event.clientX;
+      startScrollLeft=host.scrollLeft;
+      host.classList.add('sl-dragging');
+
+      try{ host.setPointerCapture(event.pointerId); }catch(_){}
+    });
+
+    host.addEventListener('pointermove',event=>{
+      if(!active || event.pointerId!==pointerId) return;
+
+      const delta=event.clientX-startX;
+      if(Math.abs(delta)>=5) moved=true;
+
+      if(moved){
+        host.scrollLeft=startScrollLeft-delta;
+        event.preventDefault();
+      }
+    },{passive:false});
+
+    host.addEventListener('pointerup',finishDrag);
+    host.addEventListener('pointercancel',finishDrag);
+    host.addEventListener('lostpointercapture',()=>{
+      if(active){
+        active=false;
+        host.classList.remove('sl-dragging');
+        if(moved) suppressClick=true;
+        pointerId=null;
+      }
+    });
+
+    /* ドラッグ直後のジャンルボタン誤クリックを防止。
+       ほぼ動かさずクリックした場合は通常通りジャンルを選択できます。 */
+    host.addEventListener('click',event=>{
+      if(!suppressClick) return;
+      suppressClick=false;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+    },true);
+
+    /* マウスホイールの横方向入力もそのまま利用可能 */
+    host.addEventListener('wheel',event=>{
+      if(Math.abs(event.deltaX)>Math.abs(event.deltaY)) return;
+      if(event.shiftKey){
+        host.scrollLeft+=event.deltaY;
+        event.preventDefault();
+      }
+    },{passive:false});
+  }
+
   function slInitShell(){
     document.body.classList.add('sl-redesign');
     slMove('searchInput','slSearchHost');
     slMove('genreFilters','slGenreHost');
-    slMove('songCountDisplay','slListMeta');
+    slMove('songCountDisplay','slBottomMetaHost');
     slMove('artistFilterIndicator','slListMeta');
+    slEnableGenreDrag();
     slMove('loginStatus','slUserHost');
     slMove('googleLoginBtn','slSidebarFooter');
     slMove('googleLogoutBtn','slSidebarFooter');
