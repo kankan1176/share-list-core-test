@@ -2576,6 +2576,112 @@ body.sl-add-song-open #homeLanding{
   }
 }
 
+
+/* =========================================================
+   NEW SONG PAGE TOP GAP FIX
+   新規楽曲追加ページ上部の大きな余白を削除
+========================================================= */
+#addSongModal.sl-add-song-page-overlay{
+  padding-top:12px!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+}
+
+#addSongModal .sl-add-song-page{
+  margin:0 auto!important;
+  padding-top:0!important;
+}
+
+#addSongModal .sl-add-song-heading{
+  padding-top:0!important;
+  margin-top:0!important;
+  padding-bottom:12px!important;
+}
+
+/* 低い画面でも上端から開始 */
+@media(max-height:760px) and (min-width:821px){
+  #addSongModal.sl-add-song-page-overlay{
+    padding-top:7px!important;
+  }
+}
+
+/* スマホも上部余白を最小化 */
+@media(max-width:820px){
+  #addSongModal.sl-add-song-page-overlay{
+    padding-top:7px!important;
+  }
+}
+
+
+/* =========================================================
+   ROOM GLOBAL NAVIGATION SYNC
+========================================================= */
+
+/* ルーム入室中の右セッション進行バーは、一覧・マイリスト・共通曲・
+   フレンド・設定・ヘルプ・新規楽曲追加など、どの画面でも維持する */
+body.in-room #slRoomDock{
+  display:flex!important;
+  flex-direction:column!important;
+  z-index:2200!important;
+}
+
+/* モーダルを開いても右ドックを隠さない */
+@media(min-width:1281px){
+  body.in-room:not(.sl-room-dock-collapsed) .modal-overlay:not(#roomCreateModal):not(#slHelpModal){
+    right:var(--sl-dock)!important;
+  }
+
+  body.in-room:not(.sl-room-dock-collapsed) #slHelpModal,
+  body.in-room:not(.sl-room-dock-collapsed) #slTermsModal,
+  body.in-room:not(.sl-room-dock-collapsed) #slPrivacyModal{
+    right:var(--sl-dock)!important;
+  }
+}
+
+/* ルーム内の左メニューは、全曲・自分・共通曲の現在表示を強調 */
+body.in-room #slNavAll.active,
+body.in-room #slNavMy.active,
+body.in-room #slNavCommon.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#287de8 0%,#5354ea 62%,#7142ea 100%)!important;
+  border-color:rgba(104,167,255,.58)!important;
+  box-shadow:0 8px 22px rgba(46,78,219,.32),inset 0 1px rgba(255,255,255,.10);
+}
+
+
+/* =========================================================
+   LEFT MENU LABEL FIX
+========================================================= */
+#slNavAdd .sl-nav-add-icon{
+  width:27px!important;
+  flex:0 0 27px!important;
+  text-align:center!important;
+  font-size:19px!important;
+  line-height:1!important;
+}
+
+#slNavAdd .sl-nav-add-label{
+  display:block!important;
+  min-width:0!important;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  letter-spacing:0!important;
+  font-size:13.5px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+}
+
+
+/* A single, consistent active-menu state across app views and overlays. */
+#slSidebar .sl-sidebar-nav button[aria-current="page"]{
+  color:#fff!important;
+  background:linear-gradient(135deg,#287de8,#5354ea 62%,#7142ea)!important;
+  border-color:rgba(104,167,255,.58)!important;
+  box-shadow:0 8px 22px rgba(46,78,219,.32)!important;
+}
+
 </style>
 </head>
 <body>
@@ -2600,26 +2706,26 @@ body.sl-add-song-open #homeLanding{
   </div>
 
   <nav class="sl-sidebar-nav">
-    <button type="button" id="slNavHome" class="sl-nav-home" onclick="slRunNav(()=>goHome())"><span>🏠</span><b>トップ</b></button>
-    <button type="button" id="slNavAll" class="sl-nav-all" onclick="slRunNav(()=>openHomeDestination('all'))"><span>🎵</span><b>全曲一覧</b></button>
-    <button type="button" id="slNavMy" class="sl-nav-my" onclick="slRunNav(()=>openHomeDestination('mylist'))"><span>📋</span><b>マイリスト</b></button>
-    <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slRunNav(()=>createRoom())"><span>➕</span><b>ルーム作成</b></button>
-    <button type="button" id="slNavCommon" class="sl-nav-common" onclick="slRunNav(()=>slOpenCommonSongs())"><span>🤝</span><b>共通曲</b></button>
-    <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slRunNav(()=>slOpenExclusiveAction(openFriendsModal))"><span>👥</span><b>フレンド</b></button>
-    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slRunNav(()=>slOpenAddSongPage())"><span>📄＋</span><b>新規楽曲追加</b></button>
+    <button type="button" id="slNavHome" class="sl-nav-home" onclick="slNavigate('home')"><span>🏠</span><b>トップ</b></button>
+    <button type="button" id="slNavAll" class="sl-nav-all" onclick="slNavigate('all')"><span>🎵</span><b>全曲一覧</b></button>
+    <button type="button" id="slNavMy" class="sl-nav-my" onclick="slNavigate('mylist')"><span>📋</span><b>マイリスト</b></button>
+    <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slNavigate('room')"><span>🎤</span><b>ルーム</b></button>
+    <button type="button" id="slNavCommon" class="sl-nav-common" onclick="slNavigate('common')"><span>🤝</span><b>共通曲</b></button>
+    <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slNavigate('friends')"><span>👥</span><b>フレンド</b></button>
+    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slNavigate('add')"><span class="sl-nav-add-icon">📄</span><b class="sl-nav-add-label">新規楽曲追加</b></button>
 
     <div class="sl-nav-divider"></div>
 
-    <button type="button" id="slNavPage" class="sl-nav-page" onclick="slRunNav(()=>slOpenExclusiveAction(openMyPage))"><span>👤</span><b>マイページ</b></button>
-    <button type="button" id="slNavSettings" class="sl-nav-settings" onclick="slRunNav(()=>slOpenExclusive('settingsModal'))"><span>⚙️</span><b>設定</b></button>
-    <button type="button" id="slNavHelp" class="sl-nav-help" onclick="slRunNav(()=>slOpenExclusive('slHelpModal'))"><span>🚨</span><b>ヘルプ</b></button>
+    <button type="button" id="slNavPage" class="sl-nav-page" onclick="slNavigate('mypage')"><span>👤</span><b>マイページ</b></button>
+    <button type="button" id="slNavHelp" class="sl-nav-help" onclick="slNavigate('help')"><span>🚨</span><b>ヘルプ</b></button>
+    <button type="button" id="slNavSettings" class="sl-nav-settings" onclick="slNavigate('settings')"><span>⚙️</span><b>設定</b></button>
     <a href="admin.html" id="slAdminLink" class="sl-nav-admin" style="display:none;"><span>🛡️</span><b>管理者メニュー</b></a>
   </nav>
 
   
 <div class="sl-sidebar-legal" aria-label="利用規約・プライバシー">
-  <button type="button" onclick="slRunNav(()=>slOpenExclusive('slTermsModal'))">利用規約と免責事項</button>
-  <button type="button" onclick="slRunNav(()=>slOpenExclusive('slPrivacyModal'))">プライバシーポリシー</button>
+  <button type="button" onclick="slNavigate('terms')">利用規約と免責事項</button>
+  <button type="button" onclick="slNavigate('privacy')">プライバシーポリシー</button>
   <div class="sl-sidebar-copyright">Copyright © 2026 シェアリスコア.<br>All Rights Reserved.</div>
 </div>
 <div class="sl-sidebar-footer" id="slSidebarFooter"></div>
@@ -4856,6 +4962,7 @@ body.sl-add-song-open #homeLanding{
         renderRoomListTabs();
         renderTable();
         tableBodyWrapper.scrollTop = 0;
+        if (typeof slSyncUi === 'function') slSyncUi();
     }
     let roomActiveMembers = {};
     // 接続はタブごとのsessionIdで保持するが、参加者表示は認証UIDごとに1人と数える。
@@ -4955,7 +5062,7 @@ body.sl-add-song-open #homeLanding{
             if(color.border)button.style.setProperty('--room-tab-border',color.border);
             button.classList.toggle('active',roomListView===value);
             button.setAttribute('aria-pressed',String(roomListView===value));
-            button.onclick=onClick || (()=>{roomListView=value;renderRoomListTabs();renderTable();tableBodyWrapper.scrollTop=0;});
+            button.onclick=onClick || (()=>{roomListView=value;renderRoomListTabs();renderTable();tableBodyWrapper.scrollTop=0;if(typeof slSyncUi==='function')slSyncUi();});
             tabs.append(button);
         };
         add('all','🌐 全曲一覧',palette.all);
@@ -8349,6 +8456,133 @@ html, body { background: transparent !important; color: ${text} !important; }
     document.body.classList.toggle('sl-sidebar-open',next);
   };
 
+  // Single view coordinator. Firebase, room and auth functions remain in their original handlers.
+  let slNavSerial=0;
+  let slOpenOverlayId=null;
+  const slMenuModalIds=new Set([
+    'slHelpModal','settingsModal','friendsModal','myPageModal',
+    'slTermsModal','slPrivacyModal','addSongModal','roomCreateModal'
+  ]);
+  function slVisible(id){
+    const el=slById(id);
+    return !!el && getComputedStyle(el).display!=='none';
+  }
+  function slResolveCurrentView(){
+    if(document.body.classList.contains('sl-add-song-open')&&slVisible('addSongModal'))return 'add';
+    if(document.body.classList.contains('sl-room-create-open')&&slVisible('roomCreateModal'))return 'room';
+    if(slVisible('slHelpModal'))return 'help';
+    if(slVisible('settingsModal'))return 'settings';
+    if(slVisible('slTermsModal'))return 'terms';
+    if(slVisible('slPrivacyModal'))return 'privacy';
+    if(slVisible('friendsModal'))return 'friends';
+    if(document.documentElement.classList.contains('entry-home')&&!slHasRoom())return 'home';
+    if(slHasRoom()){
+      const rv=String(roomListView||'all');
+      if(rv==='common')return 'common';
+      if(signedInUser&&rv===signedInUser.uid)return 'mylist';
+      if(rv==='all')return 'all';
+      return 'member';
+    }
+    return document.body.classList.contains('my-list-mode')?'mylist':'all';
+  }
+  function slApplyActiveMenu(){
+    const view=slResolveCurrentView();
+    const activeId={
+      home:'slNavHome',all:'slNavAll',mylist:'slNavMy',
+      room:'slNavRoom',common:'slNavCommon',friends:'slNavFriends',
+      add:'slNavAdd',mypage:'slNavPage',help:'slNavHelp',settings:'slNavSettings'
+    }[view]||'';
+    document.querySelectorAll('#slSidebar .sl-sidebar-nav button').forEach(el=>{
+      const active=!!activeId&&el.id===activeId;
+      if(el.classList.contains('active')!==active)el.classList.toggle('active',active);
+      if(active)el.setAttribute('aria-current','page');
+      else el.removeAttribute('aria-current');
+    });
+    slOpenOverlayId=['help','settings','friends','mypage','terms','privacy'].includes(view)?view:null;
+  }
+  window.slRefreshNavigation=function(){
+    slSyncUi();
+    slApplyActiveMenu();
+  };
+
+  // Preserve the existing base history logic; only overlay entries are handled here.
+  const SL_OVERLAY_HISTORY='shareliscoreUiOverlay';
+  let slOverlayHistoryToken=0;
+  function slRecordOverlay(id){
+    if(!id || !slVisible(id))return;
+    const token=++slOverlayHistoryToken;
+    const state={...(history.state||{}),[SL_OVERLAY_HISTORY]:id,shareliscoreUiToken:token};
+    try{history.pushState(state,'',location.href);}catch(_){}
+  }
+  window.addEventListener('popstate',event=>{
+    // Capture phase: close an overlay when navigating back out of it.
+    const open=Array.from(document.querySelectorAll('.modal-overlay')).find(el=>getComputedStyle(el).display!=='none');
+    if(open && !event.state?.[SL_OVERLAY_HISTORY]){
+      slCloseVisibleModals('');
+      document.body.classList.remove('sl-add-song-open','sl-room-create-open');
+      slRefreshNavigation();
+      event.stopImmediatePropagation();
+    }else if(open && event.state?.[SL_OVERLAY_HISTORY]!==open.id){
+      slCloseVisibleModals('');
+      document.body.classList.remove('sl-add-song-open','sl-room-create-open');
+      slRefreshNavigation();
+      event.stopImmediatePropagation();
+    }else if(event.state?.[SL_OVERLAY_HISTORY]){
+      slRefreshNavigation();
+      event.stopImmediatePropagation();
+    }
+  },true);
+
+  window.slNavigate=async function(destination){
+    const serial=++slNavSerial;
+    // Always close the previous UI before transitioning.
+    slCloseVisibleModals('');
+    document.body.classList.remove('sl-add-song-open','sl-room-create-open');
+    try{
+      switch(destination){
+        case 'home':
+          if(slHasRoom()){
+            // Existing app deliberately does not leave a room via the Home link.
+            slSetRoomListView('all');
+          }else if(typeof goHome==='function')goHome();
+          break;
+        case 'all': await slGoAllSongs();break;
+        case 'mylist': await slGoMyList();break;
+        case 'room': slGoRoom();break;
+        case 'common': slOpenCommonSongs();break;
+        case 'add': slOpenAddSongPage();break;
+        case 'friends':
+          if(typeof openFriendsModal==='function')openFriendsModal();
+          break;
+        case 'mypage':
+          if(typeof openMyPage==='function')openMyPage();
+          break;
+        case 'help':
+          if(typeof openModal==='function')openModal('slHelpModal');
+          break;
+        case 'settings':
+          if(typeof openModal==='function')openModal('settingsModal');
+          break;
+        case 'terms':
+          if(typeof openModal==='function')openModal('slTermsModal');
+          break;
+        case 'privacy':
+          if(typeof openModal==='function')openModal('slPrivacyModal');
+          break;
+      }
+      if(serial!==slNavSerial)return;
+      const overlayByRoute={help:'slHelpModal',settings:'settingsModal',friends:'friendsModal',
+        add:'addSongModal',room:'roomCreateModal',terms:'slTermsModal',privacy:'slPrivacyModal'};
+      const overlay=overlayByRoute[destination];
+      if(overlay && slVisible(overlay))slRecordOverlay(overlay);
+    }catch(error){
+      console.error('ナビゲーションエラー',error);
+    }finally{
+      if(serial===slNavSerial)slRefreshNavigation();
+      if(window.innerWidth<=820)slToggleSidebar(false);
+    }
+  };
+
   window.slRunNav=function(action){
     try{
       // 左メニューから別画面・別モーダルを開く時は、
@@ -8420,6 +8654,75 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
     if(typeof openRoomCommonMemberPicker==='function')openRoomCommonMemberPicker();
   };
+
+  window.slHasRoom=function(){
+    try{
+      return !!currentRoomId || document.body.classList.contains('in-room');
+    }catch(_){
+      return document.body.classList.contains('in-room');
+    }
+  };
+
+  window.slSetRoomListView=function(view){
+    if(!slHasRoom()) return false;
+
+    try{
+      roomListView=view;
+      myListMode=false;
+      document.body.classList.remove('my-list-mode');
+      document.documentElement.classList.remove('entry-home');
+
+      if(typeof renderRoomListTabs==='function') renderRoomListTabs();
+      if(typeof renderTable==='function') renderTable();
+      if(typeof tableBodyWrapper!=='undefined' && tableBodyWrapper) tableBodyWrapper.scrollTop=0;
+      if(typeof slSyncUi==='function') slSyncUi();
+      return true;
+    }catch(error){
+      console.warn('ルーム一覧の切り替えに失敗:',error);
+      return false;
+    }
+  };
+
+  window.slGoAllSongs=async function(){
+    if(slHasRoom()){
+      slSetRoomListView('all');
+      return;
+    }
+    if(typeof openHomeDestination==='function') await openHomeDestination('all');
+    if(typeof slSyncUi==='function') slSyncUi();
+  };
+
+  window.slGoMyList=async function(){
+    if(slHasRoom()){
+      if(!signedInUser){
+        alert('ルーム内の「自分」マイリストはGoogleログイン後に利用できます。');
+        return;
+      }
+
+      const myUid=signedInUser.uid;
+      if(!roomSharedLists || !roomSharedLists[myUid]){
+        alert('このルームでは、あなたのマイリスト共有がまだ準備できていません。');
+        return;
+      }
+
+      slSetRoomListView(myUid);
+      return;
+    }
+
+    if(typeof openHomeDestination==='function') await openHomeDestination('mylist');
+    if(typeof slSyncUi==='function') slSyncUi();
+  };
+
+  window.slGoRoom=function(){
+    if(slHasRoom()){
+      /* 入室済みの場合はルーム全曲一覧へ戻す。
+         左メニューの選択状態は内容に合わせて「全曲一覧」とする。 */
+      slSetRoomListView('all');
+      return;
+    }
+    if(typeof createRoom==='function') createRoom();
+  };
+
 
   window.slOpenRoomSettings=function(){
     if(document.body.classList.contains('sl-room-create-open'))return;
@@ -8544,7 +8847,13 @@ html, body { background: transparent !important; color: ${text} !important; }
 
   window.slSyncUi=function(){
     const home=document.documentElement.classList.contains('entry-home');
-    const inRoom=document.body.classList.contains('in-room');
+    let inRoom=document.body.classList.contains('in-room');
+    try{
+      if(currentRoomId){
+        inRoom=true;
+        document.body.classList.add('in-room');
+      }
+    }catch(_){}
     const roomCreate=document.body.classList.contains('sl-room-create-open');
     const addSong=document.body.classList.contains('sl-add-song-open');
     const my=!!document.body.classList.contains('my-list-mode');
@@ -8552,8 +8861,23 @@ html, body { background: transparent !important; color: ${text} !important; }
     const title=slById('slPageTitle'),sub=slById('slPageSubtitle');
     if(title&&sub){
       if(inRoom){
-        title.textContent='ルーム全曲一覧';
-        sub.textContent='参加メンバーと楽曲を共有し、演奏候補を予約できます';
+        let view='all';
+        try{view=String(roomListView||'all');}catch(_){}
+        if(view==='common'){
+          title.textContent='共通曲';
+          sub.textContent='選択した参加メンバー全員が登録している楽曲を表示しています';
+        }else if(signedInUser && view===signedInUser.uid){
+          title.textContent='マイリスト';
+          sub.textContent='ルームに共有している自分のマイリストを表示しています';
+        }else if(view!=='all'){
+          let memberName='メンバー';
+          try{memberName=roomSharedLists?.[view]?.name||'メンバー';}catch(_){}
+          title.textContent=memberName+' のマイリスト';
+          sub.textContent='ルーム参加メンバーが共有している楽曲です';
+        }else{
+          title.textContent='ルーム全曲一覧';
+          sub.textContent='参加メンバーと楽曲を共有し、演奏候補を予約できます';
+        }
       }else if(my){
         title.textContent='マイリスト';
         sub.textContent='自分の登録曲・Key・担当パートを管理できます';
@@ -8563,11 +8887,23 @@ html, body { background: transparent !important; color: ${text} !important; }
       }
     }
 
+    let roomView='';
+    let ownRoomView=false;
+    try{
+      roomView=inRoom ? String(roomListView||'all') : '';
+      ownRoomView=!!(inRoom && signedInUser && roomView===signedInUser.uid);
+    }catch(_){}
+
     const states={
-      slNavHome:home&&!roomCreate&&!addSong,
-      slNavAll:!home&&!my&&!roomCreate&&!addSong,
-      slNavMy:!home&&my&&!roomCreate&&!addSong,
+      slNavHome:home&&!roomCreate&&!addSong&&!inRoom,
+      slNavAll:inRoom
+        ? roomView==='all'
+        : (!home&&!my&&!roomCreate&&!addSong),
+      slNavMy:inRoom
+        ? ownRoomView
+        : (!home&&my&&!roomCreate&&!addSong),
       slNavRoom:roomCreate&&!addSong,
+      slNavCommon:inRoom && roomView==='common',
       slNavAdd:addSong
     };
     Object.entries(states).forEach(([id,on])=>slById(id)?.classList.toggle('active',!!on));
@@ -8583,6 +8919,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
     slApplyResponsiveDock();
     slRenderRoomDock();
+    slApplyActiveMenu();
   };
 
   function slEnableGenreDrag(){
@@ -8688,6 +9025,25 @@ html, body { background: transparent !important; color: ${text} !important; }
     setTimeout(slSyncUi,1200);
   }
 
+  // Legacy modal openings also update the sidebar, without changing their Firebase logic.
+  if(typeof openModal==='function'){
+    const slOriginalOpenModal=openModal;
+    openModal=function(id){
+      if(slMenuModalIds.has(id))slCloseVisibleModals(id);
+      const result=slOriginalOpenModal.apply(this,arguments);
+      slApplyActiveMenu();
+      return result;
+    };
+  }
+  if(typeof closeModal==='function'){
+    const slOriginalCloseModal=closeModal;
+    closeModal=function(){
+      const result=slOriginalCloseModal.apply(this,arguments);
+      requestAnimationFrame(slApplyActiveMenu);
+      return result;
+    };
+  }
+
   // Existing functions are wrapped rather than replaced.
   if(typeof updateQueueUI==='function'){
     const originalUpdateQueueUI=updateQueueUI;
@@ -8766,8 +9122,8 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
   });
 
-  window.addEventListener('popstate',()=>setTimeout(slSyncUi,0),{passive:true});
-  window.addEventListener('hashchange',()=>setTimeout(slSyncUi,0),{passive:true});
+  window.addEventListener('popstate',()=>setTimeout(slRefreshNavigation,60),{passive:true});
+  window.addEventListener('hashchange',()=>setTimeout(slRefreshNavigation,0),{passive:true});
   window.addEventListener('resize',()=>{if(!window.slDockUserToggled)slApplyResponsiveDock();},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)slSyncUi();});
 
