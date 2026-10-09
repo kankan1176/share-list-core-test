@@ -3213,6 +3213,32 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
   #roomCreateModal .sl-room-create-page{width:100%!important;}
 }
 
+
+/* 2026-10-09 サイドメニュー整理：ユーザー名入口とお気に入りアーティスト */
+#slSidebarAccount{
+ display:flex;align-items:center;gap:9px;width:100%;min-height:48px;
+ margin:1px 0 11px;padding:9px 11px;border:1px solid rgba(102,153,237,.34);
+ border-radius:11px;background:#122746;color:#f0f5ff;cursor:pointer;text-align:left;
+ box-sizing:border-box;transition:background .16s,border-color .16s;
+}
+#slSidebarAccount:hover,#slSidebarAccount:focus-visible{background:#1d3c69;border-color:#67a4ff;outline-offset:2px}
+#slSidebarAccount .sl-account-icon{flex:0 0 auto;font-size:18px}
+#slSidebarAccount #loginStatus{min-width:0;flex:1;max-width:none!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px!important;font-weight:800;color:#eef5ff;background:none!important;border:0!important;padding:0!important;box-shadow:none!important}
+#slSidebarAccount .sl-account-gear{flex:0 0 auto;font-size:15px;color:#8fb6fb}
+#slSearchHost{display:flex;align-items:center;gap:10px;max-width:none!important}
+#slSearchHost #searchInput{flex:1 1 auto;min-width:0;width:100%!important}
+#slFavArtistsShortcut{display:none;flex:0 0 auto;min-height:44px;padding:8px 13px;border:1px solid #6f579d;border-radius:11px;background:#272146;color:#ffdb83;font-size:12px;font-weight:800;cursor:pointer}
+#slFavArtistsShortcut:hover{background:#382d60;border-color:#a184de;color:#ffeaac}
+body.sl-redesign.my-list-mode:not(.in-room) #slFavArtistsShortcut{display:inline-flex;align-items:center;justify-content:center}
+/* ルーム内の自分のマイリスト表示時も JS がクラスを切り替える */
+body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-items:center;justify-content:center}
+#slNavPage{display:none!important}
+@media(max-width:820px){
+ #slSidebarAccount{min-height:49px;margin-bottom:9px}
+ #slSearchHost{gap:6px}
+ #slFavArtistsShortcut{font-size:11px;min-height:40px;padding:6px 8px;max-width:42%;white-space:normal;line-height:1.3}
+}
+
 </style>
 </head>
 <body>
@@ -3236,19 +3262,19 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
     <div><strong>シェアリスコア</strong><small>ShareLiScore</small></div>
   </div>
 
+  <button type="button" id="slSidebarAccount" onclick="openModal('accountModal')" aria-label="アカウント設定を開く" title="ユーザー名・基本担当パートを設定"><span class="sl-account-icon">👤</span><span id="slSidebarAccountName">ゲスト利用中</span><span class="sl-account-gear">⚙</span></button>
   <nav class="sl-sidebar-nav">
     <button type="button" id="slNavHome" class="sl-nav-home" onclick="slNavigate('home')"><span>🏠</span><b>トップ</b></button>
-    <button type="button" id="slNavAll" class="sl-nav-all" onclick="slNavigate('all')"><span>🎵</span><b>全曲一覧</b></button>
-    <button type="button" id="slNavMy" class="sl-nav-my" onclick="slNavigate('mylist')"><span>📋</span><b>マイリスト</b></button>
-    <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slNavigate('room')"><span>🎤</span><b>ルーム</b></button>
+    <button type="button" id="slNavAll" class="sl-nav-all" onclick="slNavigate('all')"><span>📚</span><b>全曲一覧</b></button>
+    <button type="button" id="slNavMy" class="sl-nav-my" onclick="slNavigate('mylist')"><span>📒</span><b>マイリスト</b></button>
+    <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slNavigate('room')"><span>🎧</span><b>ルーム</b></button>
     <button type="button" id="slNavObs" class="sl-nav-obs" onclick="openObsModal()" aria-haspopup="dialog" aria-controls="obsModal"><span>📹</span><b>OBSカスタムCSS設定</b></button>
     <!-- 共通曲はルーム内部のタブ専用。左サイドバーには常時表示しない。 -->
     <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slNavigate('friends')"><span>👥</span><b>フレンド</b></button>
-    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slNavigate('add')"><span class="sl-nav-add-icon">📄</span><b class="sl-nav-add-label">新規楽曲追加</b></button>
+    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slNavigate('add')"><span class="sl-nav-add-icon">🖊️</span><b class="sl-nav-add-label">新規楽曲追加</b></button>
 
     <div class="sl-nav-divider"></div>
 
-    <button type="button" id="slNavPage" class="sl-nav-page" onclick="slNavigate('mypage')"><span>👤</span><b>マイページ</b></button>
     <button type="button" id="slNavHelp" class="sl-nav-help" onclick="slNavigate('help')"><span>🚨</span><b>ヘルプ</b></button>
     <button type="button" id="slNavSettings" class="sl-nav-settings" onclick="slNavigate('settings')"><span>⚙️</span><b>設定</b></button>
     <a href="admin.html" id="slAdminLink" class="sl-nav-admin" style="display:none;"><span>🛡️</span><b>管理者メニュー</b></a>
@@ -3270,7 +3296,7 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
     <h1 id="slPageTitle">全曲一覧</h1>
     <p id="slPageSubtitle">登録されている楽曲を検索・閲覧できます</p>
   </div>
-  <div id="slSearchHost"></div>
+  <div id="slSearchHost"><button type="button" id="slFavArtistsShortcut" onclick="openFavoriteArtistsModal()" title="お気に入りアーティスト一覧" aria-label="お気に入りアーティスト一覧を開く">⭐ お気に入りアーティスト</button></div>
   <div id="slUserHost"></div>
 </header>
 
@@ -3711,7 +3737,6 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
             <div id="mobileMorePanel" hidden>
                 <div id="mobileIdentity" aria-live="polite">ゲスト利用中</div>
                 <button type="button" id="mobileHomeItem" onclick="closeMobileMenu();goHome()">🏠 トップ</button>
-                <button type="button" onclick="closeMobileMenu();openMyPage()">👤 マイページ</button>
                 <button type="button" onclick="closeMobileMenu();openFriendsModal()">👥 フレンド</button>
                 <button type="button" onclick="closeMobileMenu();openManualModal()">📖 使い方ガイド</button>
                 <button type="button" onclick="closeMobileMenu();openModal('settingsModal')">⚙ 設定</button>
@@ -3881,7 +3906,6 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
     <span class="modal-close" role="button" tabindex="0" onclick="closeModal(null,'siteMenuModal')">&times;</span>
     <h2>📝 メニュー</h2>
     <div class="mypage-menu">
-      <button type="button" onclick="closeModal(null,'siteMenuModal');openMyPage()">👤 マイページ</button>
       <button type="button" onclick="closeModal(null,'siteMenuModal');openFriendsModal()">👥 フレンド</button>
       <button type="button" onclick="closeModal(null,'siteMenuModal');openManualModal()">📖 使い方ガイド</button>
       <button type="button" onclick="closeModal(null,'siteMenuModal');openModal('settingsModal')">⚙ 設定</button>
@@ -4283,7 +4307,7 @@ body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
 <div class="modal-overlay" id="accountModal" onclick="closeModal(event, 'accountModal')">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle" onclick="event.stopPropagation()" style="max-width:480px;">
         <span class="modal-close" onclick="closeModal(null, 'accountModal')">&times;</span>
-        <h2 id="accountTitle">👤 マイアカウント</h2>
+        <h2 id="accountTitle">👤 アカウント設定</h2>
         <p style="font-size:12px;opacity:.8;">ユーザー名と基本担当パートを設定します。Googleログイン中はアカウントに保存されます。</p>
         <div class="setting-group" style="margin-bottom: 25px;">
             <label>👤 ユーザー名 (セッション用)</label>
@@ -9637,6 +9661,8 @@ html, body { background: transparent !important; color: ${text} !important; }
     const roomCreate=document.body.classList.contains('sl-room-create-open');
     const addSong=document.body.classList.contains('sl-add-song-open');
     const my=!!document.body.classList.contains('my-list-mode');
+    const roomMy=!!inRoom && !!signedInUser && String(roomListView||'all')===signedInUser.uid;
+    document.body.classList.toggle('sl-room-mylist',roomMy);
 
     const title=slById('slPageTitle'),sub=slById('slPageSubtitle');
     if(title&&sub){
@@ -9795,7 +9821,19 @@ html, body { background: transparent !important; color: ${text} !important; }
     slMove('songCountDisplay','slBottomMetaHost');
     slMove('artistFilterIndicator','slListMeta');
     slEnableGenreDrag();
-    slMove('loginStatus','slUserHost');
+    slMove('loginStatus','slSidebarAccount');
+    const accountLabel=slById('loginStatus');
+    if(accountLabel){
+      accountLabel.removeAttribute('style');
+      accountLabel.setAttribute('title','クリックでアカウント設定');
+    }
+    const accountHost=slById('slSidebarAccount');
+    if(accountHost && accountLabel){
+      // 見出しの初期ダミーテキストを削除し、従来のログイン表示をそのまま利用する。
+      const oldLabel=slById('slSidebarAccountName');
+      if(oldLabel)oldLabel.remove();
+      accountHost.querySelector('.sl-account-icon')?.after(accountLabel);
+    }
     slMove('googleLoginBtn','slSidebarFooter');
     slMove('googleLogoutBtn','slSidebarFooter');
 
