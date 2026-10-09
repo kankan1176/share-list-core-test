@@ -9054,7 +9054,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         status:newStatus,
         order:firebase.database.ServerValue.TIMESTAMP
       });
-      slSelectDockStatus(newStatus);
+      // 操作後もユーザーが選択している右メニューのタブを維持する。
       slDockFeedback('「'+label+'」を'+({reserved:'予約',confirmed:'演奏確定',completed:'完了'}[newStatus]||newStatus)+'へ移動しました');
     }catch(err){
       console.error('進行状態変更エラー',err);
@@ -9106,7 +9106,7 @@ html, body { background: transparent !important; color: ${text} !important; }
       slDockUndoEntry=null;
       clearTimeout(slDockUndoTimer);
       const box=slById('slDockUndo');if(box)box.hidden=true;
-      slSelectDockStatus(pending.record.status);
+      // 復元時もタブを自動切り替えしない。
       slDockFeedback('「'+pending.name+'」を元に戻しました');
     }catch(err){
       console.error('削除復元エラー',err);
