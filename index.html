@@ -1747,6 +1747,157 @@ body.sl-redesign .modal textarea{
   font-size:12.5px;
 }
 
+
+
+/* モーダル可読性改善 */
+body.sl-redesign .modal{
+  font-size:16px!important;
+  line-height:1.75!important;
+}
+body.sl-redesign .modal h2{
+  font-size:31px!important;
+  line-height:1.35!important;
+  padding-bottom:13px!important;
+  margin-bottom:16px!important;
+}
+body.sl-redesign .modal h3{
+  font-size:22px!important;
+  line-height:1.45!important;
+}
+body.sl-redesign .modal p,
+body.sl-redesign .modal li,
+body.sl-redesign .modal label,
+body.sl-redesign .modal .status,
+body.sl-redesign .modal small{
+  font-size:16px!important;
+  line-height:1.85!important;
+}
+body.sl-redesign .modal button,
+body.sl-redesign .modal input,
+body.sl-redesign .modal select,
+body.sl-redesign .modal textarea{
+  font-size:16px!important;
+  line-height:1.5!important;
+}
+body.sl-redesign .modal button,
+body.sl-redesign .modal select,
+body.sl-redesign .modal input[type="text"],
+body.sl-redesign .modal input[type="search"],
+body.sl-redesign .modal input[type="url"],
+body.sl-redesign .modal textarea{
+  min-height:46px;
+}
+body.sl-redesign .modal-close{
+  font-size:32px!important;
+}
+
+/* マイページ */
+#myPageModal .modal{
+  max-width:620px!important;
+  padding:26px 22px!important;
+}
+#myPageModal #myPageAccountHint{
+  font-size:17px!important;
+  line-height:1.8!important;
+  margin:2px 0 18px!important;
+}
+#myPageModal .mypage-menu{
+  gap:12px!important;
+}
+#myPageModal .mypage-menu > button,
+#myPageModal .mypage-menu > a{
+  font-size:17px!important;
+  line-height:1.45!important;
+  padding:15px 14px!important;
+  min-height:58px!important;
+  border-radius:10px!important;
+}
+
+/* ヘルプ */
+#slHelpModal .modal{
+  max-width:980px!important;
+  padding:22px 18px!important;
+}
+.sl-help-layout{
+  grid-template-columns:250px minmax(0,1fr)!important;
+  gap:16px!important;
+}
+.sl-help-nav{
+  gap:8px!important;
+}
+.sl-help-nav button{
+  min-height:48px!important;
+  padding:10px 12px!important;
+  font-size:15px!important;
+  line-height:1.5!important;
+}
+.sl-help-group-title{
+  font-size:14px!important;
+  padding:10px 4px 4px!important;
+}
+.sl-help-content{
+  padding:4px 10px!important;
+}
+.sl-help-section h3{
+  font-size:24px!important;
+  margin-bottom:12px!important;
+}
+.sl-help-section p,
+.sl-help-section li{
+  font-size:16px!important;
+  line-height:1.9!important;
+}
+
+/* 設定 */
+#settingsModal .modal{
+  max-width:560px!important;
+  padding:24px 22px!important;
+}
+#settingsModal .setting-group{
+  margin-bottom:18px!important;
+}
+#settingsModal .setting-group > label{
+  display:block;
+  font-size:18px!important;
+  font-weight:800!important;
+  margin-bottom:8px!important;
+}
+#settingsModal p{
+  font-size:14px!important;
+  line-height:1.8!important;
+}
+#settingsModal select,
+#settingsModal button{
+  font-size:16px!important;
+  min-height:46px!important;
+}
+
+@media(max-width:900px){
+  #slHelpModal .modal{max-width:96vw!important;}
+  .sl-help-layout{grid-template-columns:1fr!important;gap:12px!important;}
+  .sl-help-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important;padding-right:0!important;border-right:0!important;border-bottom:1px solid var(--sl-border-soft)!important;padding-bottom:10px!important;}
+}
+@media(max-width:600px){
+  body.sl-redesign .modal{font-size:15px!important;}
+  body.sl-redesign .modal h2{font-size:25px!important;}
+  body.sl-redesign .modal p,
+  body.sl-redesign .modal li,
+  body.sl-redesign .modal label,
+  body.sl-redesign .modal button,
+  body.sl-redesign .modal input,
+  body.sl-redesign .modal select,
+  body.sl-redesign .modal textarea{font-size:15px!important;}
+  #myPageModal .mypage-menu{grid-template-columns:1fr!important;}
+  #myPageModal .mypage-menu > button,
+  #myPageModal .mypage-menu > a{font-size:16px!important;min-height:54px!important;}
+  .sl-help-nav button{font-size:14px!important;min-height:44px!important;}
+  .sl-help-group-title{font-size:13px!important;}
+  .sl-help-section h3{font-size:22px!important;}
+  .sl-help-section p,
+  .sl-help-section li{font-size:15px!important;}
+  #settingsModal .setting-group > label{font-size:17px!important;}
+}
+
 /* ルーム作成 */
 .sl-room-create-heading h2{font-size:34px!important}
 .sl-room-create-heading p{font-size:12.5px!important}
