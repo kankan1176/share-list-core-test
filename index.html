@@ -1108,6 +1108,10 @@ body.sl-redesign .status-buttons,
 body.sl-redesign .room-status-bar .room-actions,
 body.sl-redesign #listModeIndicator{display:none!important}
 
+/* OBS設定はルーム入室中だけ左メニューのルーム直下に表示 */
+#slNavObs{display:none!important;}
+body.in-room #slNavObs{display:flex!important;}
+
 /* ================= SIDEBAR ================= */
 #slSidebar{
   position:fixed;z-index:2100;left:0;top:0;bottom:0;width:var(--sl-side);
@@ -3036,6 +3040,7 @@ body.sl-redesign #friendSharedModal.modal-overlay {
     <button type="button" id="slNavAll" class="sl-nav-all" onclick="slNavigate('all')"><span>🎵</span><b>全曲一覧</b></button>
     <button type="button" id="slNavMy" class="sl-nav-my" onclick="slNavigate('mylist')"><span>📋</span><b>マイリスト</b></button>
     <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slNavigate('room')"><span>🎤</span><b>ルーム</b></button>
+    <button type="button" id="slNavObs" class="sl-nav-obs" onclick="openObsModal()" aria-haspopup="dialog" aria-controls="obsModal"><span>📹</span><b>OBSカスタムCSS設定</b></button>
     <!-- 共通曲はルーム内部のタブからのみ利用可能。左メニュー項目は削除。 -->
     <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slNavigate('friends')"><span>👥</span><b>フレンド</b></button>
     <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slNavigate('add')"><span class="sl-nav-add-icon">📄</span><b class="sl-nav-add-label">新規楽曲追加</b></button>
