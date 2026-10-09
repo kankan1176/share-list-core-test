@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <title>シェアリスコア-Share List Score-</title>
     <!-- ルーム招待URLだけは従来どおり直接入室。それ以外はホームを最初に表示する。 -->
     <script>if (!new URLSearchParams(location.search).has('room')) document.documentElement.classList.add('entry-home');</script>
@@ -1048,8 +1049,8 @@ body.in-room #homeBackBtn,body.in-room #mobileHomeItem {display:none!important;}
 
 
 /* =========================================================
-   2026 UI REDESIGN PREVIEW
-   既存ID・既存関数・Firebase処理を維持したまま、外観とナビゲーションのみ刷新
+   2026 UI REDESIGN
+   既存ID・既存関数・Firebase処理を維持したまま、外観とナビゲーションを刷新
 ========================================================= */
 :root{
   --ui-sidebar-w:236px;
@@ -1901,7 +1902,7 @@ body.room-queue-dock-collapsed #roomQueueDock{
   box-sizing:border-box;
   padding:12px;
   display:grid;
-  grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr);
   gap:10px;
 }
 
@@ -2089,6 +2090,89 @@ body.room-queue-dock-collapsed #roomQueueDockToggleIcon{
   border-color:rgba(255,189,74,.28)!important;
 }
 
+
+/* 予約 / 確定 / 完了：選択中の1画面だけを大きく表示 */
+.room-dock-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  padding:5px;
+  border:1px solid var(--ui-soft-border);
+  border-radius:14px;
+  background:color-mix(in srgb,var(--bg-color) 82%,var(--panel-bg) 18%);
+}
+.room-dock-tab{
+  min-width:0;
+  min-height:40px;
+  padding:6px 5px!important;
+  border:1px solid transparent!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:var(--text-color)!important;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:11px!important;
+  font-weight:900!important;
+  overflow:hidden;
+}
+.room-dock-tab:hover{
+  background:var(--btn-hover)!important;
+}
+.room-dock-tab.active[data-room-dock-status="reserved"]{
+  background:linear-gradient(135deg,#e5a52f,#ffc75b)!important;
+  color:#21170a!important;
+}
+.room-dock-tab.active[data-room-dock-status="confirmed"]{
+  background:linear-gradient(135deg,#7d5be8,#a96cff)!important;
+  color:#fff!important;
+}
+.room-dock-tab.active[data-room-dock-status="completed"]{
+  background:linear-gradient(135deg,#2eae73,#43d78f)!important;
+  color:#07150e!important;
+}
+.room-dock-tab-count{
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  box-sizing:border-box;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.15);
+  font-size:9px;
+  line-height:1;
+}
+#roomQueueDock .room-dock-section[data-room-dock-panel]{
+  display:none!important;
+  min-height:0!important;
+  height:100%!important;
+}
+#roomQueueDock .room-dock-section[data-room-dock-panel].active{
+  display:flex!important;
+  flex-direction:column!important;
+}
+#roomQueueDock .room-dock-section[data-room-dock-panel].active .room-dock-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow:auto!important;
+}
+
+/* 右ドック格納時、開閉ハンドルと右上ログイン表示が重ならないよう余白を確保 */
+body.ui-redesign.room-queue-dock-collapsed #redesignTopbar{
+  padding-right:62px!important;
+}
+body.ui-redesign.room-queue-dock-collapsed #redesignUserButton{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+@media(max-width:820px){
+  body.ui-redesign.room-queue-dock-collapsed #redesignTopbar{
+    padding-right:52px!important;
+  }
+}
+
 /* 右ドック展開中は中央一覧が隠れないように幅を確保 */
 @media(min-width:1181px){
   body.ui-redesign.in-room:not(.room-queue-dock-collapsed) .container,
@@ -2127,53 +2211,6 @@ body.room-queue-dock-collapsed #roomQueueDockToggleIcon{
   #roomQueueDockToggle{
     left:-32px;
     width:32px;
-  }
-}
-
-
-/* =========================================================
-   UIプレビュー専用
-   実ルームがなくても右側セッション進行ドックを確認できる。
-   本番用ではなく、デザイン確認専用。
-========================================================= */
-body.ui-room-preview #roomQueueDock{
-  display:block!important;
-}
-body.ui-room-preview:not(.room-queue-dock-collapsed) .container{
-  width:calc(100% - var(--ui-sidebar-w) - var(--room-dock-w));
-}
-body.ui-room-preview:not(.room-queue-dock-collapsed) #redesignTopbar,
-body.ui-room-preview:not(.room-queue-dock-collapsed) #redesignTopFilterBar{
-  right:var(--room-dock-w);
-}
-body.ui-room-preview #roomQueueDock::before{
-  content:"UI PREVIEW";
-  position:absolute;
-  right:12px;
-  top:12px;
-  z-index:3;
-  padding:3px 7px;
-  border-radius:999px;
-  background:rgba(167,124,255,.14);
-  border:1px solid rgba(167,124,255,.28);
-  color:#cdbdff;
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.08em;
-  pointer-events:none;
-}
-@media(max-width:1180px){
-  body.ui-room-preview:not(.room-queue-dock-collapsed) .container{
-    width:calc(100% - var(--ui-sidebar-w));
-  }
-  body.ui-room-preview:not(.room-queue-dock-collapsed) #redesignTopbar,
-  body.ui-room-preview:not(.room-queue-dock-collapsed) #redesignTopFilterBar{
-    right:0;
-  }
-}
-@media(max-width:820px){
-  body.ui-room-preview:not(.room-queue-dock-collapsed) .container{
-    width:100%;
   }
 }
 
@@ -2240,6 +2277,28 @@ body.ui-redesign .top-area>.header{height:0;margin:0;padding:0}
   body.ui-redesign #tableWrapper{border-radius:12px!important}
 }
 
+
+/* TEST環境識別 */
+body.ui-redesign::after{
+  content:"TEST";
+  position:fixed;
+  z-index:2600;
+  left:calc(var(--ui-sidebar-w) + 12px);
+  bottom:10px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#ffb020;
+  color:#211400;
+  border:1px solid #ffd27a;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  pointer-events:none;
+}
+@media(max-width:820px){
+  body.ui-redesign::after{left:10px;bottom:10px}
+}
+
 </style>
 </head>
 <body>
@@ -2256,14 +2315,14 @@ body.ui-redesign .top-area>.header{height:0;margin:0;padding:0}
 </script>
 
 <!-- =========================================================
-     新UIプレビュー：左サイドバー + 上部バー
+     新UI：左サイドバー + 上部バー
      既存機能のIDは変更せず、ナビゲーションだけ追加
 ========================================================= -->
 <div id="redesignSidebarBackdrop" onclick="closeRedesignSidebar()"></div>
 <aside id="redesignSidebar" aria-label="メインナビゲーション">
   <div class="redesign-brand">
     <img src="site-logo.png?v=20261003-3" alt="" onerror="this.style.display='none'">
-    <div><strong>シェアリスコア</strong><small>Share List Score</small></div>
+    <div><strong>シェアリスコア</strong><small>Share List Score ・ TEST</small></div>
   </div>
 
   <div id="redesignModeSwitch" aria-label="サイドバー表示切替">
@@ -2320,12 +2379,23 @@ body.ui-redesign .top-area>.header{height:0;margin:0;padding:0}
     <div class="room-queue-dock-header">
       <div>
         <strong>🎛️ セッション進行</strong>
-        <small>予約 → 演奏確定 → 完了</small>
+        <small>予約 → 確定 → 完了</small>
       </div>
-      <button type="button" class="room-dock-mini-btn" id="roomQueueDockCollapseBtn">格納</button>
     </div>
 
-    <section class="room-dock-section room-dock-reserved">
+    <div class="room-dock-tabs" role="tablist" aria-label="進行状態">
+      <button type="button" class="room-dock-tab active" data-room-dock-status="reserved" role="tab" aria-selected="true">
+        <span>📝 予約</span><span class="room-dock-tab-count" id="roomDockReservedTabCount">0</span>
+      </button>
+      <button type="button" class="room-dock-tab" data-room-dock-status="confirmed" role="tab" aria-selected="false">
+        <span>🎸 確定</span><span class="room-dock-tab-count" id="roomDockConfirmedTabCount">0</span>
+      </button>
+      <button type="button" class="room-dock-tab" data-room-dock-status="completed" role="tab" aria-selected="false">
+        <span>✅ 完了</span><span class="room-dock-tab-count" id="roomDockCompletedTabCount">0</span>
+      </button>
+    </div>
+
+    <section class="room-dock-section room-dock-reserved active" data-room-dock-panel="reserved">
       <div class="room-dock-section-title">
         <span>📝 予約</span>
         <span class="room-dock-count" id="roomDockReservedCount">0</span>
@@ -2335,9 +2405,9 @@ body.ui-redesign .top-area>.header{height:0;margin:0;padding:0}
       </div>
     </section>
 
-    <section class="room-dock-section room-dock-confirmed">
+    <section class="room-dock-section room-dock-confirmed" data-room-dock-panel="confirmed">
       <div class="room-dock-section-title">
-        <span>🎸 演奏確定</span>
+        <span>🎸 確定</span>
         <span class="room-dock-count" id="roomDockConfirmedCount">0</span>
       </div>
       <div class="room-dock-list" id="roomDockConfirmedList">
@@ -2345,7 +2415,7 @@ body.ui-redesign .top-area>.header{height:0;margin:0;padding:0}
       </div>
     </section>
 
-    <section class="room-dock-section room-dock-completed">
+    <section class="room-dock-section room-dock-completed" data-room-dock-panel="completed">
       <div class="room-dock-section-title">
         <span>✅ 完了</span>
         <span class="room-dock-count" id="roomDockCompletedCount">0</span>
@@ -7298,6 +7368,9 @@ html, body { background: transparent !important; color: ${text} !important; }
         setCount('roomDockReservedCount', reservedItems.length);
         setCount('roomDockConfirmedCount', confirmedItems.length);
         setCount('roomDockCompletedCount', completedItems.length);
+        setCount('roomDockReservedTabCount', reservedItems.length);
+        setCount('roomDockConfirmedTabCount', confirmedItems.length);
+        setCount('roomDockCompletedTabCount', completedItems.length);
 
         const configs = [
             {
@@ -7741,7 +7814,7 @@ html, body { background: transparent !important; color: ${text} !important; }
 
 <script>
 /* =========================================================
-   新UIプレビュー用の薄い橋渡し層
+   新UI用の薄い橋渡し層
    既存ロジックは呼び出すだけで、Firebase / 検索 / マイリスト処理は変更しない
 ========================================================= */
 (function(){
@@ -7776,18 +7849,28 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
   }
 
+  window.selectRoomQueueDockStatus = function(status){
+    if(!['reserved','confirmed','completed'].includes(status)) return;
+    document.querySelectorAll('#roomQueueDock .room-dock-tab').forEach(button=>{
+      const active = button.dataset.roomDockStatus === status;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+    document.querySelectorAll('#roomQueueDock .room-dock-section[data-room-dock-panel]').forEach(panel=>{
+      panel.classList.toggle('active', panel.dataset.roomDockPanel === status);
+    });
+  };
+
   window.toggleRoomQueueDock = function(forceOpen){
     const collapsed = document.body.classList.contains('room-queue-dock-collapsed');
     const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : collapsed;
     document.body.classList.toggle('room-queue-dock-collapsed', !shouldOpen);
 
     const toggle = document.getElementById('roomQueueDockToggle');
-    const collapseBtn = document.getElementById('roomQueueDockCollapseBtn');
     if(toggle){
       toggle.title = shouldOpen ? '格納' : '表示';
       toggle.setAttribute('aria-label', shouldOpen ? 'ルーム進行パネルを格納' : 'ルーム進行パネルを表示');
     }
-    if(collapseBtn) collapseBtn.textContent = shouldOpen ? '格納' : '表示';
   };
 
   window.toggleRedesignSidebar = function(){
@@ -8022,7 +8105,10 @@ html, body { background: transparent !important; color: ${text} !important; }
 
   setInterval(syncTopSearchFromMain,700);
   document.getElementById('roomQueueDockToggle')?.addEventListener('click',()=>toggleRoomQueueDock());
-  document.getElementById('roomQueueDockCollapseBtn')?.addEventListener('click',()=>toggleRoomQueueDock(false));
+  document.querySelectorAll('#roomQueueDock .room-dock-tab').forEach(button=>{
+    button.addEventListener('click',()=>selectRoomQueueDockStatus(button.dataset.roomDockStatus));
+  });
+  selectRoomQueueDockStatus('reserved');
 
   setTimeout(()=>{
     mountRedesignTopControls();
@@ -8038,83 +8124,6 @@ html, body { background: transparent !important; color: ${text} !important; }
 
   // genreFilters / songCountDisplay は同じDOMノードを再描画して使うため、
   // 周期的なDOM移動は行わない。必要時は body の状態変化で再マウントする。
-})();
-</script>
-
-
-<script>
-/* =========================================================
-   右側セッション進行ドック UIプレビュー用サンプルデータ
-   Firebaseへは書き込まず、ローカル状態だけで動作確認する。
-========================================================= */
-(function(){
-  function startRoomDockPreview(){
-    try{
-      // 実ルームに入っている場合は本物のデータを優先し、サンプルは入れない。
-      const hasRealRoom =
-        (typeof currentRoomId !== 'undefined' && !!currentRoomId) ||
-        new URLSearchParams(location.search).has('room');
-
-      if(hasRealRoom) return;
-
-      document.body.classList.add('ui-room-preview');
-      document.body.classList.remove('room-queue-dock-collapsed');
-
-      const previewSongs = [
-        {id:'preview_song_01', title:'透明な夜', artist:'Sample Band'},
-        {id:'preview_song_02', title:'Blue Signal', artist:'Demo Project'},
-        {id:'preview_song_03', title:'夕焼けセッション', artist:'ShareLiScore'},
-        {id:'preview_song_04', title:'Midnight Drive', artist:'Studio Friends'},
-        {id:'preview_song_05', title:'アンコール', artist:'Session Members'}
-      ];
-
-      if(typeof roomQueueSongCache !== 'undefined'){
-        previewSongs.forEach(song=>{
-          roomQueueSongCache.set(song.id,{
-            _id:song.id,
-            _legacyId:'',
-            '曲名':song.title,
-            'アーティスト':song.artist,
-            'コードwiki':'',
-            'BPM':'',
-            'ジャンル':'',
-            'ジャンル①':'',
-            'ジャンル②':'',
-            'ジャンル③':'',
-            'タイアップ情報':'',
-            '検索':'',
-            '作詞':'',
-            '作曲':'',
-            '編曲':'',
-            _updatedAt:0,
-            _searchText:(song.title+' '+song.artist).toLowerCase()
-          });
-        });
-      }
-
-      if(typeof roomQueue !== 'undefined'){
-        roomQueue = {
-          preview_q_01:{songId:'preview_song_01',status:'reserved',order:1,key:0},
-          preview_q_02:{songId:'preview_song_02',status:'reserved',order:2,key:2},
-          preview_q_03:{songId:'preview_song_03',status:'confirmed',order:3,key:-1},
-          preview_q_04:{songId:'preview_song_04',status:'completed',order:4,key:0},
-          preview_q_05:{songId:'preview_song_05',status:'completed',order:5,key:0}
-        };
-      }
-
-      if(typeof updateQueueUI === 'function'){
-        updateQueueUI();
-      }
-    }catch(error){
-      console.warn('右側セッション進行ドックのプレビュー初期化に失敗:',error);
-    }
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(startRoomDockPreview,250),{once:true});
-  }else{
-    setTimeout(startRoomDockPreview,250);
-  }
 })();
 </script>
 
