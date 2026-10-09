@@ -2835,6 +2835,69 @@ body.sl-redesign.sl-add-song-open #addSongModal .sl-add-song-page{
   }
 }
 
+
+/* Friends page 3-area redesign, retaining original Firebase hooks and IDs */
+body.sl-redesign #friendsModal.modal-overlay{
+ position:fixed!important;inset:0 0 0 var(--sl-side)!important;
+ padding:18px!important;background:#06101f!important;
+ display:none;align-items:stretch!important;justify-content:center!important;
+ overflow:hidden!important;border:0!important;z-index:1950!important;
+}
+body.sl-redesign #friendsModal.modal-overlay[style*="flex"]{display:flex!important}
+body.sl-redesign #friendsModal .sl-friends-workspace{
+ width:min(1320px,100%)!important;max-width:1320px!important;
+ height:100%!important;max-height:100%!important;min-height:0!important;
+ padding:0!important;margin:0 auto!important;overflow:hidden!important;
+ display:flex!important;flex-direction:column!important;gap:0!important;
+ border:1px solid #29466f!important;border-radius:16px!important;
+ background:#0c1d36!important;box-shadow:0 18px 60px #0005!important;
+}
+#friendsModal .sl-friends-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px;border-bottom:1px solid #294669}
+#friendsModal .sl-friends-header h2{margin:0!important;color:#f3f7ff;font-size:22px}
+#friendsModal .sl-friends-header p{margin:3px 0 0;color:#a1b5d5;font-size:12px}
+#friendsModal .sl-friends-header-actions{display:flex;align-items:center;gap:8px}
+#friendsModal .sl-friends-header-actions button{border:1px solid #3c5782;color:#e3edff;background:#203b63;border-radius:9px;padding:8px 11px;cursor:pointer}
+#friendsModal .sl-friends-header-actions .sl-friends-close{font-size:22px;padding:2px 12px}
+#friendsModal .sl-friends-layout{display:grid;grid-template-columns:minmax(280px,1.18fr) minmax(330px,1fr);gap:14px;flex:1;min-height:0;padding:14px}
+#friendsModal .sl-friends-panel{background:#112641;border:1px solid #2d4b73;border-radius:12px;padding:13px;min-height:0;min-width:0;overflow:hidden}
+#friendsModal .sl-friends-main{display:flex;flex-direction:column}
+#friendsModal .sl-friends-panel-title{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+#friendsModal .sl-friends-panel-title h3{margin:0!important;font-size:16px!important;white-space:nowrap;color:#f0f6ff}
+#friendsModal .sl-friends-caption{font-size:11px;color:#91a9cb;text-align:right}
+#friendsModal .sl-friends-right{display:grid;grid-template-rows:minmax(245px,auto) minmax(180px,1fr);gap:14px;min-height:0}
+#friendsModal .sl-friends-search{overflow-y:auto;scrollbar-width:thin}
+#friendsModal .sl-friends-history{display:flex;flex-direction:column}
+#friendsModal .sl-friends-info{font-size:11px;color:#99b2d0;margin:0 0 9px;line-height:1.5}
+#friendsModal .sl-friends-label{display:block;font-size:12px;color:#b7c9e4;margin:10px 0 5px}
+#friendsModal .sl-friends-field{display:flex;gap:7px;align-items:center}
+#friendsModal .sl-friends-field input{flex:1;min-width:0;width:100%;background:#081a32!important;color:#e8f1ff!important;border:1px solid #385779!important;padding:10px!important;border-radius:8px!important}
+#friendsModal .sl-friends-field button{flex-shrink:0;white-space:nowrap;padding:9px 13px!important;border-radius:8px!important}
+#friendsModal .sl-friends-compact-list{min-height:0;flex:1;overflow-y:auto;scrollbar-width:thin;display:flex;flex-direction:column;gap:5px;padding-right:3px}
+#friendsModal .friend-item{display:flex!important;align-items:center;justify-content:space-between;gap:8px;margin:0!important;padding:7px 9px!important;border:1px solid #2b486e!important;border-radius:8px!important;background:#1a3152!important;min-height:42px!important}
+#friendsModal .friend-name{font-size:13px!important;font-weight:600!important;color:#edf4ff!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#friendsModal .friend-commands{display:flex!important;flex:0 0 auto;gap:5px!important;flex-wrap:nowrap!important}
+#friendsModal .friend-commands button{font-size:11px!important;padding:5px 7px!important;white-space:nowrap;border-radius:6px!important}
+#friendsModal .sl-friends-search-results{margin-top:8px;max-height:140px;overflow:auto}
+#friendsModal .sl-friends-footer{padding:0 14px 9px;flex-shrink:0;font-size:12px;color:#bfd2ee}
+#friendsModal #friendSyncStatus{padding:7px;border:1px solid #3a567d;border-radius:7px}
+@media(min-width:1281px){body.sl-redesign.in-room:not(.sl-room-dock-collapsed) #friendsModal.modal-overlay{right:var(--sl-dock)!important}}
+@media(max-width:1000px){
+ body.sl-redesign #friendsModal.modal-overlay{padding:9px!important}
+ #friendsModal .sl-friends-layout{grid-template-columns:minmax(200px,1fr) minmax(290px,1fr);gap:9px;padding:9px}
+ #friendsModal .friend-item{align-items:flex-start;flex-direction:column}
+ #friendsModal .friend-commands{flex-wrap:wrap!important}
+}
+@media(max-width:680px){
+ body.sl-redesign #friendsModal.modal-overlay{left:0!important;right:0!important;padding:4px!important}
+ body.sl-redesign #friendsModal .sl-friends-workspace{border-radius:9px!important}
+ #friendsModal .sl-friends-header{padding:10px 12px}
+ #friendsModal .sl-friends-layout{display:flex;flex-direction:column;overflow-y:auto}
+ #friendsModal .sl-friends-main{min-height:245px;max-height:360px;flex-shrink:0}
+ #friendsModal .sl-friends-right{display:flex;flex-direction:column;overflow:visible}
+ #friendsModal .sl-friends-search{flex-shrink:0;overflow:visible}
+ #friendsModal .sl-friends-history{height:235px;flex-shrink:0}
+}
+
 </style>
 </head>
 <body>
@@ -3534,28 +3597,36 @@ body.sl-redesign.sl-add-song-open #addSongModal .sl-add-song-page{
   <div style="display:flex;justify-content:flex-end;margin-top:12px;"><button type="button" onclick="closeModal(null,'favoriteArtistsModal')">閉じる</button></div>
  </div>
 </div>
-<!-- お気に入りユーザー・フレンドコード検索・セッション履歴 -->
+<!-- フレンド画面：左一覧／右上検索／右下セッション履歴 -->
 <div class="modal-overlay" id="friendsModal" onclick="closeModal(event,'friendsModal')">
- <div class="modal" onclick="event.stopPropagation()" style="max-width:620px;max-height:88dvh;overflow:auto;">
-  <span class="modal-close" onclick="closeModal(null,'friendsModal')">&times;</span>
-  <h2>👥 フレンド</h2>
-  <p style="font-size:12px;line-height:1.6;">承認不要でユーザーを自分のお気に入りに登録できます。公開マイリスト・お気に入りアーティストはゲストも閲覧できます。</p>
-  <h3 id="friendsListHeading">⭐ お気に入り中ユーザー（0人）</h3><div id="friendsList" class="friends-section"></div>
-  <hr style="border:0;border-top:1px solid var(--border-color);margin:14px 0;">
-  <h3>🔎 フレンド検索</h3>
-  <p style="font-size:12px;">自分のフレンドコード（Googleログイン時に表示）</p>
-  <div style="display:flex;gap:6px;"><input id="myFriendCode" class="setting-input" readonly style="flex:1;min-width:0;"><button onclick="copyMyFriendCode()">コピー</button></div>
-  <p style="font-size:12px;">フレンドコード検索</p>
-  <div style="display:flex;gap:6px;"><input id="friendCodeInput" class="setting-input" placeholder="SL-XXXXXXXXXX を入力" style="flex:1;min-width:0;"><button id="sendFriendRequestBtn" class="primary-btn" onclick="sendFriendRequest()">検索</button></div>
-  <div id="publicProfilesList" class="friends-section" style="margin:9px 0;"></div>
-  <hr style="border:0;border-top:1px solid var(--border-color);margin:14px 0;">
-  <h3>🎵 セッション履歴ユーザー</h3>
-  <p style="font-size:12px;">同じルームに参加したGoogleアカウント登録済みユーザーのみ表示します。ゲストは記録しません。</p>
-  <div id="sessionHistoryUsersList" class="friends-section"></div>
-  <div id="friendFeedback" role="status" aria-live="polite" style="font-size:12px;margin:10px 0;"></div>
-  <div id="friendSyncStatus" role="status" aria-live="polite" hidden style="font-size:12px;padding:8px;border:1px solid var(--border-color);border-radius:5px;"><span id="friendSyncStatusText"></span><button id="friendSyncRetry" onclick="retryFriendSharedSync()">↻ 再試行</button></div>
-  <button onclick="refreshFriendsPanel()">↻ 更新</button>
- </div>
+ <section class="modal sl-friends-workspace" onclick="event.stopPropagation()" aria-label="フレンド画面">
+  <div class="sl-friends-header">
+   <div><h2>👥 フレンド</h2><p>登録ユーザーの管理・検索・セッション履歴</p></div>
+   <div class="sl-friends-header-actions"><button type="button" onclick="refreshFriendsPanel()">↻ 更新</button><button type="button" class="sl-friends-close" aria-label="フレンド画面を閉じる" onclick="closeModal(null,'friendsModal')">×</button></div>
+  </div>
+  <div class="sl-friends-layout">
+   <section class="sl-friends-panel sl-friends-main" aria-labelledby="friendsListHeading">
+    <div class="sl-friends-panel-title"><h3 id="friendsListHeading">👥 フレンド（0人）</h3><span class="sl-friends-caption">公開リストを見る・お気に入り解除</span></div>
+    <div id="friendsList" class="friends-section sl-friends-compact-list"></div>
+   </section>
+   <div class="sl-friends-right">
+    <section class="sl-friends-panel sl-friends-search" aria-labelledby="sl-friends-search-title">
+     <div class="sl-friends-panel-title"><h3 id="sl-friends-search-title">🔎 フレンド検索</h3></div>
+     <label for="myFriendCode" class="sl-friends-label">自分のフレンドコード</label>
+     <div class="sl-friends-field"><input id="myFriendCode" class="setting-input" readonly placeholder="Googleログイン後に表示"><button type="button" onclick="copyMyFriendCode()">コピー</button></div>
+     <label for="friendCodeInput" class="sl-friends-label">フレンドコードで探す</label>
+     <div class="sl-friends-field"><input id="friendCodeInput" class="setting-input" placeholder="SL-XXXXXXXXXX を入力"><button type="button" id="sendFriendRequestBtn" class="primary-btn" onclick="sendFriendRequest()">検索</button></div>
+     <div id="publicProfilesList" class="friends-section sl-friends-search-results"></div>
+    </section>
+    <section class="sl-friends-panel sl-friends-history" aria-labelledby="sl-friends-history-title">
+     <div class="sl-friends-panel-title"><h3 id="sl-friends-history-title">🎵 セッション履歴ユーザー</h3></div>
+     <p class="sl-friends-info">同じルームに参加したGoogle登録ユーザーを表示します。</p>
+     <div id="sessionHistoryUsersList" class="friends-section sl-friends-compact-list"></div>
+    </section>
+   </div>
+  </div>
+  <div class="sl-friends-footer"><div id="friendFeedback" role="status" aria-live="polite"></div><div id="friendSyncStatus" role="status" aria-live="polite" hidden><span id="friendSyncStatusText"></span><button type="button" id="friendSyncRetry" onclick="retryFriendSharedSync()">↻ 再試行</button></div></div>
+ </section>
 </div>
 <!-- STEP 3-2: 承認済みフレンドの公開マイリスト（閲覧のみ） -->
 
@@ -5721,7 +5792,7 @@ body.sl-redesign.sl-add-song-open #addSongModal .sl-add-song-page{
         void refreshFriendsPanel();
       }catch(err){console.error('ユーザーお気に入り初期化失敗',err);friendNotice('ユーザー情報の準備に失敗しました。Firebaseルールを確認してください。',true);}
     }
-    function updateFriendCount(count){const n=count===null?'−':String(count);const h=document.getElementById('homeFriendCount');if(h)h.textContent=`(${n}人)`;const t=document.getElementById('friendsListHeading');if(t)t.textContent=`⭐ お気に入り中ユーザー（${n}人）`;}
+    function updateFriendCount(count){const n=count===null?'−':String(count);const h=document.getElementById('homeFriendCount');if(h)h.textContent=`(${n}人)`;const t=document.getElementById('friendsListHeading');if(t)t.textContent=`👥 フレンド（${n}人）`;}
     function openFriendsModal(){friendNotice('');renderFriendSyncStatus();openModal('friendsModal');const u=friendUser();document.getElementById('myFriendCode').value=u?(friendCodeForUser||'取得中…'):'Googleログイン後に表示';void refreshFriendsPanel();}
     function copyMyFriendCode(){if(!friendUser())return friendNotice('Googleログインが必要です。',true);if(!friendCodeForUser)return friendNotice('フレンドコード取得中です。',true);navigator.clipboard.writeText(friendCodeForUser).then(()=>friendNotice('フレンドコードをコピーしました。')).catch(()=>friendNotice('コピーできませんでした。',true));}
     async function getFriendDisplayName(uid){if(friendNameCache[uid])return friendNameCache[uid];try{const v=await db.ref(`publicProfiles/${uid}/displayName`).once('value');return friendNameCache[uid]=String(v.val()||'ユーザー').slice(0,40);}catch{return 'ユーザー';}}
