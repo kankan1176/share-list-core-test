@@ -1816,6 +1816,164 @@ body.sl-redesign .modal textarea{
   .sl-sidebar-nav button>b,.sl-sidebar-nav a>b{font-size:13px!important}
 }
 
+
+/* =========================================================
+   LEGAL / COPYRIGHT
+========================================================= */
+
+/* トップ画面のCopyrightを読みやすく */
+html.entry-home body.sl-redesign .home-copyright{
+  font-size:11px!important;
+  line-height:1.45!important;
+  font-weight:650!important;
+  color:#8191ae!important;
+  opacity:.9!important;
+  bottom:10px!important;
+}
+
+/* 左メニュー下部の法務リンク */
+.sl-sidebar-legal{
+  flex:0 0 auto;
+  margin-top:auto;
+  padding:10px 4px 8px;
+  border-top:1px solid var(--sl-border-soft);
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.sl-sidebar-legal button{
+  width:100%;
+  min-height:29px;
+  padding:4px 5px;
+  border:0;
+  background:transparent;
+  color:#8092b1;
+  text-align:left;
+  font-size:10px!important;
+  line-height:1.35;
+  font-weight:700;
+  cursor:pointer;
+  border-radius:7px;
+}
+
+.sl-sidebar-legal button:hover{
+  color:#dce8ff;
+  background:rgba(73,116,210,.10);
+}
+
+.sl-sidebar-copyright{
+  margin-top:5px;
+  padding:6px 4px 0;
+  font-size:8.5px;
+  line-height:1.45;
+  color:#617492;
+}
+
+/* ログインボタンは法務表示の下へ */
+.sl-sidebar-footer{
+  margin-top:0!important;
+  padding-top:8px!important;
+}
+
+/* 法務モーダル */
+.sl-legal-modal{
+  width:min(900px,96%)!important;
+  max-width:900px!important;
+  max-height:80dvh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+.sl-legal-modal > h2{
+  flex:0 0 auto;
+  padding-right:40px;
+  margin-bottom:3px!important;
+}
+
+.sl-legal-meta{
+  flex:0 0 auto;
+  padding-bottom:10px;
+  margin-bottom:4px;
+  border-bottom:1px solid var(--sl-border-soft);
+  color:#8192af;
+  font-size:10.5px;
+}
+
+.sl-legal-content{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding:3px 9px 8px 1px;
+}
+
+.sl-legal-content section{
+  padding:10px 0;
+  border-bottom:1px solid rgba(112,143,205,.12);
+}
+
+.sl-legal-content section:last-child{
+  border-bottom:0;
+}
+
+.sl-legal-content h3{
+  margin:0 0 7px!important;
+  color:#72b9ff;
+  font-size:15px!important;
+}
+
+.sl-legal-content p,
+.sl-legal-content li{
+  font-size:12px!important;
+  line-height:1.75!important;
+  color:#c3cee0;
+}
+
+.sl-legal-content p{
+  margin:6px 0;
+}
+
+.sl-legal-content ul,
+.sl-legal-content ol{
+  margin:6px 0;
+  padding-left:1.5em;
+}
+
+@media(max-height:730px) and (min-width:821px){
+  .sl-sidebar-legal{
+    padding-top:6px;
+    padding-bottom:5px;
+  }
+  .sl-sidebar-legal button{
+    min-height:24px;
+    font-size:9px!important;
+  }
+  .sl-sidebar-copyright{
+    display:none;
+  }
+}
+
+@media(max-width:820px){
+  .sl-sidebar-legal button{
+    font-size:10.5px!important;
+  }
+  .sl-sidebar-copyright{
+    font-size:8px;
+  }
+  .sl-legal-modal{
+    width:calc(100vw - 14px)!important;
+    max-height:86dvh!important;
+  }
+  .sl-legal-content h3{
+    font-size:14px!important;
+  }
+  .sl-legal-content p,
+  .sl-legal-content li{
+    font-size:11.5px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1856,7 +2014,14 @@ body.sl-redesign .modal textarea{
     <a href="admin.html" id="slAdminLink" class="sl-nav-admin" style="display:none;"><span>🛡️</span><b>管理者メニュー</b></a>
   </nav>
 
-  <div class="sl-sidebar-footer" id="slSidebarFooter"></div>
+  
+<div class="sl-sidebar-legal" aria-label="利用規約・プライバシー">
+  <button type="button" onclick="slRunNav(()=>slOpenExclusive('slTermsModal'))">利用規約と免責事項</button>
+  <button type="button" onclick="slRunNav(()=>slOpenExclusive('slPrivacyModal'))">プライバシーポリシー</button>
+  <div class="sl-sidebar-copyright">Copyright © 2026 シェアリスコア.<br>All Rights Reserved.</div>
+</div>
+<div class="sl-sidebar-footer" id="slSidebarFooter"></div>
+
 </aside>
 
 <header id="slTopbar">
@@ -1971,6 +2136,181 @@ body.sl-redesign .modal textarea{
     </div>
   </div>
 </div>
+
+<!-- 利用規約と免責事項 -->
+<div class="modal-overlay" id="slTermsModal" onclick="closeModal(event,'slTermsModal')">
+  <div class="modal sl-legal-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="slTermsTitle">
+    <span class="modal-close" onclick="closeModal(null,'slTermsModal')">&times;</span>
+    <h2 id="slTermsTitle">利用規約と免責事項</h2>
+    <div class="sl-legal-meta">最終更新日：2026年10月9日</div>
+
+    <div class="sl-legal-content">
+      <section>
+        <h3>1. 本規約について</h3>
+        <p>本規約は、シェアリスコア（以下「本サービス」）の利用条件を定めるものです。本サービスを利用した時点で、本規約の内容に同意したものとみなします。</p>
+      </section>
+
+      <section>
+        <h3>2. 本サービスの内容</h3>
+        <p>本サービスは、楽曲情報の検索、マイリスト管理、Key・担当パートの登録、セッションルーム、共通曲、予約・演奏確定・完了、OBS表示、フレンド・公開マイリスト等の機能を提供します。</p>
+        <p>サービス内容は、改善・保守・運営上の都合により追加、変更、停止または終了する場合があります。</p>
+      </section>
+
+      <section>
+        <h3>3. アカウントとログイン</h3>
+        <p>一部機能ではGoogleアカウントによるログインを利用します。利用者は、自身のアカウントを適切に管理し、第三者による不正利用を防止する責任を負います。</p>
+        <p>ゲスト利用が可能な機能については、ログイン利用時と比べて保存・共有・履歴等の機能が制限される場合があります。</p>
+      </section>
+
+      <section>
+        <h3>4. 楽曲情報・投稿情報について</h3>
+        <p>利用者が登録・編集・共有する楽曲情報、プロフィール、マイリスト、ルーム情報その他のデータについて、利用者は正確かつ適切な内容を登録するよう努めるものとします。</p>
+        <p>楽曲名、アーティスト名、タイアップ情報その他の第三者に関する情報の権利は、各権利者に帰属します。本サービスは楽曲・音源そのものを提供するものではありません。</p>
+      </section>
+
+      <section>
+        <h3>5. 禁止事項</h3>
+        <ul>
+          <li>法令、公序良俗または第三者の権利に反する行為</li>
+          <li>虚偽情報、権利侵害情報、攻撃的・差別的・迷惑な内容を登録または共有する行為</li>
+          <li>不正アクセス、認証回避、脆弱性の悪用、サービス運営を妨害する行為</li>
+          <li>過度な自動アクセス、大量リクエスト、スクレイピング等によりサービスへ著しい負荷を与える行為</li>
+          <li>他人のアカウントやフレンドコード等を不正に利用する行為</li>
+          <li>本サービスを利用した違法行為または第三者への迷惑行為</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>6. 公開・共有機能</h3>
+        <p>公開マイリスト、プロフィール、フレンド機能、ルーム機能等を利用した場合、設定や機能の性質に応じて他の利用者から情報を閲覧できる場合があります。公開・共有する内容は、利用者自身の判断と責任で設定してください。</p>
+      </section>
+
+      <section>
+        <h3>7. 外部サービス・外部リンク</h3>
+        <p>本サービスでは、Google認証、Firebase、GitHub Pages、ChordWiki等の外部サービスまたは外部ページを利用・参照する場合があります。外部サービスの利用には、それぞれの提供者が定める規約・ポリシーが適用されます。</p>
+        <p>外部サイトの内容、可用性、安全性、正確性について、本サービス運営者は保証しません。</p>
+      </section>
+
+      <section>
+        <h3>8. 免責事項</h3>
+        <p>本サービスは、楽曲情報、検索結果、Key、BPM、ジャンル、タイアップ、共通曲判定、セッション進行その他の情報について、完全性・正確性・最新性・特定目的への適合性を保証するものではありません。</p>
+        <p>通信障害、サーバー障害、ブラウザ・端末環境、外部サービスの障害、保守、仕様変更その他の事情により、データの表示遅延、消失、利用不能等が生じる場合があります。</p>
+        <p>本サービスの利用または利用不能により発生した損害について、運営者に故意または重大な過失がある場合を除き、法令上認められる範囲で責任を負わないものとします。</p>
+      </section>
+
+      <section>
+        <h3>9. データの保存</h3>
+        <p>本サービスはデータの永続的な保存を保証するものではありません。重要な情報については、必要に応じて利用者自身でも控えを保管してください。</p>
+      </section>
+
+      <section>
+        <h3>10. 利用停止等</h3>
+        <p>本規約への重大な違反、不正利用、運営妨害、セキュリティ上の問題等が確認された場合、事前通知なく機能の制限、データの非公開化、利用停止等の対応を行う場合があります。</p>
+      </section>
+
+      <section>
+        <h3>11. 知的財産権</h3>
+        <p>本サービス独自の画面デザイン、プログラム、ロゴ、文章その他のコンテンツに関する権利は、運営者または正当な権利者に帰属します。第三者の楽曲・作品・商標等に関する権利は各権利者に帰属します。</p>
+      </section>
+
+      <section>
+        <h3>12. 規約の変更</h3>
+        <p>必要に応じて本規約を変更することがあります。重要な変更がある場合は、本サービス上での表示その他適切な方法により案内します。</p>
+      </section>
+
+      <section>
+        <h3>13. 準拠法</h3>
+        <p>本規約および本サービスには日本法を適用します。紛争が生じた場合は、当事者間で誠実に協議し、解決しない場合は法令に従って管轄裁判所を定めるものとします。</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- プライバシーポリシー -->
+<div class="modal-overlay" id="slPrivacyModal" onclick="closeModal(event,'slPrivacyModal')">
+  <div class="modal sl-legal-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="slPrivacyTitle">
+    <span class="modal-close" onclick="closeModal(null,'slPrivacyModal')">&times;</span>
+    <h2 id="slPrivacyTitle">プライバシーポリシー</h2>
+    <div class="sl-legal-meta">最終更新日：2026年10月9日</div>
+
+    <div class="sl-legal-content">
+      <section>
+        <h3>1. 基本方針</h3>
+        <p>シェアリスコア（以下「本サービス」）は、利用者の情報を本サービスの提供・改善・安全な運営に必要な範囲で取り扱います。</p>
+      </section>
+
+      <section>
+        <h3>2. 取得・保存する情報</h3>
+        <p>本サービスでは、利用状況に応じて以下の情報を取得または保存する場合があります。</p>
+        <ul>
+          <li>Googleログイン時に認証サービスから提供されるユーザー識別情報、表示名その他ログインに必要な情報</li>
+          <li>マイリスト、曲ごとのKey、担当パート、公開設定等の利用者が登録する情報</li>
+          <li>プロフィール、フレンドコード、フレンド関係、お気に入りアーティスト等の情報</li>
+          <li>セッションルームへの参加情報、予約・演奏確定・完了、セットリスト等のルーム利用情報</li>
+          <li>楽曲情報の追加・編集内容、編集者、編集日時等の履歴情報</li>
+          <li>サービスの安全な運営や障害調査に必要なアクセス・技術情報が、Firebase等の基盤サービスにより処理される場合があります</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>3. 利用目的</h3>
+        <ul>
+          <li>本人認証およびユーザーごとのデータ保存</li>
+          <li>マイリスト、フレンド、ルーム、共通曲、セットリスト等の機能提供</li>
+          <li>公開・共有設定に基づく他の利用者への情報表示</li>
+          <li>不正利用の防止、セキュリティ確保、障害調査</li>
+          <li>サービス品質の維持、機能改善、問い合わせ対応</li>
+          <li>規約違反や不正な編集等の確認に必要な履歴管理</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>4. 公開される情報</h3>
+        <p>公開マイリスト、プロフィール、フレンド機能、セッションルーム等では、利用者が選択した設定または機能上必要な範囲で、他の利用者へ情報が表示される場合があります。</p>
+        <p>公開したくない情報は登録しない、または公開設定を適切に設定してください。</p>
+      </section>
+
+      <section>
+        <h3>5. 第三者提供</h3>
+        <p>本サービスは、法令に基づく場合、利用者の同意がある場合、またはサービス提供に必要な外部サービスへ処理を委託する場合を除き、利用者情報を第三者へ販売または不当に提供しません。</p>
+      </section>
+
+      <section>
+        <h3>6. 外部サービス</h3>
+        <p>本サービスでは、Google認証、Firebase、GitHub Pages等の外部サービスを利用しています。これらのサービス提供者における情報の取り扱いについては、各提供者のプライバシーポリシー等が適用されます。</p>
+        <p>また、ChordWiki等の外部サイトへ移動した場合は、移動先サイトのプライバシーポリシー・利用条件が適用されます。</p>
+      </section>
+
+      <section>
+        <h3>7. 情報の保護</h3>
+        <p>本サービスは、不正アクセス、漏えい、改ざん等を防止するため、認証、アクセス制御その他合理的な安全管理措置の実施に努めます。ただし、インターネット上の通信・保存について絶対的な安全性を保証するものではありません。</p>
+      </section>
+
+      <section>
+        <h3>8. 保存期間と削除</h3>
+        <p>情報は、本サービスの提供、履歴管理、安全確保等に必要な期間保存される場合があります。機能上可能な情報については、利用者自身の操作により変更・削除できます。</p>
+        <p>不正利用対策、編集履歴、法令上必要な記録等については、利用者が画面上の情報を削除した後も一定期間保持される場合があります。</p>
+      </section>
+
+      <section>
+        <h3>9. 未成年者の利用</h3>
+        <p>未成年者が本サービスを利用する場合は、必要に応じて保護者等の法定代理人の同意を得たうえで利用してください。</p>
+      </section>
+
+      <section>
+        <h3>10. ポリシーの変更</h3>
+        <p>サービス内容、利用する外部サービス、法令等の変更に応じて、本ポリシーを変更する場合があります。重要な変更がある場合は、本サービス上で案内します。</p>
+      </section>
+
+      <section>
+        <h3>11. お問い合わせ</h3>
+        <p>本サービスにおける個人情報・プライバシーに関する問い合わせは、運営者が本サービス内または別途提示する問い合わせ窓口からご連絡ください。</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+
 <!-- =============== /SHARELISCORE IMAGE-STYLE UI =============== -->
 
 <!-- ランディング: 通常URLから最初に開くメニュー。ここでは楽曲マスターを取得しない。 -->
