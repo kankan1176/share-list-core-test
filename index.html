@@ -1316,6 +1316,13 @@ html.entry-home body.sl-redesign #homeLanding::after{
 .sl-home-compat{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important}
 html.entry-home body.sl-redesign .home-copyright{position:absolute;bottom:8px;font-size:8px;color:#667997}
 
+/* ルーム接続中のトップ表示でも右ドックを確保（画面遷移で退室しない）。 */
+@media(min-width:1281px){
+  html.entry-home body.in-room:not(.sl-room-dock-collapsed) #homeLanding{
+    right:var(--sl-dock)!important;
+  }
+}
+
 /* ================= RIGHT ROOM DOCK ================= */
 #slRoomDock{
   position:fixed;z-index:2000;display:none;right:0;top:0;bottom:0;width:var(--sl-dock);
@@ -2944,7 +2951,7 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
 #slRoomDock .sl-room-status-tabs{background:var(--sl-dock-surface)!important;border-color:var(--sl-dock-edge)!important}
 #slRoomDock .sl-room-dock-mini{font-size:19px!important;min-width:36px;min-height:36px}
 #slDockDesignPanel[hidden]{display:none!important}
-#slDockDesignPanel{position:fixed;z-index:2500;top:70px;left:20px;right:auto;width:min(310px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #5375ae;border-radius:12px;background:#101f37;color:#edf4ff;box-shadow:0 14px 40px rgba(0,0,0,.65);font-size:13px}
+#slDockDesignPanel{position:fixed;z-index:2500;top:70px;left:20px;right:auto;width:min(290px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;gap:7px;padding:12px;border:1px solid #5375ae;border-radius:12px;background:#101f37;color:#edf4ff;box-shadow:0 14px 40px rgba(0,0,0,.65);font-size:13px}
 #slDockDesignPanel .sl-dock-design-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:3px 0 8px;border-bottom:1px solid #344d75}
 #slDockDesignPanel.sl-design-dragging .sl-dock-design-heading{cursor:grabbing}
 #slDockDesignPanel .sl-dock-design-heading button{cursor:pointer;touch-action:auto}
@@ -2952,7 +2959,7 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
 #slDockDesignPanel .sl-dock-design-heading strong{font-size:14px}
 #slDockDesignPanel .sl-dock-design-heading button{font-size:21px;line-height:1;padding:2px 8px}
 #slDockDesignPanel label{font-size:12px;font-weight:700;color:#cddaf0}
-#slDockDesignPanel select{width:100%;box-sizing:border-box;font-size:13px;padding:8px;border:1px solid #426390;border-radius:7px;background:#152c4b;color:#f1f6ff}
+#slDockDesignPanel select{width:100%;box-sizing:border-box;font-size:13px;padding:6px 8px;min-height:34px;border:1px solid #426390;border-radius:7px;background:#152c4b;color:#f1f6ff}
 #slDockDesignPanel input[type=range]{width:100%;accent-color:#528aff}
 #slDockDesignPanel output{float:right;font-variant-numeric:tabular-nums}
 #slDockDesignPanel small{color:#aabbd4;font-size:10px;line-height:1.4}
@@ -3053,23 +3060,19 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
 
   <section id="slDockDesignPanel" class="sl-dock-design-panel" aria-label="右メニューデザイン設定" hidden>
     <div class="sl-dock-design-heading" title="ドラッグして移動できます"><strong>⠿ 右メニューのデザイン</strong><button type="button" onclick="slToggleDockDesign(false)" aria-label="設定を閉じる">×</button></div>
-    <label for="slDockFontScale">文字の大きさ <output id="slDockFontOutput">標準</output></label>
-    <input type="range" id="slDockFontScale" min="90" max="150" step="10" value="100" oninput="slUpdateDockDesign()">
+    <label for="slDockFontScale">文字の大きさ</label>
+    <select id="slDockFontScale" onchange="slUpdateDockDesign()">
+      <option value="90">小</option>
+      <option value="100" selected>中（標準）</option>
+      <option value="120">大</option>
+    </select>
     <label for="slDockColorSelect">配色</label>
     <select id="slDockColorSelect" onchange="slUpdateDockDesign()">
       <option value="navy">ネイビー（標準）</option>
-      <option value="charcoal">チャコール</option>
       <option value="light">ライト</option>
-      <option value="purple">パープル</option>
-    </select>
-    <label for="slDockDensitySelect">カードの余白</label>
-    <select id="slDockDensitySelect" onchange="slUpdateDockDesign()">
-      <option value="normal">標準</option>
-      <option value="compact">コンパクト（曲を多く表示）</option>
-      <option value="relaxed">ゆったり</option>
     </select>
     <button type="button" id="slDockDesignReset" onclick="slResetDockDesign()">標準に戻す</button>
-    <small>設定は即時反映され、このブラウザに保存されます。見出しをドラッグするとパネルを移動できます。</small>
+    <small>変更は即時反映・自動保存されます。見出しをドラッグして移動できます。</small>
   </section>
 
   <div class="sl-room-status-tabs" aria-label="セッション状況">
@@ -8076,7 +8079,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         } catch (_) { return null; }
     }
     function goHome() {
-        if (currentRoomId) return; // ルーム退出は既存の退出処理を使う
+        // ルーム接続を維持したままトップ画面を表示する。
         closeMobileMenu();
         forgetListView();
         document.documentElement.classList.add('entry-home');
@@ -8863,7 +8866,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     if(slVisible('slPrivacyModal'))return 'privacy';
     if(slVisible('friendsModal'))return 'friends';
     if(slVisible('myPageModal'))return 'mypage';
-    if(document.documentElement.classList.contains('entry-home')&&!slHasRoom())return 'home';
+    if(document.documentElement.classList.contains('entry-home'))return 'home';
     if(slHasRoom()){
       const rv=String(roomListView||'all');
       if(rv==='common')return 'common';
@@ -8911,10 +8914,8 @@ html, body { background: transparent !important; color: ${text} !important; }
     try{
       switch(destination){
         case 'home':
-          if(slHasRoom()){
-            // Existing app deliberately does not leave a room via the Home link.
-            slSetRoomListView('all');
-          }else if(typeof goHome==='function')goHome();
+          // ホーム表示では退室せず、Firebaseのルーム監視と右ドックを維持する。
+          if(typeof goHome==='function')goHome();
           break;
         case 'all': await slGoAllSongs();break;
         case 'mylist': await slGoMyList();break;
@@ -9436,7 +9437,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     }catch(_){}
 
     const states={
-      slNavHome:home&&!roomCreate&&!addSong&&!inRoom,
+      slNavHome:home&&!roomCreate&&!addSong,
       slNavAll:inRoom
         ? roomView==='all'
         : (!home&&!my&&!roomCreate&&!addSong),
@@ -9689,25 +9690,23 @@ html, body { background: transparent !important; color: ${text} !important; }
 (function(){
   'use strict';
   const STORE='sharelistscore_room_dock_design_v1';
-  const DEFAULTS={font:100,color:'navy',density:'normal'};
-  const allowedColors=['navy','charcoal','light','purple'];
-  const allowedDensity=['normal','compact','relaxed'];
+  const DEFAULTS={font:100,color:'navy'};
+  const allowedColors=['navy','light'];
+  const allowedFonts=[90,100,120];
   function get(id){return document.getElementById(id)}
   function apply(settings){
     const dock=get('slRoomDock');if(!dock)return;
-    const font=Math.max(90,Math.min(150,Math.round(Number(settings.font||100)/10)*10));
+    const legacyFont=Number(settings.font ?? 100);
+    const font=allowedFonts.includes(legacyFont)?legacyFont:(legacyFont>=110?120:legacyFont<95?90:100);
     const color=allowedColors.includes(settings.color)?settings.color:DEFAULTS.color;
-    const density=allowedDensity.includes(settings.density)?settings.density:DEFAULTS.density;
     dock.style.setProperty('--sl-dock-fs',String(font/100));
-    dock.dataset.dockColor=color;dock.dataset.dockDensity=density;
+    dock.dataset.dockColor=color;dock.dataset.dockDensity='normal';
     if(get('slDockFontScale'))get('slDockFontScale').value=String(font);
     if(get('slDockColorSelect'))get('slDockColorSelect').value=color;
-    if(get('slDockDensitySelect'))get('slDockDensitySelect').value=density;
-    if(get('slDockFontOutput'))get('slDockFontOutput').textContent=font===100?'標準':font+'%';
-    return {font,color,density};
+    return {font,color};
   }
   window.slUpdateDockDesign=function(){
-    const settings=apply({font:get('slDockFontScale').value,color:get('slDockColorSelect').value,density:get('slDockDensitySelect').value});
+    const settings=apply({font:get('slDockFontScale').value,color:get('slDockColorSelect').value});
     try{localStorage.setItem(STORE,JSON.stringify(settings))}catch(e){}
   };
   window.slResetDockDesign=function(){apply(DEFAULTS);try{localStorage.removeItem(STORE)}catch(e){}};
