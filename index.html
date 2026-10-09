@@ -1048,1379 +1048,455 @@ body.in-room #homeBackBtn,body.in-room #mobileHomeItem {display:none!important;}
 
 
 /* =========================================================
-   ShareLiScore NEW UI
-   添付された本番index.htmlを基準に、既存機能を変更せずUIのみ再構成
+   SHARELISCORE IMAGE-STYLE UI
+   画像モックアップを現行機能へ落とし込んだ新UI
 ========================================================= */
 :root{
-  --ui-sidebar-w:228px;
-  --ui-topbar-h:64px;
-  --ui-filterbar-h:54px;
-  --ui-room-dock-w:350px;
-  --ui-soft-border:color-mix(in srgb,var(--border-color) 72%,transparent);
+  --sl-side:260px;
+  --sl-top:104px;
+  --sl-filter:58px;
+  --sl-dock:340px;
+  --sl-bg:#06101f;
+  --sl-bg2:#09172e;
+  --sl-panel:#0b1930;
+  --sl-panel2:#102140;
+  --sl-panel3:#13264a;
+  --sl-border:rgba(91,131,222,.32);
+  --sl-border-soft:rgba(125,156,219,.16);
+  --sl-text:#f2f6ff;
+  --sl-muted:#91a3c5;
+  --sl-blue:#347df6;
+  --sl-purple:#7253ff;
+  --sl-cyan:#4ed8ff;
+  --sl-green:#38cf8d;
+  --sl-red:#ff5f70;
+  --sl-amber:#ffbd4a;
 }
-
-/* 既存の付箋・旧ヘッダー・旧スマホナビを新UIでは使用しない */
-body.ui-redesign .side-guide,
-body.ui-redesign #sideGuideToggle,
-body.ui-redesign .header,
-body.ui-redesign #mobileQuickNav,
-body.ui-redesign #listModeIndicator,
-body.ui-redesign #roomListPanel{
-  display:none!important;
-}
-
-/* 旧中央コントロールは実DOMを上部へ移動するため器だけ非表示 */
-body.ui-redesign #controls{
-  display:none!important;
-}
-body.ui-redesign .status-buttons{
-  display:none!important;
-}
-body.ui-redesign .room-status-bar .room-actions{
-  display:none!important;
-}
-
-/* ================= 左サイドバー ================= */
-#uiSidebar{
-  position:fixed;
-  z-index:1500;
-  left:0;
-  top:0;
-  bottom:0;
-  width:var(--ui-sidebar-w);
-  box-sizing:border-box;
-  padding:14px 12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+html,body{background:var(--sl-bg)!important}
+body.sl-redesign{
+  --bg-color:var(--sl-bg);
+  --panel-bg:var(--sl-panel);
+  --text-color:var(--sl-text);
+  --border-color:#263d65;
+  --btn-bg:#142746;
+  --btn-hover:#1b345a;
+  --primary:#4385ff;
+  --primary-text:#fff;
+  --link-color:#65caff;
+  --th-bg:#10213d;
+  --th-hover:#18325b;
+  --th-text:#edf4ff;
   background:
-    radial-gradient(circle at 12% 4%,rgba(50,145,255,.13),transparent 31%),
-    radial-gradient(circle at 88% 30%,rgba(164,105,255,.09),transparent 28%),
-    color-mix(in srgb,var(--panel-bg) 96%,#07111d 4%);
-  border-right:1px solid var(--ui-soft-border);
-  box-shadow:8px 0 30px rgba(0,0,0,.10);
-}
-.ui-brand{
-  padding:6px 8px 9px;
-}
-.ui-brand strong{
-  display:block;
-  font-size:18px;
-  letter-spacing:.01em;
-}
-.ui-brand small{
-  display:block;
-  margin-top:3px;
-  font-size:10px;
-  opacity:.58;
-}
-#uiModeSwitch{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  padding:5px;
-  border-radius:16px;
-  background:color-mix(in srgb,var(--bg-color) 82%,var(--panel-bg) 18%);
-  border:1px solid var(--ui-soft-border);
-}
-#uiModeSwitch button{
-  min-height:37px;
-  padding:6px 5px;
-  border:0;
-  border-radius:11px;
-  background:transparent;
-  font-size:11px;
-  font-weight:850;
-}
-body:not(.in-room) #uiNormalModeBtn,
-body.in-room:not(.ui-force-normal-nav) #uiRoomModeBtn,
-body.in-room.ui-force-normal-nav #uiNormalModeBtn{
-  color:#fff;
-  background:linear-gradient(135deg,#258cff,#547cff);
-  box-shadow:0 7px 18px rgba(37,140,255,.22);
-}
-body.in-room:not(.ui-force-normal-nav) #uiRoomModeBtn{
-  background:linear-gradient(135deg,#7d5be8,#a66cff);
-  box-shadow:0 7px 18px rgba(166,108,255,.24);
-}
-body:not(.in-room) #uiRoomModeBtn{
-  opacity:.42;
-  cursor:not-allowed;
-}
-.ui-nav{
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-  min-height:0;
-  overflow:auto;
-  padding-right:2px;
-}
-#uiRoomNav{display:none}
-body.in-room:not(.ui-force-normal-nav) #uiNormalNav{display:none}
-body.in-room:not(.ui-force-normal-nav) #uiRoomNav{display:flex}
-body.in-room.ui-force-normal-nav #uiNormalNav{display:flex}
-body.in-room.ui-force-normal-nav #uiRoomNav{display:none}
-
-.ui-nav button,
-.ui-nav a{
-  --nav-rgb:78,166,255;
-  width:100%;
-  min-height:44px;
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:7px 9px;
-  border:1px solid transparent;
-  border-radius:13px;
-  background:transparent;
-  color:var(--text-color);
-  text-decoration:none;
-  text-align:left;
-  font-size:12px;
-  font-weight:800;
-  cursor:pointer;
-}
-.ui-nav button:hover,
-.ui-nav a:hover{
-  text-decoration:none;
-  background:rgba(var(--nav-rgb),.10);
-  border-color:rgba(var(--nav-rgb),.22);
-}
-.ui-nav-icon{
-  width:29px;
-  height:29px;
-  flex:0 0 29px;
-  display:grid;
-  place-items:center;
-  border-radius:10px;
-  background:rgba(var(--nav-rgb),.15);
-  font-size:17px;
-  line-height:1;
-  border:0!important;
-  box-shadow:none!important;
-}
-.ui-nav .nav-home{--nav-rgb:72,185,255}
-.ui-nav .nav-all{--nav-rgb:34,140,255}
-.ui-nav .nav-my{--nav-rgb:255,103,184}
-.ui-nav .nav-room{--nav-rgb:166,108,255}
-.ui-nav .nav-friend{--nav-rgb:85,215,199}
-.ui-nav .nav-add{--nav-rgb:53,217,149}
-.ui-nav .nav-page{--nav-rgb:255,199,91}
-.ui-nav .nav-setting{--nav-rgb:140,163,189}
-.ui-nav .nav-admin{--nav-rgb:255,154,82}
-.ui-nav .nav-common{--nav-rgb:255,123,213}
-.ui-nav .nav-reserved{--nav-rgb:255,189,74}
-.ui-nav .nav-confirmed{--nav-rgb:167,124,255}
-.ui-nav .nav-completed{--nav-rgb:73,211,140}
-.ui-nav .nav-obs{--nav-rgb:75,216,255}
-.ui-nav .nav-copy{--nav-rgb:161,175,191}
-.ui-nav .nav-leave{--nav-rgb:255,109,114;color:#ff8e92}
-
-#uiSidebarFooter{
-  margin-top:auto;
-  padding-top:9px;
-  border-top:1px dashed var(--ui-soft-border);
-}
-#uiSidebarFooter #googleLoginBtn,
-#uiSidebarFooter #googleLogoutBtn{
-  width:100%;
-  min-height:40px;
-  justify-content:center;
-  border-radius:12px;
-}
-
-/* ================= 上部検索 ================= */
-#uiTopbar{
-  position:fixed;
-  z-index:1400;
-  left:var(--ui-sidebar-w);
-  right:0;
-  top:0;
-  height:var(--ui-topbar-h);
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:10px 18px;
-  background:color-mix(in srgb,var(--bg-color) 92%,transparent);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--ui-soft-border);
-}
-#uiSearchHost{
-  flex:1;
-  min-width:0;
-  max-width:760px;
-}
-#uiSearchHost #searchInput{
-  width:100%!important;
-  height:42px;
-  margin:0!important;
-  padding:9px 14px!important;
-  border-radius:13px!important;
-  background:color-mix(in srgb,var(--panel-bg) 82%,var(--bg-color) 18%)!important;
-  border:1px solid var(--ui-soft-border)!important;
-  font-size:14px!important;
-  box-shadow:none!important;
-}
-#uiSearchHost #searchInput:focus{
-  border-color:var(--primary)!important;
-  outline:none;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 15%,transparent)!important;
-}
-#uiUserHost{
-  margin-left:auto;
-  min-width:0;
-  max-width:210px;
-  display:flex;
-  justify-content:flex-end;
-}
-#uiUserHost #loginStatus{
-  display:block!important;
-  max-width:200px!important;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  padding:7px 10px;
-  border-radius:999px;
-  background:color-mix(in srgb,var(--panel-bg) 82%,var(--bg-color) 18%);
-  border:1px solid var(--ui-soft-border);
-  font-size:12px!important;
-  font-weight:800;
-}
-#uiMobileMenuBtn{
-  display:none;
-  width:40px;
-  height:40px;
-  flex:0 0 40px;
-  padding:0;
-  place-items:center;
-  font-size:20px;
-}
-
-/* ================= ジャンルバー ================= */
-#uiFilterbar{
-  position:fixed;
-  z-index:1390;
-  left:var(--ui-sidebar-w);
-  right:0;
-  top:var(--ui-topbar-h);
-  height:var(--ui-filterbar-h);
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:7px 16px;
-  background:color-mix(in srgb,var(--panel-bg) 95%,var(--bg-color) 5%);
-  border-bottom:1px solid var(--ui-soft-border);
-}
-#uiGenreHost{
-  flex:1;
-  min-width:0;
-  overflow-x:auto;
-  scrollbar-width:thin;
-}
-#uiGenreHost #genreFilters{
-  display:flex!important;
-  flex-wrap:nowrap!important;
-  gap:6px;
-  width:max-content;
-  min-width:100%;
-}
-#uiGenreHost .genre-btn{
-  flex:0 0 auto;
-  min-height:32px;
-  padding:5px 11px;
-  border-radius:999px;
-}
-#uiListMeta{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex:0 0 auto;
-  max-width:38%;
+    radial-gradient(circle at 75% 5%,rgba(90,67,255,.12),transparent 26%),
+    radial-gradient(circle at 38% 85%,rgba(29,120,255,.10),transparent 32%),
+    linear-gradient(145deg,#06101f 0%,#08152a 48%,#09152b 100%)!important;
+  color:var(--sl-text)!important;
   overflow:hidden;
 }
-#uiListMeta #songCountDisplay{
-  margin:0;
-  white-space:nowrap;
-  font-size:11px;
-}
-#uiListMeta #artistFilterIndicator{
-  min-width:0;
-  max-width:250px;
-  overflow:hidden;
-}
+body.sl-redesign button,
+body.sl-redesign select,
+body.sl-redesign input,
+body.sl-redesign textarea{font-family:inherit}
 
-/* ================= メイン領域 ================= */
-body.ui-redesign .container{
-  position:fixed;
-  left:var(--ui-sidebar-w);
-  right:0;
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h));
-  bottom:0;
-  width:auto;
-  max-width:none;
-  margin:0;
-  padding:10px 12px 12px;
-  gap:7px;
-}
-body.ui-redesign .top-area{
-  gap:6px;
-}
-body.ui-redesign #roomStatusWrapper{
-  border-radius:12px;
-  padding:7px 10px;
-}
-body.ui-redesign #masterActionsBar,
-body.ui-redesign #myListClipboardHeader,
-body.ui-redesign #myListBulkBar{
-  border-radius:10px;
-}
-body.ui-redesign #tableWrapper{
-  border-radius:12px;
-  overflow:hidden;
-}
-body.ui-redesign .data-table th,
-body.ui-redesign .data-table td{
-  padding-top:7px;
-  padding-bottom:7px;
-}
+/* hide legacy navigation/guide/header; existing functionality remains */
+body.sl-redesign .side-guide,
+body.sl-redesign #sideGuideToggle,
+body.sl-redesign .header,
+body.sl-redesign #mobileQuickNav,
+body.sl-redesign #controls,
+body.sl-redesign .status-buttons,
+body.sl-redesign .room-status-bar .room-actions,
+body.sl-redesign #listModeIndicator{display:none!important}
 
-/* ホームも左サイドバー・上部バーの内側に表示 */
-html.entry-home body.ui-redesign #uiFilterbar{display:none}
-html.entry-home body.ui-redesign #homeLanding{
-  position:fixed;
-  left:var(--ui-sidebar-w);
-  right:0;
-  top:var(--ui-topbar-h);
-  bottom:0;
-  width:auto;
-  padding:22px;
-}
-html.entry-home body.ui-redesign .container{display:none!important}
-
-/* ================= Loading ================= */
-body.ui-redesign #loadingArea{
-  position:fixed!important;
-  z-index:1200!important;
-  left:var(--ui-sidebar-w)!important;
-  right:0!important;
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h))!important;
-  bottom:0!important;
-  width:auto!important;
-  height:auto!important;
-  margin:0!important;
-  border-radius:0!important;
-  border:0!important;
-  background:color-mix(in srgb,var(--bg-color) 96%,var(--panel-bg) 4%)!important;
-}
-html.entry-home body.ui-redesign #loadingArea{
-  display:none!important;
-}
-
-/* ================= モーダル ================= */
-body.ui-redesign .modal-overlay{
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h))!important;
-  left:var(--ui-sidebar-w)!important;
-  width:auto!important;
-  height:auto!important;
-  right:0!important;
-  bottom:0!important;
-  padding:26px 16px 16px!important;
-  box-sizing:border-box;
-  background:rgba(0,0,0,.68)!important;
-  backdrop-filter:blur(5px);
-  -webkit-backdrop-filter:blur(5px);
-}
-html.entry-home body.ui-redesign .modal-overlay{
-  top:var(--ui-topbar-h)!important;
-}
-body.ui-redesign .modal{
-  position:relative!important;
-  margin:auto;
-  border-radius:14px!important;
-}
-body.ui-redesign .modal-close{
-  position:absolute!important;
-  top:11px!important;
-  right:13px!important;
-  left:auto!important;
-  float:none!important;
-  margin:0!important;
-  z-index:20;
-  width:31px;
-  height:31px;
-  display:grid!important;
-  place-items:center;
-  border-radius:8px;
-}
-body.ui-redesign .modal h2{
-  padding-right:42px;
-}
-
-/* ================= 右側ルーム進行ドック ================= */
-#uiRoomDock{
-  position:fixed;
-  z-index:1450;
-  display:none;
-  right:0;
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h));
-  bottom:0;
-  width:var(--ui-room-dock-w);
-  box-sizing:border-box;
+/* ================= SIDEBAR ================= */
+#slSidebar{
+  position:fixed;z-index:2100;left:0;top:0;bottom:0;width:var(--sl-side);
+  box-sizing:border-box;padding:18px 14px 14px;
+  display:flex;flex-direction:column;
   background:
-    radial-gradient(circle at 85% 4%,rgba(166,108,255,.10),transparent 28%),
-    color-mix(in srgb,var(--panel-bg) 97%,#07111d 3%);
-  border-left:1px solid var(--ui-soft-border);
-  box-shadow:-12px 0 30px rgba(0,0,0,.16);
-  transition:transform .22s ease;
+    radial-gradient(circle at 20% 1%,rgba(46,126,255,.16),transparent 30%),
+    linear-gradient(180deg,#09162a 0%,#081322 58%,#07101d 100%);
+  border-right:1px solid rgba(98,135,215,.22);
+  box-shadow:12px 0 35px rgba(0,0,0,.22);
 }
-body.in-room #uiRoomDock{display:block}
-body.in-room.ui-room-dock-collapsed #uiRoomDock{
-  transform:translateX(calc(100% - 14px));
+.sl-sidebar-brand{
+  display:flex;align-items:center;gap:10px;padding:2px 7px 14px;margin-bottom:8px;
+  border-bottom:1px solid var(--sl-border-soft);
 }
-#uiRoomDockHandle{
-  position:absolute;
-  left:-29px;
-  top:16px;
-  width:29px;
-  height:56px;
-  padding:0;
-  border-radius:12px 0 0 12px;
-  border:1px solid var(--ui-soft-border);
-  border-right:0;
-  background:var(--panel-bg);
-  font-size:22px;
-  font-weight:900;
-  display:grid;
-  place-items:center;
+.sl-sidebar-brand img{width:54px;height:54px;object-fit:contain}
+.sl-sidebar-brand strong{display:block;font-size:16px;font-weight:950;color:#fff;white-space:nowrap}
+.sl-sidebar-brand small{display:block;margin-top:2px;font-size:10px;letter-spacing:.07em;color:#86a1c8}
+.sl-sidebar-nav{display:flex;flex-direction:column;gap:5px;min-height:0;overflow:auto;padding-right:2px}
+.sl-sidebar-nav button,.sl-sidebar-nav a{
+  width:100%;min-height:45px;box-sizing:border-box;padding:7px 10px;
+  display:flex;align-items:center;gap:11px;
+  border:1px solid transparent;border-radius:12px;background:transparent;
+  color:#b9c7df;text-decoration:none;text-align:left;cursor:pointer;
+  transition:.16s ease;
 }
-#uiRoomDockHandle span{
-  transition:transform .2s ease;
+.sl-sidebar-nav button>span,.sl-sidebar-nav a>span{width:27px;text-align:center;font-size:19px;line-height:1}
+.sl-sidebar-nav button>b,.sl-sidebar-nav a>b{font-size:12px;font-weight:800}
+.sl-sidebar-nav button:hover,.sl-sidebar-nav a:hover{background:rgba(63,117,231,.11);color:#fff;border-color:rgba(80,131,235,.15);text-decoration:none}
+.sl-sidebar-nav .active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#287de8 0%,#5354ea 62%,#7142ea 100%)!important;
+  border-color:rgba(104,167,255,.58)!important;
+  box-shadow:0 8px 22px rgba(46,78,219,.32),inset 0 1px rgba(255,255,255,.10);
 }
-body.ui-room-dock-collapsed #uiRoomDockHandle span{
-  transform:rotate(180deg);
+.sl-nav-divider{height:1px;background:var(--sl-border-soft);margin:7px 7px}
+.sl-nav-help span{filter:saturate(1.25)}
+.sl-nav-common:disabled{opacity:.38;cursor:not-allowed}
+.sl-sidebar-footer{
+  margin-top:auto;padding:12px 4px 0;border-top:1px solid var(--sl-border-soft);
+  display:flex;flex-direction:column;gap:7px
 }
-.ui-room-dock-inner{
-  height:100%;
-  padding:12px;
-  box-sizing:border-box;
-  display:grid;
-  grid-template-rows:auto auto minmax(0,1fr);
-  gap:10px;
-}
-.ui-room-dock-title strong{
-  display:block;
-  font-size:14px;
-}
-.ui-room-dock-title small{
-  display:block;
-  margin-top:3px;
-  font-size:10px;
-  opacity:.56;
-}
-#uiRoomDockTabs{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:5px;
-  padding:5px;
-  border-radius:14px;
-  background:color-mix(in srgb,var(--bg-color) 80%,var(--panel-bg) 20%);
-  border:1px solid var(--ui-soft-border);
-}
-.ui-dock-tab{
-  min-width:0;
-  min-height:39px;
-  padding:5px 3px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  font-size:11px;
-  font-weight:900;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-}
-.ui-dock-tab .ui-dock-tab-count{
-  min-width:20px;
-  height:20px;
-  padding:0 5px;
-  box-sizing:border-box;
-  display:grid;
-  place-items:center;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  font-size:9px;
-}
-.ui-dock-tab.active[data-status="reserved"]{
-  background:linear-gradient(135deg,#e7a832,#ffc75b);
-  color:#1d1507;
-}
-.ui-dock-tab.active[data-status="confirmed"]{
-  background:linear-gradient(135deg,#7d5be8,#a66cff);
-  color:#fff;
-}
-.ui-dock-tab.active[data-status="completed"]{
-  background:linear-gradient(135deg,#2eae73,#43d78f);
-  color:#07150e;
-}
-.ui-dock-panel{
-  display:none;
-  min-height:0;
-  height:100%;
-  border:1px solid var(--ui-soft-border);
-  border-radius:14px;
-  overflow:hidden;
-  background:color-mix(in srgb,var(--bg-color) 62%,var(--panel-bg) 38%);
-}
-.ui-dock-panel.active{
-  display:flex;
-  flex-direction:column;
-}
-.ui-dock-panel-head{
-  flex:0 0 auto;
-  padding:9px 10px;
-  border-bottom:1px solid var(--ui-soft-border);
-  font-size:12px;
-  font-weight:900;
-}
-.ui-dock-panel[data-panel="reserved"] .ui-dock-panel-head{background:linear-gradient(90deg,rgba(255,199,91,.15),transparent)}
-.ui-dock-panel[data-panel="confirmed"] .ui-dock-panel-head{background:linear-gradient(90deg,rgba(166,108,255,.16),transparent)}
-.ui-dock-panel[data-panel="completed"] .ui-dock-panel-head{background:linear-gradient(90deg,rgba(67,215,143,.15),transparent)}
-.ui-dock-list{
-  flex:1 1 auto;
-  min-height:0;
-  overflow:auto;
-  padding:6px;
-}
-.ui-dock-empty{
-  padding:22px 8px;
-  text-align:center;
-  font-size:11px;
-  opacity:.48;
-}
-.ui-dock-song{
-  display:grid;
-  grid-template-columns:24px minmax(0,1fr) auto;
-  gap:7px;
-  align-items:center;
-  padding:8px 7px;
-  margin-bottom:5px;
-  border-radius:10px;
-  background:color-mix(in srgb,var(--panel-bg) 84%,transparent);
-}
-.ui-dock-num{
-  text-align:center;
-  font-size:10px;
-  opacity:.55;
-}
-.ui-dock-main{min-width:0}
-.ui-dock-song-title{
-  font-size:11px;
-  font-weight:850;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.ui-dock-song-artist{
-  margin-top:2px;
-  font-size:9px;
-  opacity:.58;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.ui-dock-action{
-  width:30px;
-  height:30px;
-  padding:0;
-  display:grid;
-  place-items:center;
-  border-radius:8px;
+.sl-sidebar-footer #googleLoginBtn,.sl-sidebar-footer #googleLogoutBtn{
+  width:100%;min-height:40px;border-radius:11px!important;justify-content:center!important;margin:0!important;
 }
 
-/* 右ドック展開時は一覧と上部UIを隠さない */
+/* ================= TOPBAR ================= */
+#slTopbar{
+  position:fixed;z-index:1900;left:var(--sl-side);right:0;top:0;height:var(--sl-top);
+  box-sizing:border-box;padding:20px 22px;
+  display:grid;grid-template-columns:minmax(260px,.8fr) minmax(320px,1.2fr) auto;
+  gap:18px;align-items:center;
+  background:rgba(6,15,29,.90);
+  border-bottom:1px solid var(--sl-border-soft);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.sl-page-heading{min-width:0}
+.sl-page-heading h1{margin:0;font-size:30px;line-height:1.05;color:#fff;font-weight:950;letter-spacing:.01em}
+.sl-page-heading p{margin:7px 0 0;font-size:11px;color:#8fa0bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#slSearchHost{min-width:0;width:100%;max-width:720px;justify-self:end}
+#slSearchHost #searchInput{
+  width:100%!important;height:45px!important;box-sizing:border-box;margin:0!important;padding:9px 16px!important;
+  border:1px solid rgba(112,144,216,.24)!important;border-radius:14px!important;
+  background:rgba(18,34,62,.92)!important;color:#eaf2ff!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025)!important;font-size:13px!important;
+}
+#slSearchHost #searchInput::placeholder{color:#8192b2}
+#slSearchHost #searchInput:focus{outline:none!important;border-color:#527eff!important;box-shadow:0 0 0 3px rgba(72,103,255,.13)!important}
+#slUserHost{display:flex;align-items:center;justify-content:flex-end;min-width:0}
+#slUserHost #loginStatus{
+  max-width:180px!important;padding:8px 11px!important;
+  border:1px solid rgba(113,145,216,.22)!important;border-radius:999px;
+  background:rgba(18,34,62,.88);color:#c7d3e8;font-size:11px!important;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#slMobileMenu{display:none;width:41px;height:41px;padding:0;border-radius:11px}
+
+/* ================= FILTERBAR ================= */
+#slFilterbar{
+  position:fixed;z-index:1850;left:var(--sl-side);right:0;top:var(--sl-top);height:var(--sl-filter);
+  box-sizing:border-box;padding:8px 21px;display:flex;align-items:center;gap:12px;
+  background:rgba(8,20,39,.96);border-bottom:1px solid var(--sl-border-soft)
+}
+#slGenreHost{flex:1 1 auto;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#slGenreHost #genreFilters{display:flex!important;flex-wrap:nowrap!important;width:max-content!important;min-width:max-content!important;gap:7px!important}
+#slGenreHost .genre-btn{
+  flex:0 0 auto!important;min-height:34px!important;padding:5px 13px!important;
+  border-radius:999px!important;border:1px solid rgba(110,143,213,.24)!important;
+  background:#10213e!important;color:#aebdd7!important;font-size:11px!important;font-weight:800!important;
+}
+#slGenreHost .genre-btn:hover{background:#183158!important;color:#fff!important}
+#slGenreHost .genre-btn.active{
+  background:linear-gradient(135deg,#2c83f2,#4d5df0)!important;
+  border-color:#5fa8ff!important;color:#fff!important;
+  box-shadow:0 6px 18px rgba(47,99,234,.24)!important;
+}
+#slListMeta{flex:0 0 auto;display:flex;align-items:center;gap:7px;max-width:32%;overflow:hidden}
+#slListMeta #songCountDisplay{margin:0!important;color:#68c8ff!important;font-size:10px!important;white-space:nowrap}
+#slListMeta #artistFilterIndicator{min-width:0;max-width:240px;overflow:hidden}
+
+/* ================= MAIN LIST ================= */
+body.sl-redesign .container{
+  position:fixed!important;left:var(--sl-side)!important;right:0!important;
+  top:calc(var(--sl-top) + var(--sl-filter))!important;bottom:0!important;
+  width:auto!important;max-width:none!important;margin:0!important;
+  padding:10px 14px 14px!important;box-sizing:border-box!important;gap:7px!important;
+}
+body.sl-redesign .top-area{gap:6px!important}
+body.sl-redesign #roomStatusWrapper{
+  padding:7px 10px!important;border-radius:11px!important;
+  background:linear-gradient(135deg,#0a62d7,#0f82e8)!important;
+  border:1px solid rgba(102,195,255,.27)!important;box-shadow:0 8px 22px rgba(10,93,210,.18)
+}
+body.sl-redesign #roomListPanel{
+  border-radius:10px!important;background:#0b1a31!important;border:1px solid var(--sl-border-soft)!important
+}
+body.sl-redesign #masterActionsBar,
+body.sl-redesign #myListClipboardHeader,
+body.sl-redesign #myListBulkBar{
+  min-height:42px;border-radius:11px!important;
+  background:#0c1a30!important;border:1px solid var(--sl-border-soft)!important;
+  box-shadow:none!important
+}
+body.sl-redesign #tableWrapper{
+  border-radius:13px!important;border:1px solid rgba(75,132,235,.48)!important;
+  background:#08182c!important;overflow:hidden!important;
+  box-shadow:0 14px 35px rgba(0,0,0,.16)!important
+}
+body.sl-redesign .table-header-wrapper{background:#11213b!important;border-bottom:1px solid var(--sl-border-soft)!important}
+body.sl-redesign .table-body-wrapper{background:#0a172a!important}
+body.sl-redesign .data-table th{background:#11213b!important;color:#dce8fb!important;font-size:11px!important;border-color:var(--sl-border-soft)!important}
+body.sl-redesign .data-table td{font-size:11px!important;border-color:rgba(117,145,196,.14)!important}
+body.sl-redesign .data-table tbody tr:nth-child(even){background:rgba(255,255,255,.008)}
+body.sl-redesign .data-table tbody tr:hover{background:#112746!important}
+body.sl-redesign .pagination-container{background:#0a172a!important;border-top:1px solid var(--sl-border-soft)!important}
+
+/* MY LIST */
+body.sl-redesign.my-list-mode #myListBulkBar{display:flex!important;gap:7px!important;align-items:center!important}
+body.sl-redesign.my-list-mode #myListClipboardHeader{display:flex!important}
+body.sl-redesign.my-list-mode #masterActionsBar{display:none!important}
+body.sl-redesign.my-list-mode .my-part-icons button{
+  border-radius:7px!important;background:#102342!important;border:1px solid rgba(118,150,216,.17)!important
+}
+body.sl-redesign.my-list-mode .my-part-icons button.active{
+  background:linear-gradient(135deg,#235fae,#3b55c3)!important;border-color:#5193ff!important
+}
+
+/* LOADING */
+body.sl-redesign #loadingArea{
+  position:fixed!important;z-index:1700!important;left:var(--sl-side)!important;right:0!important;
+  top:calc(var(--sl-top) + var(--sl-filter))!important;bottom:0!important;
+  width:auto!important;height:auto!important;margin:0!important;border:0!important;border-radius:0!important;
+  background:rgba(6,16,31,.97)!important
+}
+
+/* ================= HOME ================= */
+html.entry-home body.sl-redesign #slTopbar,
+html.entry-home body.sl-redesign #slFilterbar{display:none!important}
+html.entry-home body.sl-redesign .container{display:none!important}
+html.entry-home body.sl-redesign #homeLanding{
+  position:fixed!important;z-index:50!important;left:var(--sl-side)!important;right:0!important;top:0!important;bottom:0!important;
+  width:auto!important;height:auto!important;padding:24px!important;box-sizing:border-box!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;
+  background:
+    radial-gradient(circle at 83% 27%,rgba(72,92,255,.24),transparent 18%),
+    radial-gradient(circle at 22% 78%,rgba(31,114,255,.15),transparent 25%),
+    linear-gradient(145deg,#071225 0%,#081631 48%,#091a38 100%)!important;
+}
+html.entry-home body.sl-redesign #homeLanding::before{
+  content:"";position:absolute;right:-120px;top:70px;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle at 38% 38%,rgba(101,126,255,.38),rgba(45,75,181,.12) 52%,transparent 69%);
+  pointer-events:none
+}
+html.entry-home body.sl-redesign #homeLanding::after{
+  content:"";position:absolute;left:8%;right:-8%;bottom:4%;height:180px;
+  border-top:2px solid rgba(66,112,255,.28);border-radius:50%;transform:rotate(-8deg);
+  box-shadow:0 -15px 50px rgba(53,99,255,.14);pointer-events:none
+}
+.sl-home-center{
+  position:relative;z-index:2;width:min(760px,100%);max-height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px
+}
+.sl-home-brand{display:flex;flex-direction:column;align-items:center;gap:7px}
+.sl-home-brand img{width:min(430px,70vw);max-height:155px;object-fit:contain;filter:drop-shadow(0 14px 28px rgba(45,102,255,.22))}
+.sl-home-version{font-size:11px;letter-spacing:.08em;color:#9baac5}
+.sl-home-update{
+  width:min(700px,100%);box-sizing:border-box;border:1px solid rgba(110,140,219,.42);border-radius:18px;
+  background:linear-gradient(180deg,rgba(26,44,80,.84),rgba(15,31,58,.82));
+  box-shadow:0 24px 60px rgba(0,0,0,.27),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden
+}
+.sl-home-update-title{
+  display:flex;align-items:center;gap:10px;padding:16px 18px 13px;border-bottom:1px solid var(--sl-border-soft)
+}
+.sl-home-update-title>span{font-size:21px}
+.sl-home-update-title h1{margin:0;flex:1;font-size:17px;color:#fff}
+.sl-home-update-title small{font-size:9px;color:#8192b4}
+.sl-home-update-list{display:grid;gap:7px;padding:11px}
+.sl-home-update-list article{
+  display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center;
+  padding:10px 12px;border-radius:11px;border:1px solid rgba(119,148,211,.12);background:rgba(27,45,78,.67)
+}
+.sl-home-update-list article>span{width:31px;height:31px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(135deg,rgba(64,111,255,.26),rgba(112,75,236,.20));font-size:17px}
+.sl-home-update-list strong{display:block;font-size:11.5px;color:#eff5ff}
+.sl-home-update-list small{display:block;margin-top:2px;font-size:9px;line-height:1.45;color:#9daac4}
+.sl-home-compat{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important}
+html.entry-home body.sl-redesign .home-copyright{position:absolute;bottom:8px;font-size:8px;color:#667997}
+
+/* ================= RIGHT ROOM DOCK ================= */
+#slRoomDock{
+  position:fixed;z-index:2000;display:none;right:0;top:0;bottom:0;width:var(--sl-dock);
+  box-sizing:border-box;padding:14px 11px 11px;
+  background:
+    radial-gradient(circle at 75% 4%,rgba(111,73,255,.13),transparent 30%),
+    linear-gradient(180deg,#0a172c 0%,#081321 100%);
+  border-left:1px solid rgba(104,137,214,.24);box-shadow:-12px 0 34px rgba(0,0,0,.22);
+  transition:transform .2s ease
+}
+body.in-room #slRoomDock,body.sl-room-create-open #slRoomDock{display:flex;flex-direction:column}
+body.sl-room-dock-collapsed #slRoomDock{transform:translateX(calc(100% - 12px))}
+#slRoomDockHandle{
+  position:absolute;left:-28px;top:52px;width:28px;height:52px;padding:0;border-radius:11px 0 0 11px;
+  border:1px solid var(--sl-border);border-right:0;background:#0d1c34;color:#d7e3f8;font-size:20px
+}
+body.sl-room-dock-collapsed #slRoomDockHandle span{display:inline-block;transform:rotate(180deg)}
+.sl-room-dock-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 4px 10px}
+.sl-room-dock-top small{display:block;color:#61dea2;font-size:9px;font-weight:800}
+.sl-room-dock-top strong{display:block;margin-top:3px;font-size:12px;color:#eef4ff}
+.sl-room-dock-mini{width:34px;height:34px;padding:0;border-radius:10px}
+.sl-room-status-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;border-radius:12px;background:#081220;border:1px solid var(--sl-border-soft)}
+.sl-room-status-tabs button{min-height:38px;padding:4px;border:0;border-radius:9px;background:#12213d;color:#b6c4dc;font-size:10px;font-weight:850}
+.sl-room-status-tabs button:first-child{background:linear-gradient(135deg,#2279f0,#4d5de9);color:#fff}
+.sl-room-status-tabs b{display:inline-grid;place-items:center;min-width:19px;height:19px;margin-left:3px;padding:0 4px;border-radius:999px;background:rgba(255,255,255,.12);font-size:9px}
+.sl-room-dock-scroll{flex:1;min-height:0;overflow:auto;padding:9px 1px 1px}
+.sl-dock-section{border:1px solid var(--sl-border-soft);border-radius:12px;background:#0b1930;overflow:hidden}
+.sl-dock-section header{display:flex;align-items:center;gap:7px;padding:9px 10px;border-bottom:1px solid var(--sl-border-soft)}
+.sl-dock-section header strong{flex:1;font-size:11px}
+.sl-dock-section header b{min-width:20px;height:20px;display:grid;place-items:center;padding:0 4px;border-radius:999px;background:#182a49;font-size:9px}
+.sl-dock-reserved header{background:linear-gradient(90deg,rgba(55,123,255,.13),transparent)}
+.sl-dock-confirmed header{background:linear-gradient(90deg,rgba(119,82,255,.14),transparent)}
+.sl-dock-completed header{background:linear-gradient(90deg,rgba(50,207,141,.13),transparent)}
+.sl-dock-list{padding:6px}
+.sl-dock-empty{padding:18px 8px;text-align:center;color:#6f809f;font-size:9.5px}
+.sl-dock-song{
+  display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:7px;align-items:center;
+  margin-bottom:5px;padding:7px;border:1px solid rgba(113,145,208,.12);border-radius:9px;background:#10213b
+}
+.sl-dock-index{font-size:9px;color:#7485a3;text-align:center}
+.sl-dock-main{min-width:0}
+.sl-dock-title{font-size:10.5px;font-weight:850;color:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.sl-dock-artist{margin-top:2px;font-size:8.5px;color:#8394b4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-dock-actions{display:flex;gap:3px;align-items:center}
+.sl-dock-actions button{min-width:27px;height:27px;padding:3px 5px;border-radius:7px;font-size:9px;font-weight:850}
+.sl-act-back{background:#172a49!important;color:#d5e1f4!important;border-color:#354c71!important}
+.sl-act-ok{background:rgba(45,199,128,.17)!important;color:#70e0ac!important;border-color:rgba(61,210,144,.40)!important}
+.sl-act-delete{background:rgba(245,74,91,.15)!important;color:#ff8894!important;border-color:rgba(247,82,99,.36)!important}
+.sl-dock-arrow{text-align:center;color:#4d8fff;font-size:15px;line-height:22px}
+
+/* Reserve central width while dock is open */
 @media(min-width:1181px){
-  body.in-room:not(.ui-room-dock-collapsed) #uiTopbar,
-  body.in-room:not(.ui-room-dock-collapsed) #uiFilterbar{
-    right:var(--ui-room-dock-w);
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .container{
-    right:var(--ui-room-dock-w);
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .modal-overlay{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) #loadingArea{
-    right:var(--ui-room-dock-w)!important;
-  }
+  body.in-room:not(.sl-room-dock-collapsed) #slTopbar,
+  body.in-room:not(.sl-room-dock-collapsed) #slFilterbar{right:var(--sl-dock)}
+  body.sl-redesign.in-room:not(.sl-room-dock-collapsed) .container{right:var(--sl-dock)!important}
+  body.sl-redesign.in-room:not(.sl-room-dock-collapsed) #loadingArea{right:var(--sl-dock)!important}
+  body.in-room:not(.sl-room-dock-collapsed) .modal-overlay:not(#roomCreateModal):not(#slHelpModal){right:var(--sl-dock)!important}
 }
 
-/* ================= スマホ ================= */
+/* ================= ROOM CREATE PAGE ================= */
+#roomCreateModal.sl-room-create-overlay{
+  left:var(--sl-side)!important;right:var(--sl-dock)!important;top:0!important;bottom:0!important;
+  width:auto!important;height:auto!important;padding:22px!important;box-sizing:border-box!important;
+  background:
+    radial-gradient(circle at 85% 15%,rgba(88,72,255,.19),transparent 25%),
+    linear-gradient(145deg,#071225,#091832)!important;
+  backdrop-filter:none!important
+}
+#roomCreateModal .sl-room-create-page{
+  width:min(1050px,100%)!important;height:100%!important;max-width:none!important;max-height:none!important;
+  margin:0 auto!important;padding:18px 4px!important;box-sizing:border-box!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;overflow:auto!important
+}
+.sl-room-create-close{
+  position:absolute;right:16px;top:14px;width:36px;height:36px;padding:0;border-radius:10px;font-size:22px
+}
+.sl-room-create-heading{display:flex;align-items:center;gap:13px;padding:3px 8px 18px}
+.sl-room-create-icon{font-size:35px;filter:drop-shadow(0 6px 14px rgba(70,112,255,.28))}
+.sl-room-create-heading h2{margin:0;font-size:30px;color:#fff}
+.sl-room-create-heading p{margin:6px 0 0;font-size:11px;color:#97a8c6}
+.sl-room-create-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:13px}
+.sl-room-create-card{border:1px solid rgba(98,139,226,.34);border-radius:15px;background:linear-gradient(180deg,rgba(14,31,59,.88),rgba(9,23,44,.88));box-shadow:0 15px 40px rgba(0,0,0,.16)}
+.sl-room-create-main{padding:18px}
+.sl-section-heading{display:flex;align-items:center;gap:8px;padding-bottom:12px;font-size:14px;color:#fff}
+.sl-section-heading>span{font-size:19px}
+.sl-room-create-info{display:grid;gap:8px}
+.sl-room-create-info>div{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;padding:11px;border:1px solid var(--sl-border-soft);border-radius:11px;background:#0e1f3a}
+.sl-room-info-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:10px;background:#18325a;font-size:18px}
+.sl-room-create-info strong{display:block;font-size:11px}
+.sl-room-create-info small{display:block;margin-top:3px;font-size:9px;line-height:1.45;color:#8fa0bf}
+.sl-room-create-note{margin-top:11px;padding:12px;border:1px solid var(--sl-border-soft);border-radius:11px;background:#0a192e}
+.sl-room-create-note>strong{font-size:11px}
+.sl-room-flow{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:9px}
+.sl-room-flow span{padding:7px 9px;border-radius:9px;background:#122845;font-size:9px}
+.sl-room-flow b{color:#4d8fff}
+.sl-room-create-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.sl-room-create-actions button{min-height:42px;padding:7px 14px;border-radius:10px;font-weight:850}
+.sl-room-create-primary{min-width:220px;background:linear-gradient(90deg,#2d8bf3,#654de9)!important;color:#fff!important;border-color:#5c75ff!important}
+#roomCreateMessage{min-height:18px;margin:8px 0 0;font-size:10px;color:#85c8ff;text-align:right}
+.sl-room-feature-card{padding:18px}
+.sl-room-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sl-room-feature-grid>div{min-height:104px;padding:12px;border:1px solid var(--sl-border-soft);border-radius:12px;background:#10213c}
+.sl-room-feature-grid>div:nth-child(2){background:linear-gradient(135deg,rgba(113,73,225,.28),#10213c)}
+.sl-room-feature-grid>div:nth-child(3){background:linear-gradient(135deg,rgba(42,184,143,.22),#10213c)}
+.sl-room-feature-grid>div:nth-child(4){background:linear-gradient(135deg,rgba(231,112,77,.19),#10213c)}
+.sl-room-feature-grid>div>span{font-size:25px}
+.sl-room-feature-grid strong{display:block;margin-top:7px;font-size:11px}
+.sl-room-feature-grid small{display:block;margin-top:3px;font-size:8.5px;line-height:1.45;color:#92a3bf}
+
+/* ================= MODALS / HELP ================= */
+body.sl-redesign .modal-overlay:not(#roomCreateModal){
+  top:calc(var(--sl-top) + var(--sl-filter))!important;left:var(--sl-side)!important;right:0!important;bottom:0!important;
+  width:auto!important;height:auto!important;padding:22px 14px 14px!important;box-sizing:border-box!important;
+  background:rgba(2,7,15,.77)!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
+}
+html.entry-home body.sl-redesign .modal-overlay:not(#roomCreateModal){top:0!important}
+body.sl-redesign .modal{
+  position:relative!important;border-radius:14px!important;background:linear-gradient(180deg,#0f1f39,#0b182c)!important;
+  border:1px solid rgba(109,142,216,.30)!important;box-shadow:0 24px 70px rgba(0,0,0,.42)!important;color:#edf4ff!important
+}
+body.sl-redesign .modal-close{position:absolute!important;right:12px!important;top:10px!important;left:auto!important;z-index:4}
+.sl-help-modal{width:min(900px,96%)!important;max-width:900px!important;max-height:80dvh!important;overflow:hidden!important}
+.sl-help-layout{display:grid;grid-template-columns:215px minmax(0,1fr);gap:12px;min-height:0}
+.sl-help-nav{display:flex;flex-direction:column;gap:5px;padding-right:5px;border-right:1px solid var(--sl-border-soft)}
+.sl-help-nav button{width:100%;min-height:38px;padding:6px 8px;text-align:left;border-radius:9px;font-size:10px;font-weight:800;white-space:normal}
+.sl-help-nav button.active{background:linear-gradient(135deg,#277ce8,#5d54ed);color:#fff;border-color:#668cff}
+.sl-help-group-title{padding:8px 4px 2px;font-size:10px;font-weight:900;color:#9aaac4}
+.sl-help-content{min-height:0;max-height:65dvh;overflow:auto;padding:2px 8px}
+.sl-help-section{display:none}.sl-help-section.active{display:block}
+.sl-help-section h3{margin:0 0 10px;color:#72b9ff}.sl-help-section p,.sl-help-section li{font-size:11px;line-height:1.75}.sl-help-section ul,.sl-help-section ol{padding-left:1.35em}
+
+/* mobile */
+@media(max-width:1180px){
+  :root{--sl-dock:min(88vw,360px)}
+  #slRoomDock{width:min(88vw,360px)}
+  body.in-room:not(.sl-room-dock-collapsed) #slTopbar,
+  body.in-room:not(.sl-room-dock-collapsed) #slFilterbar{right:0}
+  body.sl-redesign.in-room:not(.sl-room-dock-collapsed) .container{right:0!important}
+  #roomCreateModal.sl-room-create-overlay{right:0!important}
+}
 @media(max-width:820px){
-  :root{
-    --ui-sidebar-w:0px;
-    --ui-topbar-h:60px;
-    --ui-filterbar-h:52px;
+  :root{--sl-side:0px;--sl-top:76px;--sl-filter:52px}
+  body.sl-redesign{overflow:hidden}
+  #slSidebar{
+    width:min(86vw,285px);transform:translateX(-104%);transition:transform .2s ease;
+    box-shadow:16px 0 40px rgba(0,0,0,.42)
   }
-  #uiSidebar{
-    width:min(86vw,286px);
-    transform:translateX(-104%);
-    transition:transform .2s ease;
-    box-shadow:15px 0 38px rgba(0,0,0,.35);
-  }
-  body.ui-sidebar-open #uiSidebar{
-    transform:translateX(0);
-  }
-  #uiTopbar{
-    left:0;
-    padding:9px 10px;
-    gap:8px;
-  }
-  #uiMobileMenuBtn{display:grid}
-  #uiUserHost{
-    max-width:105px;
-  }
-  #uiUserHost #loginStatus{
-    max-width:105px!important;
-    padding:6px 8px;
-    font-size:10px!important;
-  }
-  #uiFilterbar{
-    left:0;
-    padding:7px 9px;
-  }
-  #uiListMeta{
-    max-width:38vw;
-  }
-  #uiListMeta #songCountDisplay{display:none}
-  body.ui-redesign .container{
-    left:0;
-    padding:8px 8px max(8px,env(safe-area-inset-bottom));
-  }
-  html.entry-home body.ui-redesign #homeLanding{
-    left:0;
-    padding:16px 10px;
-  }
-  body.ui-redesign .modal-overlay{
-    left:0!important;
-    padding:18px 8px 8px!important;
-  }
-  body.ui-redesign #loadingArea{
-    left:0!important;
-  }
-  #uiRoomDock{
-    width:min(90vw,360px);
-  }
-  body.in-room.ui-room-dock-collapsed #uiRoomDock{
-    transform:translateX(calc(100% - 11px));
-  }
-  #uiRoomDockHandle{
-    left:-31px;
-    width:31px;
-  }
-}
-
-/* 低い画面ではサイドバーを少し圧縮 */
-@media(max-height:760px) and (min-width:821px){
-  #uiSidebar{padding-top:8px;padding-bottom:8px;gap:6px}
-  .ui-nav button,.ui-nav a{min-height:37px;padding-top:5px;padding-bottom:5px}
-  .ui-nav-icon{width:25px;height:25px;flex-basis:25px;font-size:15px}
-}
-
-
-/* =========================================================
-   FIX 2026-10-09
-   右側セッション進行ドック位置 + ジャンル表示改善
-========================================================= */
-
-/* ジャンルバーを少し高くし、ジャンルを主役にする */
-:root{
-  --ui-filterbar-h:68px;
-}
-
-/* 右側ドックは検索・ジャンルバーの下から開始し、
-   一覧領域と完全に揃える */
-#uiRoomDock{
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h))!important;
-  right:10px!important;
-  bottom:10px!important;
-  height:auto!important;
-  border-radius:14px!important;
-  border:1px solid var(--ui-soft-border)!important;
-  overflow:visible!important;
-}
-
-/* ハンドルはドックの左端中央寄りへ。
-   ジャンルバーと重ならない位置に固定 */
-#uiRoomDockHandle{
-  top:18px!important;
-}
-
-/* PCでは右ドック分 + 外側余白ぶん、中央画面を確実に縮める */
-@media(min-width:1181px){
-  body.in-room:not(.ui-room-dock-collapsed) #uiTopbar,
-  body.in-room:not(.ui-room-dock-collapsed) #uiFilterbar{
-    right:calc(var(--ui-room-dock-w) + 20px)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .container{
-    right:calc(var(--ui-room-dock-w) + 20px)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .modal-overlay{
-    right:calc(var(--ui-room-dock-w) + 20px)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) #loadingArea{
-    right:calc(var(--ui-room-dock-w) + 20px)!important;
-  }
-}
-
-/* ジャンルバーは「ジャンル」と「曲数表示」を上下に分離。
-   ジャンルの横幅を曲数表示に奪われないようにする */
-#uiFilterbar{
-  align-items:stretch!important;
-  flex-direction:column!important;
-  gap:4px!important;
-  padding:6px 12px 5px!important;
-}
-
-#uiGenreHost{
-  width:100%!important;
-  max-width:none!important;
-  flex:1 1 auto!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-  scrollbar-width:thin;
-  scrollbar-color:var(--border-color) transparent;
-}
-
-#uiGenreHost::-webkit-scrollbar{
-  height:6px;
-}
-#uiGenreHost::-webkit-scrollbar-track{
-  background:transparent;
-}
-#uiGenreHost::-webkit-scrollbar-thumb{
-  background:var(--border-color);
-  border-radius:999px;
-}
-
-#uiGenreHost #genreFilters{
-  min-width:max-content!important;
-  width:max-content!important;
-  flex-wrap:nowrap!important;
-  padding-bottom:1px;
-}
-
-#uiListMeta{
-  width:100%!important;
-  max-width:none!important;
-  flex:0 0 auto!important;
-  min-height:18px;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  gap:8px!important;
-  overflow:visible!important;
-  padding-right:2px;
-}
-
-#uiListMeta #songCountDisplay{
-  font-size:10px!important;
-  line-height:1.2!important;
-  white-space:nowrap!important;
-  opacity:.86;
-}
-
-#uiListMeta #artistFilterIndicator{
-  max-width:min(52vw,420px)!important;
-  min-width:0!important;
-  overflow:hidden!important;
-  white-space:nowrap!important;
-}
-
-/* テーブル領域の開始位置を新しいジャンルバー高さに同期 */
-body.ui-redesign .container,
-body.ui-redesign #loadingArea,
-body.ui-redesign .modal-overlay{
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h))!important;
-}
-
-/* ルームステータスとテーブルが右ドックへ食い込まないようにする */
-body.in-room:not(.ui-room-dock-collapsed) #roomStatusWrapper,
-body.in-room:not(.ui-room-dock-collapsed) #tableWrapper,
-body.in-room:not(.ui-room-dock-collapsed) #masterActionsBar,
-body.in-room:not(.ui-room-dock-collapsed) #myListBulkBar,
-body.in-room:not(.ui-room-dock-collapsed) #myListClipboardHeader{
-  max-width:100%!important;
-  box-sizing:border-box!important;
-}
-
-/* ドック内部は角丸に合わせてクリップ */
-#uiRoomDock .ui-room-dock-inner{
-  overflow:hidden;
-  border-radius:14px;
-}
-
-/* スマホでは余白を外し、従来どおり右からのドロワーとして使う */
-@media(max-width:820px){
-  :root{
-    --ui-filterbar-h:64px;
-  }
-
-  #uiRoomDock{
-    right:0!important;
-    bottom:0!important;
-    border-radius:14px 0 0 14px!important;
-  }
-
-  #uiFilterbar{
-    padding:5px 8px!important;
-  }
-
-  #uiListMeta{
-    justify-content:flex-start!important;
-  }
-
-  #uiListMeta #songCountDisplay{
-    display:none!important;
-  }
-
-  #uiListMeta #artistFilterIndicator{
-    max-width:100%!important;
-    font-size:10px!important;
-  }
-}
-
-
-/* =========================================================
-   RIGHT DOCK REFERENCE LAYOUT
-   参考画像に合わせて右バーを画面最上部から固定。
-   検索・ジャンル・一覧は右バーの左側だけを使用する。
-========================================================= */
-:root{
-  --ui-room-dock-w:300px;
-  --ui-filterbar-h:54px;
-}
-
-/* 右バー：参考画像のように画面上端～下端まで固定 */
-#uiRoomDock{
-  top:0!important;
-  right:0!important;
-  bottom:0!important;
-  width:var(--ui-room-dock-w)!important;
-  height:auto!important;
-  border-radius:0!important;
-  border:0!important;
-  border-left:1px solid var(--ui-soft-border)!important;
-  overflow:visible!important;
-  box-shadow:-10px 0 26px rgba(0,0,0,.16)!important;
-}
-
-/* ドックの開閉ハンドルも画像に近い上部位置 */
-#uiRoomDockHandle{
-  top:48px!important;
-  left:-27px!important;
-  width:27px!important;
-  height:48px!important;
-  border-radius:10px 0 0 10px!important;
-}
-
-/* 参考画像のように右ドック内部をややコンパクトに */
-.ui-room-dock-inner{
-  padding:12px 10px 10px!important;
-  gap:8px!important;
-  grid-template-rows:auto auto minmax(0,1fr)!important;
-}
-.ui-room-dock-title{
-  padding:0 2px 4px;
-}
-.ui-room-dock-title strong{
-  font-size:13px!important;
-}
-.ui-room-dock-title small{
-  font-size:9px!important;
-}
-#uiRoomDockTabs{
-  gap:4px!important;
-  padding:4px!important;
-  border-radius:12px!important;
-}
-.ui-dock-tab{
-  min-height:36px!important;
-  font-size:10px!important;
-}
-.ui-dock-panel{
-  border-radius:12px!important;
-}
-.ui-dock-panel-head{
-  padding:8px 9px!important;
-  font-size:11px!important;
-}
-.ui-dock-song{
-  grid-template-columns:20px minmax(0,1fr) 28px!important;
-  gap:6px!important;
-  padding:7px 6px!important;
-}
-.ui-dock-song-title{
-  font-size:10px!important;
-}
-.ui-dock-song-artist{
-  font-size:8px!important;
-}
-.ui-dock-action{
-  width:28px!important;
-  height:28px!important;
-}
-
-/* 右バー表示中は、検索・ジャンル・一覧を右バーの左で止める */
-@media(min-width:1181px){
-  body.in-room:not(.ui-room-dock-collapsed) #uiTopbar,
-  body.in-room:not(.ui-room-dock-collapsed) #uiFilterbar{
-    right:var(--ui-room-dock-w)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .container{
-    right:var(--ui-room-dock-w)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .modal-overlay{
-    right:var(--ui-room-dock-w)!important;
-  }
-
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) #loadingArea{
-    right:var(--ui-room-dock-w)!important;
-  }
-}
-
-/* ジャンルは参考画像のように検索欄の下、中央領域だけに1行表示 */
-#uiFilterbar{
-  flex-direction:row!important;
-  align-items:center!important;
-  gap:8px!important;
-  padding:7px 12px!important;
-  height:var(--ui-filterbar-h)!important;
-}
-
-#uiGenreHost{
-  flex:1 1 auto!important;
-  min-width:0!important;
-  width:auto!important;
-  max-width:none!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-  scrollbar-width:thin;
-}
-
-#uiGenreHost #genreFilters{
-  display:flex!important;
-  flex-wrap:nowrap!important;
-  width:max-content!important;
-  min-width:max-content!important;
-  gap:5px!important;
-  padding:0 0 3px!important;
-}
-
-#uiGenreHost .genre-btn{
-  min-height:31px!important;
-  padding:4px 10px!important;
-  font-size:11px!important;
-}
-
-/* 曲数はジャンルを圧迫しないよう右端の小領域に固定 */
-#uiListMeta{
-  flex:0 0 auto!important;
-  width:auto!important;
-  max-width:230px!important;
-  min-width:0!important;
-  min-height:0!important;
-  padding:0!important;
-  justify-content:flex-end!important;
-  overflow:hidden!important;
-}
-
-#uiListMeta #songCountDisplay{
-  display:block!important;
-  max-width:230px!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-  font-size:10px!important;
-}
-
-#uiListMeta #artistFilterIndicator{
-  max-width:210px!important;
-}
-
-/* 中央コンテンツ開始位置もジャンルバー高さへ同期 */
-body.ui-redesign .container,
-body.ui-redesign #loadingArea,
-body.ui-redesign .modal-overlay{
-  top:calc(var(--ui-topbar-h) + var(--ui-filterbar-h))!important;
-}
-
-/* 右バーは最上部からなので、このルールだけ上書き */
-#uiRoomDock{
-  top:0!important;
-}
-
-/* ドック格納時：参考画像のように右端に細いハンドルだけ残す */
-body.in-room.ui-room-dock-collapsed #uiRoomDock{
-  transform:translateX(calc(100% - 12px))!important;
-}
-
-/* スマホでは従来どおり右ドロワー */
-@media(max-width:820px){
-  :root{
-    --ui-room-dock-w:min(90vw,340px);
-    --ui-filterbar-h:52px;
-  }
-
-  #uiRoomDock{
-    width:min(90vw,340px)!important;
-    top:0!important;
-  }
-
-  #uiRoomDockHandle{
-    top:62px!important;
-  }
-
-  #uiFilterbar{
-    padding:6px 8px!important;
-  }
-
-  #uiListMeta{
-    max-width:38vw!important;
-  }
-
-  #uiListMeta #songCountDisplay{
-    display:none!important;
-  }
-}
-
-
-/* =========================================================
-   RIGHT DOCK TEXT READABILITY / HIGH-DPI STYLE
-   右バーの文字を大きく・高コントラスト・読みやすく調整
-========================================================= */
-:root{
-  --ui-room-dock-w:330px;
-}
-
-/* 右バー内の文字描画を見やすく */
-#uiRoomDock,
-#uiRoomDock button{
-  text-rendering:optimizeLegibility;
-  -webkit-font-smoothing:antialiased;
-  font-synthesis:none;
-}
-
-/* タイトル */
-.ui-room-dock-title strong{
-  font-size:15px!important;
-  line-height:1.35!important;
-  font-weight:900!important;
-  letter-spacing:.01em;
-}
-.ui-room-dock-title small{
-  font-size:11px!important;
-  line-height:1.4!important;
-  opacity:.72!important;
-  font-weight:700!important;
-}
-
-/* 予約 / 確定 / 完了 タブ */
-.ui-dock-tab{
-  min-height:42px!important;
-  font-size:12px!important;
-  line-height:1.2!important;
-  font-weight:900!important;
-  letter-spacing:.01em;
-}
-.ui-dock-tab .ui-dock-tab-count{
-  min-width:22px!important;
-  height:22px!important;
-  font-size:10px!important;
-  font-weight:900!important;
-}
-
-/* 各一覧タイトル */
-.ui-dock-panel-head{
-  padding:10px 11px!important;
-  font-size:13px!important;
-  line-height:1.35!important;
-  font-weight:900!important;
-}
-
-/* 楽曲行を少し大きく */
-.ui-dock-song{
-  grid-template-columns:26px minmax(0,1fr) 32px!important;
-  gap:8px!important;
-  padding:10px 9px!important;
-  margin-bottom:7px!important;
-  border:1px solid color-mix(in srgb,var(--ui-soft-border) 70%,transparent);
-}
-
-/* 通し番号 */
-.ui-dock-num{
-  font-size:11px!important;
-  font-weight:800!important;
-  opacity:.72!important;
-}
-
-/* 曲名 */
-.ui-dock-song-title{
-  font-size:13px!important;
-  line-height:1.35!important;
-  font-weight:900!important;
-  letter-spacing:.005em;
-  color:var(--text-color)!important;
-}
-
-/* アーティスト */
-.ui-dock-song-artist{
-  margin-top:3px!important;
-  font-size:10.5px!important;
-  line-height:1.35!important;
-  font-weight:650!important;
-  opacity:.78!important;
-}
-
-/* 状態変更ボタン */
-.ui-dock-action{
-  width:32px!important;
-  height:32px!important;
-  min-width:32px!important;
-  min-height:32px!important;
-  font-size:15px!important;
-  font-weight:900!important;
-}
-
-/* 空表示 */
-.ui-dock-empty{
-  padding:28px 10px!important;
-  font-size:12px!important;
-  line-height:1.6!important;
-  opacity:.64!important;
-}
-
-/* 右ドック内のリスト余白 */
-.ui-dock-list{
-  padding:8px!important;
-}
-
-/* 右バー展開時の中央領域も新しい幅に追従 */
-@media(min-width:1181px){
-  body.in-room:not(.ui-room-dock-collapsed) #uiTopbar,
-  body.in-room:not(.ui-room-dock-collapsed) #uiFilterbar{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .container{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .modal-overlay{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) #loadingArea{
-    right:var(--ui-room-dock-w)!important;
-  }
-}
-
-/* 1920px以上ではさらに読みやすく */
-@media(min-width:1600px){
-  :root{
-    --ui-room-dock-w:350px;
-  }
-  .ui-room-dock-title strong{font-size:16px!important}
-  .ui-room-dock-title small{font-size:11.5px!important}
-  .ui-dock-tab{font-size:12.5px!important}
-  .ui-dock-panel-head{font-size:13.5px!important}
-  .ui-dock-song-title{font-size:13.5px!important}
-  .ui-dock-song-artist{font-size:11px!important}
-}
-
-/* スマホは横幅を取りすぎない範囲で可読性を維持 */
-@media(max-width:820px){
-  #uiRoomDock{
-    width:min(92vw,360px)!important;
-  }
-  .ui-dock-song-title{font-size:12.5px!important}
-  .ui-dock-song-artist{font-size:10.5px!important}
-}
-
-
-/* =========================================================
-   ROOM DOCK ACTION BUTTONS
-   予約 ⇄ 演奏確定 ⇄ 完了 + 予約/確定から削除
-========================================================= */
-:root{
-  --ui-room-dock-w:380px;
-}
-
-.ui-dock-song{
-  grid-template-columns:26px minmax(0,1fr) auto!important;
-  align-items:center!important;
-}
-
-.ui-dock-actions{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:5px;
-  flex-wrap:nowrap;
-}
-
-.ui-dock-action{
-  width:auto!important;
-  min-width:0!important;
-  height:32px!important;
-  min-height:32px!important;
-  padding:4px 7px!important;
-  display:inline-flex!important;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
-  border-radius:8px!important;
-  font-size:10.5px!important;
-  line-height:1!important;
-  font-weight:900!important;
-  white-space:nowrap;
-}
-
-.ui-dock-action-back{
-  background:rgba(112,128,144,.20)!important;
-  border-color:rgba(145,160,175,.36)!important;
-}
-
-.ui-dock-action-confirm{
-  background:rgba(49,190,117,.18)!important;
-  border-color:rgba(67,215,143,.38)!important;
-}
-
-.ui-dock-action-delete{
-  background:rgba(225,76,89,.16)!important;
-  border-color:rgba(255,105,120,.38)!important;
-  color:#ff9aa5!important;
-}
-
-.ui-dock-action:hover{
-  filter:brightness(1.12);
-}
-
-/* 右ドック拡張幅へ中央領域も同期 */
-@media(min-width:1181px){
-  body.in-room:not(.ui-room-dock-collapsed) #uiTopbar,
-  body.in-room:not(.ui-room-dock-collapsed) #uiFilterbar{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .container{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) .modal-overlay{
-    right:var(--ui-room-dock-w)!important;
-  }
-  body.ui-redesign.in-room:not(.ui-room-dock-collapsed) #loadingArea{
-    right:var(--ui-room-dock-w)!important;
-  }
-}
-
-@media(max-width:820px){
-  #uiRoomDock{
-    width:min(96vw,390px)!important;
-  }
-  .ui-dock-action{
-    font-size:10px!important;
-    padding:4px 6px!important;
-  }
+  body.sl-sidebar-open #slSidebar{transform:translateX(0)}
+  #slTopbar{left:0;height:var(--sl-top);padding:10px;grid-template-columns:42px minmax(0,1fr) auto;gap:7px}
+  #slMobileMenu{display:block}
+  .sl-page-heading h1{font-size:18px}.sl-page-heading p{display:none}
+  #slSearchHost{grid-column:1/-1;grid-row:2;display:none}
+  #slUserHost #loginStatus{max-width:105px!important;font-size:9px!important}
+  #slFilterbar{left:0;padding:7px 8px}
+  #slListMeta{display:none}
+  body.sl-redesign .container{left:0!important;padding:7px!important}
+  body.sl-redesign #loadingArea{left:0!important}
+  html.entry-home body.sl-redesign #homeLanding{left:0!important;padding:12px!important}
+  .sl-home-brand img{width:min(300px,78vw);max-height:100px}
+  .sl-home-update{border-radius:14px}.sl-home-update-title{padding:10px 11px}.sl-home-update-title h1{font-size:13px}
+  .sl-home-update-list{padding:7px;gap:5px}.sl-home-update-list article{padding:7px 8px}.sl-home-update-list strong{font-size:9.5px}.sl-home-update-list small{font-size:7.5px}
+  body.sl-redesign .modal-overlay:not(#roomCreateModal){left:0!important;padding:12px 7px!important}
+  #roomCreateModal.sl-room-create-overlay{left:0!important;padding:10px!important}
+  .sl-room-create-grid{grid-template-columns:1fr}.sl-room-feature-card{display:none}
+  .sl-room-create-heading h2{font-size:22px}
+  .sl-help-layout{grid-template-columns:1fr}.sl-help-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-right:0;border-bottom:1px solid var(--sl-border-soft);padding-bottom:8px}
+}
+@media(max-height:730px) and (min-width:821px){
+  :root{--sl-top:86px;--sl-filter:50px}
+  #slTopbar{padding:14px 20px}.sl-page-heading h1{font-size:24px}.sl-page-heading p{margin-top:4px}
+  #slFilterbar{padding-top:6px;padding-bottom:6px}
+  .sl-sidebar-nav button,.sl-sidebar-nav a{min-height:37px}
+  .sl-sidebar-nav button>span,.sl-sidebar-nav a>span{font-size:16px}
+  .sl-sidebar-brand img{width:42px;height:42px}
+  .sl-home-brand img{max-height:95px;width:min(330px,60vw)}
+  .sl-home-center{gap:9px}.sl-home-update-title{padding:10px 13px 8px}.sl-home-update-list{padding:7px;gap:4px}.sl-home-update-list article{padding:7px 9px}.sl-home-update-list small{font-size:7.8px}
 }
 
 </style>
 </head>
-<body class="ui-redesign">
-
-<!-- ================= NEW UI SHELL ================= -->
-<aside id="uiSidebar" aria-label="メインナビゲーション">
-  <div class="ui-brand">
-    <strong>ShareLiScore</strong>
-    <small>シェアリスコア</small>
-  </div>
-
-  <div id="uiModeSwitch" aria-label="メニュー表示切替">
-    <button type="button" id="uiNormalModeBtn" onclick="uiSetSidebarMode('normal')">✨ 通常</button>
-    <button type="button" id="uiRoomModeBtn" onclick="uiSetSidebarMode('room')">🎤 ルーム</button>
-  </div>
-
-  <nav class="ui-nav" id="uiNormalNav">
-    <button type="button" class="nav-home" onclick="uiNavAction(()=>goHome())"><span class="ui-nav-icon">🏠</span><span>トップ</span></button>
-    <button type="button" class="nav-all" onclick="uiNavAction(()=>openHomeDestination('all'))"><span class="ui-nav-icon">🎵</span><span>全曲一覧</span></button>
-    <button type="button" class="nav-my" onclick="uiNavAction(()=>openHomeDestination('mylist'))"><span class="ui-nav-icon">💖</span><span>マイリスト</span></button>
-    <button type="button" class="nav-room" onclick="uiNavAction(()=>createRoom())"><span class="ui-nav-icon">🎤</span><span>ルーム作成</span></button>
-    <button type="button" class="nav-friend" onclick="uiNavAction(()=>uiOpenExclusiveAction(openFriendsModal))"><span class="ui-nav-icon">🫶</span><span>フレンド</span></button>
-    <button type="button" class="nav-add" onclick="uiNavAction(()=>uiOpenExclusiveAction(openAddSongModal))"><span class="ui-nav-icon">➕</span><span>新規楽曲追加</span></button>
-    <button type="button" class="nav-page" onclick="uiNavAction(()=>uiOpenExclusiveAction(openMyPage))"><span class="ui-nav-icon">👤</span><span>マイページ</span></button>
-    <button type="button" class="nav-setting" onclick="uiNavAction(()=>uiOpenExclusive('settingsModal'))"><span class="ui-nav-icon">⚙️</span><span>設定</span></button>
-    <div id="uiAdminHost"></div>
-  </nav>
-
-  <nav class="ui-nav" id="uiRoomNav">
-    <button type="button" class="nav-all" onclick="uiNavAction(()=>uiRoomList('all'))"><span class="ui-nav-icon">🎶</span><span>ルーム全曲一覧</span></button>
-    <button type="button" class="nav-common" onclick="uiNavAction(()=>uiOpenExclusiveAction(openRoomCommonMemberPicker))"><span class="ui-nav-icon">🤝</span><span>共通曲</span></button>
-    <button type="button" class="nav-reserved" onclick="uiNavAction(()=>uiOpenExclusive('reservedModal'))"><span class="ui-nav-icon">📝</span><span>予約</span></button>
-    <button type="button" class="nav-confirmed" onclick="uiNavAction(()=>uiOpenExclusive('confirmedModal'))"><span class="ui-nav-icon">🎸</span><span>演奏リスト</span></button>
-    <button type="button" class="nav-completed" onclick="uiNavAction(()=>uiOpenExclusive('completedModal'))"><span class="ui-nav-icon">✅</span><span>本日のセットリスト</span></button>
-    <button type="button" class="nav-obs" onclick="uiNavAction(()=>uiOpenExclusiveAction(openObsModal))"><span class="ui-nav-icon">📺</span><span>OBS配信</span></button>
-    <button type="button" class="nav-copy" onclick="uiNavAction(()=>copyRoomLink())"><span class="ui-nav-icon">🔗</span><span>ルームURLをコピー</span></button>
-    <button type="button" class="nav-leave" onclick="uiNavAction(()=>leaveRoom())"><span class="ui-nav-icon">🚪</span><span>ルーム退出</span></button>
-  </nav>
-
-  <div id="uiSidebarFooter"></div>
-</aside>
-
-<header id="uiTopbar">
-  <button type="button" id="uiMobileMenuBtn" aria-label="メニューを開く" onclick="uiToggleSidebar()">☰</button>
-  <div id="uiSearchHost"></div>
-  <div id="uiUserHost"></div>
-</header>
-
-<div id="uiFilterbar" aria-label="ジャンル絞り込み">
-  <div id="uiGenreHost"></div>
-  <div id="uiListMeta"></div>
-</div>
-
-<aside id="uiRoomDock" aria-label="ルーム進行">
-  <button type="button" id="uiRoomDockHandle" aria-label="進行パネルを格納・表示" onclick="uiToggleRoomDock()"><span>›</span></button>
-  <div class="ui-room-dock-inner">
-    <div class="ui-room-dock-title">
-      <strong>🎛️ セッション進行</strong>
-      <small>予約 → 確定 → 完了</small>
-    </div>
-    <div id="uiRoomDockTabs" role="tablist" aria-label="進行状態">
-      <button type="button" class="ui-dock-tab active" data-status="reserved" onclick="uiSelectDockStatus('reserved')">📝 予約 <span class="ui-dock-tab-count" id="uiDockReservedCount">0</span></button>
-      <button type="button" class="ui-dock-tab" data-status="confirmed" onclick="uiSelectDockStatus('confirmed')">🎸 確定 <span class="ui-dock-tab-count" id="uiDockConfirmedCount">0</span></button>
-      <button type="button" class="ui-dock-tab" data-status="completed" onclick="uiSelectDockStatus('completed')">✅ 完了 <span class="ui-dock-tab-count" id="uiDockCompletedCount">0</span></button>
-    </div>
-
-    <section class="ui-dock-panel active" data-panel="reserved">
-      <div class="ui-dock-panel-head">📝 予約一覧</div>
-      <div class="ui-dock-list" id="uiDockReservedList"></div>
-    </section>
-    <section class="ui-dock-panel" data-panel="confirmed">
-      <div class="ui-dock-panel-head">🎸 演奏確定</div>
-      <div class="ui-dock-list" id="uiDockConfirmedList"></div>
-    </section>
-    <section class="ui-dock-panel" data-panel="completed">
-      <div class="ui-dock-panel-head">✅ 完了</div>
-      <div class="ui-dock-list" id="uiDockCompletedList"></div>
-    </section>
-  </div>
-</aside>
-<!-- =============== /NEW UI SHELL ================= -->
-
+<body>
 <script>
 // 描画開始前に端末の直近テーマを適用し、Firebase設定取得までの色のちらつきを防ぐ。
 (function () {
@@ -2433,45 +1509,247 @@ body.in-room.ui-room-dock-collapsed #uiRoomDock{
 })();
 </script>
 
-<!-- ランディング: 通常URLから最初に開くメニュー。ここでは楽曲マスターを取得しない。 -->
-<main id="homeLanding" aria-label="シェアリスコア トップページ">
-  <div class="home-inner">
-    <div class="home-brand">
-      <img src="site-logo.png?v=20261003-3" alt="" onerror="this.style.display='none'">
-      <h1>シェアリスコア</h1>
-      <p>Share List Score  セッションで繋がるマイリスト</p>
+
+<!-- ================= SHARELISCORE IMAGE-STYLE UI ================= -->
+<aside id="slSidebar" aria-label="メインメニュー">
+  <div class="sl-sidebar-brand">
+    <img src="site-logo.png?v=20261003-3" alt="" onerror="this.style.display='none'">
+    <div><strong>シェアリスコア</strong><small>ShareLiScore</small></div>
+  </div>
+
+  <nav class="sl-sidebar-nav">
+    <button type="button" id="slNavHome" class="sl-nav-home" onclick="slRunNav(()=>goHome())"><span>🏠</span><b>トップ</b></button>
+    <button type="button" id="slNavAll" class="sl-nav-all" onclick="slRunNav(()=>openHomeDestination('all'))"><span>🎵</span><b>全曲一覧</b></button>
+    <button type="button" id="slNavMy" class="sl-nav-my" onclick="slRunNav(()=>openHomeDestination('mylist'))"><span>📋</span><b>マイリスト</b></button>
+    <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slRunNav(()=>createRoom())"><span>➕</span><b>ルーム作成</b></button>
+    <button type="button" id="slNavCommon" class="sl-nav-common" onclick="slRunNav(()=>slOpenCommonSongs())"><span>🤝</span><b>共通曲</b></button>
+    <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slRunNav(()=>slOpenExclusiveAction(openFriendsModal))"><span>👥</span><b>フレンド</b></button>
+    <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slRunNav(()=>slOpenExclusiveAction(openAddSongModal))"><span>📄＋</span><b>新規楽曲追加</b></button>
+
+    <div class="sl-nav-divider"></div>
+
+    <button type="button" id="slNavPage" class="sl-nav-page" onclick="slRunNav(()=>slOpenExclusiveAction(openMyPage))"><span>👤</span><b>マイページ</b></button>
+    <button type="button" id="slNavSettings" class="sl-nav-settings" onclick="slRunNav(()=>slOpenExclusive('settingsModal'))"><span>⚙️</span><b>設定</b></button>
+    <button type="button" id="slNavHelp" class="sl-nav-help" onclick="slRunNav(()=>slOpenExclusive('slHelpModal'))"><span>🚨</span><b>ヘルプ</b></button>
+    <a href="admin.html" id="slAdminLink" class="sl-nav-admin" style="display:none;"><span>🛡️</span><b>管理者メニュー</b></a>
+  </nav>
+
+  <div class="sl-sidebar-footer" id="slSidebarFooter"></div>
+</aside>
+
+<header id="slTopbar">
+  <button type="button" id="slMobileMenu" aria-label="メニューを開く" onclick="slToggleSidebar()">☰</button>
+  <div class="sl-page-heading">
+    <h1 id="slPageTitle">全曲一覧</h1>
+    <p id="slPageSubtitle">登録されている楽曲を検索・閲覧できます</p>
+  </div>
+  <div id="slSearchHost"></div>
+  <div id="slUserHost"></div>
+</header>
+
+<div id="slFilterbar">
+  <div id="slGenreHost"></div>
+  <div id="slListMeta"></div>
+</div>
+
+<aside id="slRoomDock" aria-label="セッション進行">
+  <button type="button" id="slRoomDockHandle" onclick="slToggleRoomDock()" aria-label="セッション進行バーを格納・表示"><span>›</span></button>
+
+  <div class="sl-room-dock-top">
+    <div>
+      <small>● セッション進行</small>
+      <strong id="slDockTitle">予約 → 演奏確定 → 完了</strong>
     </div>
-    <nav class="home-grid" aria-label="メインメニュー">
-      <button type="button" class="home-card" onclick="openHomeDestination('all')"><span class="home-card-icon" aria-hidden="true">🎼</span><span><span class="home-card-heading">楽曲一覧</span><span class="home-card-caption">登録曲を検索・閲覧</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('mylist')"><span class="home-card-icon" aria-hidden="true">📁</span><span><span class="home-card-heading">マイリスト</span><span class="home-card-caption">自分の登録曲とKeyを管理</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('room')"><span class="home-card-icon" aria-hidden="true">🌐</span><span><span class="home-card-heading">ルームを作る</span><span class="home-card-caption">仲間とセットリストを共有</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('add')"><span class="home-card-icon" aria-hidden="true">➕</span><span><span class="home-card-heading">新規楽曲追加</span><span class="home-card-caption">新しい楽曲の登録申請</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('mypage')"><span class="home-card-icon" aria-hidden="true">👤</span><span><span class="home-card-heading">マイページ</span><span class="home-card-caption">アカウント管理</span></span></button>
-      <button type="button" class="home-card home-friends-card" onclick="openHomeDestination('friends')"><span class="home-card-icon" aria-hidden="true"><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="10" r="5"/><path d="M2 26v-2c0-4.7 4.2-8 10-8s10 3.3 10 8v2H2z"/><circle cx="24" cy="11" r="4" opacity=".9"/><path d="M22 17.3c4.8-.4 8 2.5 8 6.7v2h-6v-2c0-2.6-.7-4.9-2-6.7z" opacity=".9"/></svg></span><span><span class="home-card-heading">フレンド <span id="homeFriendCount" style="font-size:.75em;opacity:.8;">(−人)</span></span><span class="home-card-caption">お気に入りユーザー・フレンドコード検索</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('manual')"><span class="home-card-icon" aria-hidden="true">📖</span><span><span class="home-card-heading">使い方ガイド</span><span class="home-card-caption">基本操作と機能の説明</span></span></button>
-      <button type="button" class="home-card" onclick="openHomeDestination('settings')"><span class="home-card-icon" aria-hidden="true">⚙️</span><span><span class="home-card-heading">設定</span><span class="home-card-caption">テーマ・言語・フォント</span></span></button>
-    </nav>
-    <div class="home-account" aria-live="polite">
+    <button type="button" class="sl-room-dock-mini" onclick="slOpenRoomSettings()" title="ルーム情報">⚙️</button>
+  </div>
+
+  <div class="sl-room-status-tabs" aria-label="セッション状況">
+    <button type="button" onclick="slScrollDockTo('reserved')">予約 <b id="slDockReservedCount">0</b></button>
+    <button type="button" onclick="slScrollDockTo('confirmed')">確定 <b id="slDockConfirmedCount">0</b></button>
+    <button type="button" onclick="slScrollDockTo('completed')">完了 <b id="slDockCompletedCount">0</b></button>
+  </div>
+
+  <div class="sl-room-dock-scroll">
+    <section class="sl-dock-section sl-dock-reserved" data-status="reserved">
+      <header><span>📝</span><strong>予約</strong><b id="slReservedBadge">0</b></header>
+      <div class="sl-dock-list" id="slDockReservedList"></div>
+    </section>
+
+    <div class="sl-dock-arrow">↓</div>
+
+    <section class="sl-dock-section sl-dock-confirmed" data-status="confirmed">
+      <header><span>🎸</span><strong>演奏確定</strong><b id="slConfirmedBadge">0</b></header>
+      <div class="sl-dock-list" id="slDockConfirmedList"></div>
+    </section>
+
+    <div class="sl-dock-arrow">↓</div>
+
+    <section class="sl-dock-section sl-dock-completed" data-status="completed">
+      <header><span>✅</span><strong>完了</strong><b id="slCompletedBadge">0</b></header>
+      <div class="sl-dock-list" id="slDockCompletedList"></div>
+    </section>
+  </div>
+</aside>
+
+<!-- ヘルプ -->
+<div class="modal-overlay" id="slHelpModal" onclick="closeModal(event,'slHelpModal')">
+  <div class="modal sl-help-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="slHelpTitle">
+    <span class="modal-close" onclick="closeModal(null,'slHelpModal')">&times;</span>
+    <h2 id="slHelpTitle">🚨 ヘルプ</h2>
+    <div class="sl-help-layout">
+      <nav class="sl-help-nav">
+        <button type="button" class="active" onclick="slHelpOpen('first',this)">■ はじめての使い方</button>
+        <div class="sl-help-group-title">■ 各種説明</div>
+        <button type="button" onclick="slHelpOpen('all',this)">・全曲一覧について</button>
+        <button type="button" onclick="slHelpOpen('my',this)">・マイリストについて</button>
+        <button type="button" onclick="slHelpOpen('room',this)">・ルーム機能について</button>
+        <button type="button" onclick="slHelpOpen('obs',this)">・OBSカスタムCSSについて</button>
+        <button type="button" onclick="slHelpOpen('friends',this)">・フレンド機能について</button>
+      </nav>
+
+      <div class="sl-help-content">
+        <section class="sl-help-section active" data-help="first">
+          <h3>はじめての使い方</h3>
+          <p>シェアリスコアは、自分が演奏できる曲をマイリストに登録し、セッション参加者同士で共有するためのサービスです。</p>
+          <ol>
+            <li><strong>Googleでログイン</strong>すると、マイリスト・Key・担当パートを保存できます。</li>
+            <li><strong>全曲一覧</strong>で曲名・アーティスト・ジャンルなどから楽曲を探します。</li>
+            <li>演奏できる曲を<strong>マイリストへ登録</strong>し、自分用Keyと担当パートを設定します。</li>
+            <li><strong>ルームを作成</strong>してURLを参加者へ共有します。</li>
+            <li>共通曲や一覧から候補を<strong>予約 → 演奏確定 → 完了</strong>の順に進めます。</li>
+          </ol>
+        </section>
+        <section class="sl-help-section" data-help="all">
+          <h3>全曲一覧について</h3>
+          <p>登録されている楽曲を検索・閲覧する画面です。曲名、アーティスト、タイアップ、検索用語、作詞・作曲・編曲などから検索できます。</p>
+          <ul><li>ジャンルボタンで楽曲を絞り込めます。</li><li>曲名から詳細情報やChordWikiリンクを確認できます。</li><li>Googleログイン中はマイリスト登録と自分用Key設定ができます。</li><li>ルーム参加中は一覧から演奏候補を予約できます。</li></ul>
+        </section>
+        <section class="sl-help-section" data-help="my">
+          <h3>マイリストについて</h3>
+          <p>自分が演奏できる曲を管理する個人リストです。曲ごとにKeyと担当パートを保存できます。</p>
+          <ul><li>担当パートは複数選択できます。</li><li>複数曲を選択してKey・担当パートを一括編集できます。</li><li>ExcelやGoogleスプレッドシートからの一括登録にも対応しています。</li><li>マイリストから削除しても全曲一覧の楽曲データは削除されません。</li></ul>
+        </section>
+        <section class="sl-help-section" data-help="room">
+          <h3>ルーム機能について</h3>
+          <p>参加者同士でマイリストを共有し、演奏曲をリアルタイムで決める機能です。</p>
+          <ul><li>「共通曲」で選択した参加者全員が登録している曲を確認できます。</li><li><strong>予約：</strong>☑️確定 / ❎削除</li><li><strong>演奏確定：</strong>🔙戻す / ☑️完了 / ❎削除</li><li><strong>完了：</strong>🔙戻す</li></ul>
+          <p>右側のセッション進行バーから「予約 ⇄ 演奏確定 ⇄ 完了」を直接操作できます。</p>
+        </section>
+        <section class="sl-help-section" data-help="obs">
+          <h3>OBSカスタムCSSについて</h3>
+          <p>ルームのセットリストをOBSブラウザソースへ表示するための機能です。</p>
+          <ol><li>ルーム参加中に「OBS配信」を開きます。</li><li>ルーム用URLをOBSブラウザソースへ設定します。</li><li>枠色・文字色・背景色・透明度を選択します。</li><li>生成したCSSをOBSのカスタムCSSへ貼り付けます。</li></ol>
+        </section>
+        <section class="sl-help-section" data-help="friends">
+          <h3>フレンド機能について</h3>
+          <p>フレンドコードでユーザーを検索し、公開マイリストやお気に入りアーティストを確認できます。</p>
+          <ul><li>フレンドの公開マイリストを閲覧できます。</li><li>自分との共通曲に絞り込めます。</li><li>過去に同じルームへ参加したユーザーも確認できます。</li><li>相手のデータを直接変更することはできません。</li></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- =============== /SHARELISCORE IMAGE-STYLE UI =============== -->
+
+<!-- ランディング: 通常URLから最初に開くメニュー。ここでは楽曲マスターを取得しない。 -->
+
+<main id="homeLanding" aria-label="シェアリスコア トップページ">
+  <div class="sl-home-center">
+    <section class="sl-home-brand" aria-label="シェアリスコア">
+      <img src="site-logo.png?v=20261003-3" alt="シェアリスコア" onerror="this.style.display='none'">
+      <div class="sl-home-version">Version 2026.10.09</div>
+    </section>
+
+    <section class="sl-home-update" aria-labelledby="slHomeUpdateTitle">
+      <div class="sl-home-update-title">
+        <span aria-hidden="true">📣</span>
+        <h1 id="slHomeUpdateTitle">アップデート情報</h1>
+        <small>2026.10.09</small>
+      </div>
+      <div class="sl-home-update-list">
+        <article><span>✨</span><div><strong>新UIへ変更</strong><small>トップ・全曲一覧・マイリスト・ルーム画面を新しいデザインへ変更しました。</small></div></article>
+        <article><span>🎛️</span><div><strong>セッション進行バーを追加</strong><small>予約・演奏確定・完了を右側で確認し、そのまま操作できます。</small></div></article>
+        <article><span>🎵</span><div><strong>楽曲一覧・マイリスト表示を改善</strong><small>検索・ジャンル・編集操作を整理し、楽曲を探しやすくしました。</small></div></article>
+        <article><span>✏️</span><div><strong>楽曲情報編集機能を更新</strong><small>Googleログインユーザーによる編集と変更履歴の記録に対応しています。</small></div></article>
+      </div>
+    </section>
+
+    <!-- 既存JavaScript互換用。トップ画面には表示しません。 -->
+    <div class="sl-home-compat" aria-hidden="true">
       <span id="homeLoginState">ゲスト利用中</span>
       <button type="button" id="homeLoginBtn" onclick="loginWithGoogle()">Googleでログイン</button>
       <button type="button" id="homeLogoutBtn" onclick="logoutGoogle()" style="display:none;">ログアウト</button>
+      <div id="homeLoadingStatus" role="status" aria-live="polite"></div>
     </div>
-    <div id="homeLoadingStatus" role="status" aria-live="polite"></div>
   </div>
   <footer class="home-copyright">Copyright &copy; 2026 シェアリスコア. All Rights Reserved.</footer>
 </main>
 
 
+
 <!-- ルーム作成確認：確定するまではFirebaseへ書き込まない -->
-<div class="modal-overlay" id="roomCreateModal" style="z-index:1600;" onclick="closeRoomCreateModal(event)" role="dialog" aria-modal="true" aria-labelledby="roomCreateHeading">
-  <div class="modal" style="max-width:460px;">
-    <h2 id="roomCreateHeading">🌐 ルームを作成</h2>
-    <p style="font-size:14px;line-height:1.7;">セッション用の新しい共有ルームを作成します。作成後は自動的にルームへ入室します。<br>作成後ルームURLを仲間に共有すると、マイリストを共有できます。</p>
-    <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px;margin-top:20px;">
-      <button type="button" id="cancelRoomCreation" onclick="closeRoomCreateModal()">キャンセル</button>
-      <button type="button" id="confirmRoomCreation" class="primary-btn" onclick="confirmCreateRoom()" style="background:#007bff;color:white;border-color:#007bff;">作成して入室 →</button>
+
+<!-- ルーム作成：既存の自動ルームID発行機能を、新UIの専用画面として表示 -->
+<div class="modal-overlay sl-room-create-overlay" id="roomCreateModal" style="z-index:1600;" onclick="closeRoomCreateModal(event)" role="dialog" aria-modal="true" aria-labelledby="roomCreateHeading">
+  <div class="modal sl-room-create-page" onclick="event.stopPropagation()">
+    <button type="button" class="sl-room-create-close" id="cancelRoomCreation" onclick="closeRoomCreateModal()" aria-label="ルーム作成を閉じる">×</button>
+
+    <div class="sl-room-create-heading">
+      <span class="sl-room-create-icon" aria-hidden="true">👥＋</span>
+      <div>
+        <h2 id="roomCreateHeading">ルーム作成</h2>
+        <p>セッション用の共有ルームを作成して、仲間と演奏曲を共有しましょう。</p>
+      </div>
     </div>
-    <p id="roomCreateMessage" role="status" aria-live="polite" style="font-size:12px;min-height:1em;"></p>
+
+    <div class="sl-room-create-grid">
+      <section class="sl-room-create-card sl-room-create-main">
+        <div class="sl-section-heading"><span>⚙️</span><strong>ルーム設定</strong></div>
+
+        <div class="sl-room-create-info">
+          <div>
+            <span class="sl-room-info-icon">🔑</span>
+            <div><strong>ルームIDは自動生成</strong><small>重複しない8文字のルームIDを自動で発行します。</small></div>
+          </div>
+          <div>
+            <span class="sl-room-info-icon">🔗</span>
+            <div><strong>作成後にURLを共有</strong><small>ルームへ入室後、「ルームURLをコピー」から参加者へ共有できます。</small></div>
+          </div>
+          <div>
+            <span class="sl-room-info-icon">👤</span>
+            <div><strong>ゲスト参加にも対応</strong><small>参加者はGoogleログインまたはゲストとしてルームへ参加できます。</small></div>
+          </div>
+        </div>
+
+        <div class="sl-room-create-note">
+          <strong>セッションの流れ</strong>
+          <div class="sl-room-flow">
+            <span>🔎 曲を探す</span><b>→</b>
+            <span>📝 予約</span><b>→</b>
+            <span>☑️ 演奏確定</span><b>→</b>
+            <span>✅ 完了</span>
+          </div>
+        </div>
+
+        <div class="sl-room-create-actions">
+          <button type="button" class="sl-room-create-cancel" onclick="closeRoomCreateModal()">キャンセル</button>
+          <button type="button" id="confirmRoomCreation" class="sl-room-create-primary" onclick="confirmCreateRoom()">👥＋ ルームを作成</button>
+        </div>
+        <p id="roomCreateMessage" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="sl-room-create-card sl-room-feature-card">
+        <div class="sl-section-heading"><span>⭐</span><strong>できること</strong></div>
+        <div class="sl-room-feature-grid">
+          <div><span>🎵</span><strong>共通曲</strong><small>参加者全員が登録している曲を確認</small></div>
+          <div><span>📝</span><strong>予約</strong><small>演奏候補を順番に予約</small></div>
+          <div><span>☑️</span><strong>演奏確定</strong><small>演奏する曲を確定</small></div>
+          <div><span>✅</span><strong>完了</strong><small>演奏済み曲をセットリストへ</small></div>
+          <div><span>📺</span><strong>OBS配信</strong><small>完了曲を配信画面へ表示</small></div>
+          <div><span>🤝</span><strong>リアルタイム共有</strong><small>参加者全員へ進行状況を同期</small></div>
+        </div>
+      </aside>
+    </div>
   </div>
 </div>
 
@@ -7678,267 +6956,284 @@ html, body { background: transparent !important; color: ${text} !important; }
 (function(){
   'use strict';
 
-  function byId(id){ return document.getElementById(id); }
-
-  function moveNode(id, hostId){
-    const node=byId(id), host=byId(hostId);
-    if(node && host && node.parentElement!==host) host.appendChild(node);
+  function slById(id){return document.getElementById(id);}
+  function slMove(id,hostId){
+    const node=slById(id),host=slById(hostId);
+    if(node&&host&&node.parentElement!==host)host.appendChild(node);
   }
 
-  function initUiShell(){
-    // 既存DOMをそのまま移動する。ID・イベント・Firebase処理は変更しない。
-    moveNode('searchInput','uiSearchHost');
-    moveNode('genreFilters','uiGenreHost');
-    moveNode('songCountDisplay','uiListMeta');
-    moveNode('artistFilterIndicator','uiListMeta');
-    moveNode('loginStatus','uiUserHost');
-    moveNode('googleLoginBtn','uiSidebarFooter');
-    moveNode('googleLogoutBtn','uiSidebarFooter');
-
-    const admin=byId('adminPageLink');
-    const adminHost=byId('uiAdminHost');
-    if(admin && adminHost && admin.parentElement!==adminHost){
-      admin.classList.add('nav-admin');
-      admin.innerHTML='<span class="ui-nav-icon">🛠️</span><span>管理者メニュー</span>';
-      adminHost.appendChild(admin);
-    }
-
-    uiRenderRoomDock();
-  }
-
-  window.uiToggleSidebar=function(force){
-    const next=typeof force==='boolean' ? force : !document.body.classList.contains('ui-sidebar-open');
-    document.body.classList.toggle('ui-sidebar-open',next);
+  window.slToggleSidebar=function(force){
+    const next=typeof force==='boolean'?force:!document.body.classList.contains('sl-sidebar-open');
+    document.body.classList.toggle('sl-sidebar-open',next);
   };
 
-  window.uiNavAction=function(action){
-    try{ if(typeof action==='function') action(); }
-    finally{ if(window.innerWidth<=820) uiToggleSidebar(false); }
+  window.slRunNav=function(action){
+    try{if(typeof action==='function')action();}
+    finally{if(window.innerWidth<=820)slToggleSidebar(false);}
   };
 
-  window.uiSetSidebarMode=function(mode){
-    if(mode==='room'){
-      if(!document.body.classList.contains('in-room')) return;
-      document.body.classList.remove('ui-force-normal-nav');
-    }else{
-      if(document.body.classList.contains('in-room')) document.body.classList.add('ui-force-normal-nav');
-      else document.body.classList.remove('ui-force-normal-nav');
-    }
-  };
-
-  function closeVisibleModals(exceptId=''){
+  function slCloseVisibleModals(exceptId=''){
     document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-      if(!overlay.id || overlay.id===exceptId) return;
-      if(getComputedStyle(overlay).display==='none') return;
-
+      if(!overlay.id||overlay.id===exceptId||overlay.id==='roomCreateModal')return;
+      if(getComputedStyle(overlay).display==='none')return;
       try{
-        if(overlay.id==='friendSharedModal' && typeof closeFriendSharedList==='function'){
-          closeFriendSharedList();
-        }else if(typeof closeModal==='function'){
-          closeModal(null,overlay.id);
-        }else{
-          overlay.style.display='none';
-        }
-      }catch(_){
-        overlay.style.display='none';
-      }
+        if(overlay.id==='friendSharedModal'&&typeof closeFriendSharedList==='function')closeFriendSharedList();
+        else if(typeof closeModal==='function')closeModal(null,overlay.id);
+        else overlay.style.display='none';
+      }catch(_){overlay.style.display='none';}
     });
-
-    try{
-      if(typeof returnToFriendListFromDetail!=='undefined') returnToFriendListFromDetail=false;
-    }catch(_){}
   }
+  window.slOpenExclusive=function(id){slCloseVisibleModals(id);if(typeof openModal==='function')openModal(id);}
+  window.slOpenExclusiveAction=function(action){slCloseVisibleModals('');if(typeof action==='function')action();}
 
-  window.uiOpenExclusive=function(id){
-    closeVisibleModals(id);
-    if(typeof openModal==='function') openModal(id);
+  window.slOpenCommonSongs=function(){
+    if(!document.body.classList.contains('in-room')){
+      alert('共通曲はセッションルーム参加中に利用できます。');
+      return;
+    }
+    if(typeof openRoomCommonMemberPicker==='function')openRoomCommonMemberPicker();
   };
 
-  window.uiOpenExclusiveAction=function(action){
-    closeVisibleModals('');
-    if(typeof action==='function') action();
-  };
-
-  window.uiRoomList=function(view){
-    if(!document.body.classList.contains('in-room')) return;
-    try{
-      roomListView=view;
-      if(typeof renderRoomListTabs==='function') renderRoomListTabs();
-      if(typeof renderTable==='function') renderTable();
-    }catch(error){
-      console.warn('ルーム一覧切替:',error);
+  window.slOpenRoomSettings=function(){
+    if(document.body.classList.contains('sl-room-create-open'))return;
+    if(document.body.classList.contains('in-room')){
+      try{
+        const text=slById('roomStatusText')?.textContent?.trim()||'セッションルーム';
+        alert(text+'\n\nルームURLは左メニューまたは既存のルーム操作からコピーできます。');
+      }catch(_){}
     }
   };
 
-  window.uiToggleRoomDock=function(){
-    document.body.classList.toggle('ui-room-dock-collapsed');
+  window.slToggleRoomDock=function(){
+    document.body.classList.toggle('sl-room-dock-collapsed');
   };
 
-  window.uiSelectDockStatus=function(status){
-    document.querySelectorAll('.ui-dock-tab').forEach(btn=>{
-      const active=btn.dataset.status===status;
-      btn.classList.toggle('active',active);
-      btn.setAttribute('aria-selected',String(active));
-    });
-    document.querySelectorAll('.ui-dock-panel').forEach(panel=>{
-      panel.classList.toggle('active',panel.dataset.panel===status);
-    });
+  window.slScrollDockTo=function(status){
+    const section=document.querySelector('#slRoomDock .sl-dock-section[data-status="'+status+'"]');
+    if(section)section.scrollIntoView({behavior:'smooth',block:'start'});
   };
 
-  function roomDockItems(){
+  window.slHelpOpen=function(key,button){
+    document.querySelectorAll('#slHelpModal .sl-help-section').forEach(s=>s.classList.toggle('active',s.dataset.help===key));
+    document.querySelectorAll('#slHelpModal .sl-help-nav button').forEach(b=>b.classList.toggle('active',b===button));
+    const c=document.querySelector('#slHelpModal .sl-help-content');if(c)c.scrollTop=0;
+  };
+
+  function slQueueGroups(){
     const groups={reserved:[],confirmed:[],completed:[]};
     try{
       Object.keys(roomQueue||{}).forEach(qId=>{
         const q=roomQueue[qId];
-        if(!q || !groups[q.status]) return;
-        const song=typeof queueSongDataById==='function' ? queueSongDataById(q.songId) : null;
-        if(!song) return;
+        if(!q||!groups[q.status])return;
+        if(typeof isSafeQueueId==='function'&&!isSafeQueueId(qId))return;
+        const song=typeof queueSongDataById==='function'?queueSongDataById(q.songId):null;
+        if(!song)return;
         groups[q.status].push({qId,...q,songData:song});
       });
-      Object.values(groups).forEach(items=>items.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)));
+      Object.values(groups).forEach(arr=>arr.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)));
     }catch(_){}
     return groups;
   }
 
-  function renderDockList(status,items){
-    const map={
-      reserved:{
-        list:'uiDockReservedList',
-        count:'uiDockReservedCount',
-        empty:'予約はありません',
-        actions:[
-          {label:'☑️ 確定', title:'演奏確定へ', next:'confirmed', cls:'ui-dock-action-confirm'},
-          {label:'❎ 削除', title:'予約から削除', remove:true, cls:'ui-dock-action-delete'}
-        ]
-      },
-      confirmed:{
-        list:'uiDockConfirmedList',
-        count:'uiDockConfirmedCount',
-        empty:'確定曲はありません',
-        actions:[
-          {label:'🔙 戻す', title:'予約へ戻す', next:'reserved', cls:'ui-dock-action-back'},
-          {label:'☑️ 確定', title:'完了へ', next:'completed', cls:'ui-dock-action-confirm'},
-          {label:'❎ 削除', title:'演奏確定から削除', remove:true, cls:'ui-dock-action-delete'}
-        ]
-      },
-      completed:{
-        list:'uiDockCompletedList',
-        count:'uiDockCompletedCount',
-        empty:'完了曲はありません',
-        actions:[
-          {label:'🔙 戻す', title:'演奏確定へ戻す', next:'confirmed', cls:'ui-dock-action-back'}
-        ]
-      }
-    };
+  function slActionButton(label,title,cls,handler){
+    const b=document.createElement('button');b.type='button';b.textContent=label;b.title=title;b.className=cls;b.addEventListener('click',handler);return b;
+  }
 
-    const cfg=map[status];
-    const list=byId(cfg.list), count=byId(cfg.count);
-    if(count) count.textContent=String(items.length);
-    if(!list) return;
+  function slRenderDockList(status,items){
+    const map={
+      reserved:{list:'slDockReservedList',count:'slDockReservedCount',badge:'slReservedBadge',empty:'予約はありません'},
+      confirmed:{list:'slDockConfirmedList',count:'slDockConfirmedCount',badge:'slConfirmedBadge',empty:'演奏確定はありません'},
+      completed:{list:'slDockCompletedList',count:'slDockCompletedCount',badge:'slCompletedBadge',empty:'完了曲はありません'}
+    };
+    const cfg=map[status],list=slById(cfg.list);
+    [slById(cfg.count),slById(cfg.badge)].forEach(el=>{if(el)el.textContent=String(items.length);});
+    if(!list)return;
     list.replaceChildren();
 
     if(!items.length){
-      const empty=document.createElement('div');
-      empty.className='ui-dock-empty';
-      empty.textContent=cfg.empty;
-      list.appendChild(empty);
-      return;
+      const empty=document.createElement('div');empty.className='sl-dock-empty';
+      empty.textContent=document.body.classList.contains('sl-room-create-open')?'ルーム作成後にここへ表示されます':cfg.empty;
+      list.appendChild(empty);return;
     }
 
     items.forEach((item,index)=>{
-      const row=document.createElement('div');
-      row.className='ui-dock-song';
+      const row=document.createElement('div');row.className='sl-dock-song';
+      const no=document.createElement('div');no.className='sl-dock-index';no.textContent=String(index+1);
 
-      const num=document.createElement('div');
-      num.className='ui-dock-num';
-      num.textContent=String(index+1);
-
-      const main=document.createElement('div');
-      main.className='ui-dock-main';
-
-      const title=document.createElement('div');
-      title.className='ui-dock-song-title';
-      title.textContent=String(item.songData?.['曲名']||'曲名不明');
-      title.title=title.textContent;
-      title.style.cursor='pointer';
-      title.addEventListener('click',()=>{
-        if(typeof showSongDetails==='function') showSongDetails(item.songId);
-      });
-
-      const artist=document.createElement('div');
-      artist.className='ui-dock-song-artist';
+      const main=document.createElement('div');main.className='sl-dock-main';
+      const title=document.createElement('div');title.className='sl-dock-title';
+      title.textContent=String(item.songData?.['曲名']||'曲名不明');title.title=title.textContent;
+      title.addEventListener('click',()=>{if(typeof showSongDetails==='function')showSongDetails(item.songId);});
+      const artist=document.createElement('div');artist.className='sl-dock-artist';
       artist.textContent=String(item.songData?.['アーティスト']||'');
-
       main.append(title,artist);
 
-      const actions=document.createElement('div');
-      actions.className='ui-dock-actions';
+      const actions=document.createElement('div');actions.className='sl-dock-actions';
+      if(status==='reserved'){
+        actions.append(
+          slActionButton('☑️','演奏確定へ','sl-act-ok',()=>{if(typeof changeStatus==='function')changeStatus(item.qId,'confirmed');}),
+          slActionButton('❎','予約から削除','sl-act-delete',()=>{if(typeof removeQueue==='function')removeQueue(item.qId);})
+        );
+      }else if(status==='confirmed'){
+        actions.append(
+          slActionButton('🔙','予約へ戻す','sl-act-back',()=>{if(typeof changeStatus==='function')changeStatus(item.qId,'reserved');}),
+          slActionButton('☑️','完了へ','sl-act-ok',()=>{if(typeof changeStatus==='function')changeStatus(item.qId,'completed');}),
+          slActionButton('❎','演奏確定から削除','sl-act-delete',()=>{if(typeof removeQueue==='function')removeQueue(item.qId);})
+        );
+      }else{
+        actions.append(slActionButton('🔙','演奏確定へ戻す','sl-act-back',()=>{if(typeof changeStatus==='function')changeStatus(item.qId,'confirmed');}));
+      }
 
-      cfg.actions.forEach(actionCfg=>{
-        const action=document.createElement('button');
-        action.type='button';
-        action.className='ui-dock-action '+actionCfg.cls;
-        action.textContent=actionCfg.label;
-        action.title=actionCfg.title;
-        action.setAttribute('aria-label',title.textContent+'：'+actionCfg.title);
-
-        action.addEventListener('click',()=>{
-          if(actionCfg.remove){
-            if(typeof removeQueue==='function'){
-              removeQueue(item.qId);
-            }
-            return;
-          }
-
-          if(actionCfg.next && typeof changeStatus==='function'){
-            changeStatus(item.qId,actionCfg.next);
-            uiSelectDockStatus(actionCfg.next);
-          }
-        });
-
-        actions.appendChild(action);
-      });
-
-      row.append(num,main,actions);
-      list.appendChild(row);
+      row.append(no,main,actions);list.appendChild(row);
     });
   }
 
-  window.uiRenderRoomDock=function(){
-    const groups=roomDockItems();
-    renderDockList('reserved',groups.reserved);
-    renderDockList('confirmed',groups.confirmed);
-    renderDockList('completed',groups.completed);
+  window.slRenderRoomDock=function(){
+    const g=slQueueGroups();
+    slRenderDockList('reserved',g.reserved);
+    slRenderDockList('confirmed',g.confirmed);
+    slRenderDockList('completed',g.completed);
   };
 
-  // 既存のキュー描画後に右側ドックだけ追加更新。
+  window.slSyncUi=function(){
+    const home=document.documentElement.classList.contains('entry-home');
+    const inRoom=document.body.classList.contains('in-room');
+    const roomCreate=document.body.classList.contains('sl-room-create-open');
+    const my=!!document.body.classList.contains('my-list-mode');
+
+    const title=slById('slPageTitle'),sub=slById('slPageSubtitle');
+    if(title&&sub){
+      if(inRoom){
+        title.textContent='ルーム全曲一覧';
+        sub.textContent='参加メンバーと楽曲を共有し、演奏候補を予約できます';
+      }else if(my){
+        title.textContent='マイリスト';
+        sub.textContent='自分の登録曲・Key・担当パートを管理できます';
+      }else{
+        title.textContent='全曲一覧';
+        sub.textContent='登録されている楽曲を検索・閲覧できます';
+      }
+    }
+
+    const states={
+      slNavHome:home&&!roomCreate,
+      slNavAll:!home&&!my&&!roomCreate,
+      slNavMy:!home&&my&&!roomCreate,
+      slNavRoom:roomCreate
+    };
+    Object.entries(states).forEach(([id,on])=>slById(id)?.classList.toggle('active',!!on));
+
+    const common=slById('slNavCommon');
+    if(common)common.disabled=!inRoom;
+
+    const oldAdmin=slById('adminPageLink'),admin=slById('slAdminLink');
+    if(oldAdmin&&admin)admin.style.display=oldAdmin.style.display==='none'?'none':'flex';
+
+    if(home){
+      document.body.classList.remove('sl-room-dock-collapsed');
+    }
+    slRenderRoomDock();
+  };
+
+  function slInitShell(){
+    document.body.classList.add('sl-redesign');
+    slMove('searchInput','slSearchHost');
+    slMove('genreFilters','slGenreHost');
+    slMove('songCountDisplay','slListMeta');
+    slMove('artistFilterIndicator','slListMeta');
+    slMove('loginStatus','slUserHost');
+    slMove('googleLoginBtn','slSidebarFooter');
+    slMove('googleLogoutBtn','slSidebarFooter');
+
+    slSyncUi();
+    setTimeout(slSyncUi,350);
+    setTimeout(slSyncUi,1200);
+  }
+
+  // Existing functions are wrapped rather than replaced.
   if(typeof updateQueueUI==='function'){
     const originalUpdateQueueUI=updateQueueUI;
     updateQueueUI=function(){
-      const result=originalUpdateQueueUI.apply(this,arguments);
-      uiRenderRoomDock();
-      return result;
+      const r=originalUpdateQueueUI.apply(this,arguments);
+      slRenderRoomDock();
+      return r;
     };
   }
 
-  // 既存のopenModalを壊さず、サイドバーから開く時のみ排他的にする。
-  // ページ本来のモーダル遷移はそのまま。
+  if(typeof toggleMyList==='function'){
+    const originalToggleMyList=toggleMyList;
+    toggleMyList=async function(){
+      const r=await originalToggleMyList.apply(this,arguments);
+      slSyncUi();
+      return r;
+    };
+  }
+
+  if(typeof openHomeDestination==='function'){
+    const originalOpenHomeDestination=openHomeDestination;
+    openHomeDestination=async function(){
+      const r=await originalOpenHomeDestination.apply(this,arguments);
+      slSyncUi();
+      return r;
+    };
+  }
+
+  if(typeof goHome==='function'){
+    const originalGoHome=goHome;
+    goHome=function(){
+      const r=originalGoHome.apply(this,arguments);
+      slSyncUi();
+      return r;
+    };
+  }
+
+  if(typeof createRoom==='function'){
+    const originalCreateRoom=createRoom;
+    createRoom=function(){
+      const r=originalCreateRoom.apply(this,arguments);
+      if(!document.body.classList.contains('in-room')){
+        document.body.classList.add('sl-room-create-open');
+        slRenderRoomDock();
+        slSyncUi();
+      }
+      return r;
+    };
+  }
+
+  if(typeof closeRoomCreateModal==='function'){
+    const originalCloseRoomCreateModal=closeRoomCreateModal;
+    closeRoomCreateModal=function(){
+      const r=originalCloseRoomCreateModal.apply(this,arguments);
+      const modal=slById('roomCreateModal');
+      if(!modal||getComputedStyle(modal).display==='none'){
+        document.body.classList.remove('sl-room-create-open');
+        slSyncUi();
+      }
+      return r;
+    };
+  }
+
+  if(typeof initRoomUI==='function'){
+    const originalInitRoomUI=initRoomUI;
+    initRoomUI=async function(){
+      const r=await originalInitRoomUI.apply(this,arguments);
+      slSyncUi();
+      return r;
+    };
+  }
 
   document.addEventListener('click',event=>{
-    if(window.innerWidth<=820 &&
-       document.body.classList.contains('ui-sidebar-open') &&
-       !byId('uiSidebar')?.contains(event.target) &&
-       !byId('uiMobileMenuBtn')?.contains(event.target)){
-      uiToggleSidebar(false);
+    if(window.innerWidth<=820&&document.body.classList.contains('sl-sidebar-open')&&!slById('slSidebar')?.contains(event.target)&&!slById('slMobileMenu')?.contains(event.target)){
+      slToggleSidebar(false);
     }
   });
 
-  // 初期化は1回のみ。監視ループやintervalは使用しない。
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',initUiShell,{once:true});
-  }else{
-    initUiShell();
-  }
+  window.addEventListener('popstate',()=>setTimeout(slSyncUi,0),{passive:true});
+  window.addEventListener('hashchange',()=>setTimeout(slSyncUi,0),{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)slSyncUi();});
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',slInitShell,{once:true});
+  else slInitShell();
 })();
 </script>
 
