@@ -1112,6 +1112,10 @@ body.sl-redesign #listModeIndicator{display:none!important}
 #slNavObs{display:none!important;}
 body.in-room #slNavObs{display:flex!important;}
 
+/* 左メニューの旧・共通曲ボタンは入室状態に関係なく非表示。ルーム内タブには影響しない。 */
+#slSidebar #slNavCommon,
+#slSidebar .sl-nav-common {display:none!important;}
+
 /* ================= SIDEBAR ================= */
 #slSidebar{
   position:fixed;z-index:2100;left:0;top:0;bottom:0;width:var(--sl-side);
@@ -3012,6 +3016,52 @@ body.sl-redesign #friendSharedModal.modal-overlay {
   white-space: nowrap;
 }
 
+
+/* Room creation: independent full-width page; avoid pointer leaks and stale right dock gap. */
+body.sl-redesign.sl-room-create-open #roomCreateModal.sl-room-create-overlay{
+  left:var(--sl-side)!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:auto!important;
+  height:100dvh!important;
+  padding:22px 20px!important;
+  box-sizing:border-box!important;
+  background:#06101f!important;
+  z-index:1950!important;
+  overflow:auto!important;
+}
+body.sl-redesign.sl-room-create-open .container,
+body.sl-redesign.sl-room-create-open #loadingArea,
+body.sl-redesign.sl-room-create-open #homeLanding,
+body.sl-redesign.sl-room-create-open #slTopbar,
+body.sl-redesign.sl-room-create-open #slFilterbar{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDock,
+body.sl-redesign.sl-room-create-open:not(.in-room) #slRoomDockHandle{
+  display:none!important;
+}
+#roomCreateModal .sl-room-create-page{
+  width:min(760px,100%)!important;
+  max-width:760px!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  margin:0 auto!important;
+  padding:10px 0 18px!important;
+}
+#roomCreateModal .sl-room-create-grid{display:block!important;}
+#roomCreateModal .sl-room-create-main{width:100%;box-sizing:border-box;}
+#roomCreateModal .sl-room-create-heading{padding-left:0;padding-right:0;}
+@media(max-width:820px){
+  body.sl-redesign.sl-room-create-open #roomCreateModal.sl-room-create-overlay{
+    left:0!important;right:0!important;padding:14px 11px!important;
+  }
+  #roomCreateModal .sl-room-create-page{width:100%!important;}
+}
+
 </style>
 </head>
 <body>
@@ -3041,7 +3091,7 @@ body.sl-redesign #friendSharedModal.modal-overlay {
     <button type="button" id="slNavMy" class="sl-nav-my" onclick="slNavigate('mylist')"><span>📋</span><b>マイリスト</b></button>
     <button type="button" id="slNavRoom" class="sl-nav-room" onclick="slNavigate('room')"><span>🎤</span><b>ルーム</b></button>
     <button type="button" id="slNavObs" class="sl-nav-obs" onclick="openObsModal()" aria-haspopup="dialog" aria-controls="obsModal"><span>📹</span><b>OBSカスタムCSS設定</b></button>
-    <!-- 共通曲はルーム内部のタブからのみ利用可能。左メニュー項目は削除。 -->
+    <!-- 共通曲はルーム内部のタブ専用。左サイドバーには常時表示しない。 -->
     <button type="button" id="slNavFriends" class="sl-nav-friends" onclick="slNavigate('friends')"><span>👥</span><b>フレンド</b></button>
     <button type="button" id="slNavAdd" class="sl-nav-add" onclick="slNavigate('add')"><span class="sl-nav-add-icon">📄</span><b class="sl-nav-add-label">新規楽曲追加</b></button>
 
@@ -3416,12 +3466,12 @@ body.sl-redesign #friendSharedModal.modal-overlay {
 <!-- ルーム作成確認：確定するまではFirebaseへ書き込まない -->
 
 <!-- ルーム作成：既存の自動ルームID発行機能を、新UIの専用画面として表示 -->
-<div class="modal-overlay sl-room-create-overlay" id="roomCreateModal" style="z-index:1600;" onclick="closeRoomCreateModal(event)" role="dialog" aria-modal="true" aria-labelledby="roomCreateHeading">
+<div class="modal-overlay sl-room-create-overlay" id="roomCreateModal" style="z-index:1600;" role="dialog" aria-modal="true" aria-labelledby="roomCreateHeading">
   <div class="modal sl-room-create-page" onclick="event.stopPropagation()">
 <div class="sl-room-create-heading">
       <span class="sl-room-create-icon" aria-hidden="true">👥＋</span>
       <div>
-        <h2 id="roomCreateHeading">ルーム作成</h2>
+        <h2 id="roomCreateHeading">セットリスト共有ルーム</h2>
         <p>セッション用の共有ルームを作成して、仲間と演奏曲を共有しましょう。</p>
       </div>
     </div>
@@ -3445,16 +3495,6 @@ body.sl-redesign #friendSharedModal.modal-overlay {
           </div>
         </div>
 
-        <div class="sl-room-create-note">
-          <strong>セッションの流れ</strong>
-          <div class="sl-room-flow">
-            <span>🔎 曲を探す</span><b>→</b>
-            <span>📝 予約</span><b>→</b>
-            <span>☑️ 演奏確定</span><b>→</b>
-            <span>✅ 完了</span>
-          </div>
-        </div>
-
         <div class="sl-room-create-actions">
           <button type="button" class="sl-room-create-cancel" onclick="closeRoomCreateModal()">キャンセル</button>
           <button type="button" id="confirmRoomCreation" class="sl-room-create-primary" onclick="confirmCreateRoom()">👥＋ ルームを作成</button>
@@ -3462,17 +3502,7 @@ body.sl-redesign #friendSharedModal.modal-overlay {
         <p id="roomCreateMessage" role="status" aria-live="polite"></p>
       </section>
 
-      <aside class="sl-room-create-card sl-room-feature-card">
-        <div class="sl-section-heading"><span>⭐</span><strong>できること</strong></div>
-        <div class="sl-room-feature-grid">
-          <div><span>🎵</span><strong>共通曲</strong><small>参加者全員が登録している曲を確認</small></div>
-          <div><span>📝</span><strong>予約</strong><small>演奏候補を順番に予約</small></div>
-          <div><span>☑️</span><strong>演奏確定</strong><small>演奏する曲を確定</small></div>
-          <div><span>✅</span><strong>完了</strong><small>演奏済み曲をセットリストへ</small></div>
-          <div><span>📺</span><strong>OBS配信</strong><small>完了曲を配信画面へ表示</small></div>
-          <div><span>🤝</span><strong>リアルタイム共有</strong><small>参加者全員へ進行状況を同期</small></div>
-        </div>
-      </aside>
+
     </div>
   </div>
 </div>
@@ -8945,7 +8975,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     const view=slResolveCurrentView();
     const activeId={
       home:'slNavHome',all:'slNavAll',mylist:'slNavMy',
-      room:'slNavRoom',common:'slNavCommon',friends:'slNavFriends',
+      room:'slNavRoom',friends:'slNavFriends',
       add:'slNavAdd',mypage:'slNavPage',help:'slNavHelp',settings:'slNavSettings'
     }[view]||'';
     document.querySelectorAll('#slSidebar .sl-sidebar-nav button').forEach(el=>{
@@ -9502,13 +9532,10 @@ html, body { background: transparent !important; color: ${text} !important; }
         ? ownRoomView
         : (!home&&my&&!roomCreate&&!addSong),
       slNavRoom:roomCreate&&!addSong,
-      slNavCommon:inRoom && roomView==='common',
       slNavAdd:addSong
     };
     Object.entries(states).forEach(([id,on])=>slById(id)?.classList.toggle('active',!!on));
 
-    const common=slById('slNavCommon');
-    if(common)common.disabled=!inRoom;
 
     const oldAdmin=slById('adminPageLink'),admin=slById('slAdminLink');
     if(oldAdmin&&admin)admin.style.display=oldAdmin.style.display==='none'?'none':'flex';
