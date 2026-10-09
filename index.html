@@ -3080,6 +3080,19 @@ body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
 @media(max-width:820px){.sl-dock-song{grid-template-columns:16px minmax(0,1fr) auto!important}}
 
 
+
+/* Phase 3 — touch-safe session queue reordering */
+#slRoomDock .sl-dock-index{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:18px;user-select:none}
+#slRoomDock .sl-dock-touch-grip{display:none;color:var(--sl-dock-subtle,#8394b4);font-size:15px;line-height:1;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#slRoomDock .sl-dock-touch-grip:focus-visible{outline:2px solid #60a5fa;outline-offset:3px;border-radius:3px}
+#slRoomDock .sl-dock-song.sl-dock-touch-active{opacity:.72;outline:2px solid #60a5fa;outline-offset:-2px;position:relative;z-index:2}
+#slRoomDock .sl-dock-song.sl-dock-drop-target{outline:2px solid #60a5fa;outline-offset:-2px;background:#20395d!important}
+@media(hover:none),(pointer:coarse){
+ #slRoomDock .sl-dock-touch-grip{display:inline-block;min-width:25px;min-height:27px;display:inline-flex;align-items:center;justify-content:center}
+ #slRoomDock .sl-dock-index{min-width:25px}
+ #slRoomDock .sl-dock-song{grid-template-columns:27px minmax(0,1fr) auto!important}
+}
+
 /* Phase 2: Firebase更新が未完了の行は再操作を防止する */
 .sl-dock-song.sl-dock-pending{opacity:.62;cursor:progress}
 .sl-dock-song.sl-dock-pending button{cursor:wait;pointer-events:none}
@@ -3239,9 +3252,32 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
  #slFavArtistsShortcut{font-size:11px;min-height:40px;padding:6px 8px;max-width:42%;white-space:normal;line-height:1.3}
 }
 
+
+/* TOPアップデート情報：読むだけの静的カード（ホバー・選択演出なし） */
+.sl-home-update-list article,
+.sl-home-update-list article:hover,
+.sl-home-update-list article:focus,
+.sl-home-update-list article:active{
+  background:rgba(27,45,77,.66)!important;
+  border-color:rgba(112,142,206,.12)!important;
+  transform:none!important;
+  box-shadow:none!important;
+  cursor:default!important;
+  transition:none!important;
+}
+.sl-home-update-list article::after{content:none!important;display:none!important;}
+.sl-home-update-list article, .sl-home-update-list article *{
+  -webkit-user-select:text;
+  user-select:text;
+}
+/* 第5段階：個人データ保存の状態通知 */
+#slMySaveNotice{position:fixed;bottom:18px;left:calc(var(--sl-sidebar, 240px) + 16px);z-index:2500;max-width:min(430px,calc(100vw - 30px));display:none;align-items:center;gap:12px;background:#3d2230;border:1px solid #e89aa3;color:#fff;padding:12px 15px;border-radius:12px;box-shadow:0 8px 30px #0006;font-size:14px;line-height:1.5}
+#slMySaveNotice button{background:#fff;color:#57212b;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
+@media(max-width:700px){#slMySaveNotice{left:12px;bottom:12px;right:12px;max-width:none}}
 </style>
 </head>
 <body>
+<div id="slMySaveNotice" role="alert" aria-live="assertive"><span>マイリストの変更を保存できませんでした。通信状況を確認してください。</span><button type="button" onclick="void saveMyListChanges()">再試行</button></div>
 <script>
 // 描画開始前に端末の直近テーマを適用し、Firebase設定取得までの色のちらつきを防ぐ。
 (function () {
@@ -3478,7 +3514,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
 
       <section>
         <h3>7. 外部サービス・外部リンク</h3>
-        <p>本サービスでは、Google認証、Firebase、GitHub Pages、ChordWiki等の外部サービスまたは外部ページを利用・参照する場合があります。外部サービスの利用には、それぞれの提供者が定める規約・ポリシーが適用されます。</p>
+        <p>本サービスでは、Google認証、データ、GitHub Pages、ChordWiki等の外部サービスまたは外部ページを利用・参照する場合があります。外部サービスの利用には、それぞれの提供者が定める規約・ポリシーが適用されます。</p>
         <p>外部サイトの内容、可用性、安全性、正確性について、本サービス運営者は保証しません。</p>
       </section>
 
@@ -3539,7 +3575,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
           <li>プロフィール、フレンドコード、フレンド関係、お気に入りアーティスト等の情報</li>
           <li>セッションルームへの参加情報、予約・演奏確定・完了、セットリスト等のルーム利用情報</li>
           <li>楽曲情報の追加・編集内容、編集者、編集日時等の履歴情報</li>
-          <li>サービスの安全な運営や障害調査に必要なアクセス・技術情報が、Firebase等の基盤サービスにより処理される場合があります</li>
+          <li>サービスの安全な運営や障害調査に必要なアクセス・技術情報が、データ等の基盤サービスにより処理される場合があります</li>
         </ul>
       </section>
 
@@ -3568,7 +3604,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
 
       <section>
         <h3>6. 外部サービス</h3>
-        <p>本サービスでは、Google認証、Firebase、GitHub Pages等の外部サービスを利用しています。これらのサービス提供者における情報の取り扱いについては、各提供者のプライバシーポリシー等が適用されます。</p>
+        <p>本サービスでは、Google認証、データ、GitHub Pages等の外部サービスを利用しています。これらのサービス提供者における情報の取り扱いについては、各提供者のプライバシーポリシー等が適用されます。</p>
         <p>また、ChordWiki等の外部サイトへ移動した場合は、移動先サイトのプライバシーポリシー・利用条件が適用されます。</p>
       </section>
 
@@ -3617,7 +3653,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
       <img src="site-logo.png?v=20261003-3" alt="シェアリスコア" onerror="this.style.display='none'">
       <div class="sl-home-brand-text">シェアリスコア</div>
       <div class="sl-home-tagline">みんなでつくる、みんなで奏でる</div>
-      <div class="sl-home-version">Version 2026.10.09</div>
+      <div class="sl-home-version">Ver2.0.1</div>
     </section>
     <section class="sl-home-update" aria-labelledby="slHomeUpdateTitle">
       <div class="sl-home-update-title"><span aria-hidden="true">📣</span><h1 id="slHomeUpdateTitle">アップデート情報</h1><small>2026.10.09</small></div>
@@ -3835,7 +3871,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     <!-- ローディング画面 -->
     <div class="loading-area" id="loadingArea">
         <div class="spinner"></div>
-        <div>Firebaseから楽曲データを取得中...</div>
+        <div>データ所得中</div>
     </div>
 
     <div id="tableWrapper">
@@ -4285,7 +4321,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
       </section>
 <section class="clipboard-help-page" data-page="3" style="display:none;"border:1px solid var(--border-color);border-radius:10px;padding:10px;background:rgba(255,255,255,.02);">
         <h3 style="margin:0 0 8px;font-size:18px;color:var(--primary);">④ 確認して登録</h3>
-        <p style="margin:0 0 10px;">解析結果で <strong>「✅ 一致曲の登録内容を確認」</strong> を押すと、一括登録確認ダイアログが開きます。内容を確認して <strong>「✅ 確定して登録」</strong> を押すと、Firebaseへ保存されます。</p>
+        <p style="margin:0 0 10px;">解析結果で <strong>「✅ 一致曲の登録内容を確認」</strong> を押すと、一括登録確認ダイアログが開きます。内容を確認して <strong>「✅ 確定して登録」</strong> を押すと、データへ保存されます。</p>
         <img src="clipboard-help-step4-confirm.png" alt="一括登録の確認ダイアログで内容確認後に確定して登録する画面" style="display:block;width:auto;max-width:100%;max-height:min(52dvh,520px);object-fit:contain;margin:0 auto;border:1px solid var(--border-color);border-radius:8px;background:#111;">
       </section>
 <section class="clipboard-help-page" data-page="4" style="display:none;"border:1px solid var(--border-color);border-radius:10px;padding:10px;background:rgba(255,255,255,.02);">
@@ -4493,7 +4529,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     let signedInUser = null;
 
     // Four-language interface translations. Song metadata, UIDs, URLs and Firebase keys are never translated.
-    const UI_I18N = {"↺ Key一括リセット":{"ko":"↺ 키 일괄 초기화","en":"↺ Reset all keys","zh-TW":"↺ 批次重設調性"},"登録済み・未登録を含む全曲のKeyを0（原曲）に戻しました。":{"ko":"등록 여부와 관계없이 모든 곡의 키를 원곡(0)으로 초기화했습니다.","en":"All keys, including saved and unsaved songs, were reset to the original key (0).","zh-TW":"所有歌曲（含已加入與未加入清單）的調性均已重設為原調（0）。"},"📁 マイリスト登録済みを除外":{"ko":"📁 마이리스트 등록곡 제외","en":"📁 Hide songs in My list","zh-TW":"📁 排除已加入個人清單的歌曲"},"Googleでログイン":{"ko":"Google로 로그인","en":"Sign in with Google","zh-TW":"使用 Google 登入"},"ゲスト利用中":{"ko":"게스트로 이용 중","en":"Using as guest","zh-TW":"訪客模式"},"ログイン中":{"ko":"로그인 중","en":"Signed in","zh-TW":"已登入"},"Googleログイン中":{"ko":"Google 로그인 중","en":"Google signed in","zh-TW":"已透過 Google 登入"},"ログアウト":{"ko":"로그아웃","en":"Sign out","zh-TW":"登出"},"ログアウトしますか？":{"ko":"로그아웃할까요?","en":"Do you want to sign out?","zh-TW":"確定要登出嗎？"},"ログアウトできませんでした。":{"ko":"로그아웃하지 못했습니다.","en":"Could not sign out.","zh-TW":"無法登出。"},"全曲一覧":{"ko":"全部 곡","en":"All songs","zh-TW":"所有歌曲"},"総登録楽曲数":{"ko":"총 등록 곡 수","en":"Total registered songs","zh-TW":"歌曲總登錄數"},"自分のマイリスト":{"ko":"내 곡 목록","en":"My song list","zh-TW":"我的歌曲清單"},"マイリスト":{"ko":"마이리스트","en":"My list","zh-TW":"我的清單"},"ルームを作る":{"ko":"방 만들기","en":"Create room","zh-TW":"建立房間"},"楽曲追加":{"ko":"곡 추가","en":"Add song","zh-TW":"新增歌曲"},"OBSカスタムCSS":{"ko":"OBS 사용자 CSS","en":"OBS custom CSS","zh-TW":"OBS 自訂 CSS"},"マイページ":{"ko":"마이페이지","en":"My page","zh-TW":"個人頁面"},"マイアカウント":{"ko":"내 계정","en":"My account","zh-TW":"我的帳戶"},"フレンド":{"ko":"친구","en":"Friends","zh-TW":"好友"},"使い方ガイド":{"ko":"사용 가이드","en":"User guide","zh-TW":"使用指南"},"設定":{"ko":"설정","en":"Settings","zh-TW":"設定"},"言語 / Language":{"ko":"언어 / Language","en":"Language","zh-TW":"語言 / Language"},"日本語":{"ko":"일본어","en":"Japanese","zh-TW":"日文"},"韓国語（ハングル）":{"ko":"한국어","en":"Korean (Hangul)","zh-TW":"韓文"},"英語":{"ko":"영어","en":"English","zh-TW":"英文"},"台湾華語（繁体字）":{"ko":"繁體中文（台灣）","en":"Traditional Chinese (Taiwan)","zh-TW":"繁體中文（台灣）"},"ルーム退出":{"ko":"방 나가기","en":"Leave room","zh-TW":"離開房間"},"退出":{"ko":"나가기","en":"Leave","zh-TW":"離開"},"ルームURLをコピー":{"ko":"방 URL 복사","en":"Copy room URL","zh-TW":"複製房間網址"},"URLをコピー":{"ko":"URL 복사","en":"Copy URL","zh-TW":"複製網址"},"参加中:":{"ko":"참가 중:","en":"Participants:","zh-TW":"參與者："},"読み込み中...":{"ko":"불러오는 중...","en":"Loading...","zh-TW":"載入中..."},"読み込み中…":{"ko":"불러오는 중…","en":"Loading…","zh-TW":"載入中…"},"ルームの共有マイリストを読み込み中…":{"ko":"방 공유 목록을 불러오는 중…","en":"Loading shared room lists…","zh-TW":"正在載入房間共享清單…"},"検索":{"ko":"검색","en":"Search","zh-TW":"搜尋"},"曲名、アーティスト、アニメ名などで検索...":{"ko":"곡명, 아티스트, 애니메이션 등으로 검색...","en":"Search titles, artists, anime, etc...","zh-TW":"搜尋歌名、歌手、動畫名稱等…"},"予約":{"ko":"예약","en":"Queue","zh-TW":"預約"},"確定":{"ko":"확정","en":"Confirm","zh-TW":"確認"},"完了":{"ko":"완료","en":"Completed","zh-TW":"完成"},"表示中: 0 曲":{"ko":"표시 중: 0곡","en":"Showing: 0 songs","zh-TW":"顯示中：0 首"},"表示中:":{"ko":"표시 중:","en":"Showing:","zh-TW":"顯示中："},"アーティスト：":{"ko":"아티스트:","en":"Artist:","zh-TW":"藝人："},"絞り込み解除":{"ko":"필터 해제","en":"Clear filter","zh-TW":"清除篩選"},"ジャンル":{"ko":"장르","en":"Genre","zh-TW":"曲風"},"選択：0曲":{"ko":"선택: 0곡","en":"Selected: 0 songs","zh-TW":"已選：0 首"},"選択：":{"ko":"선택:","en":"Selected:","zh-TW":"已選："},"表示中を選択":{"ko":"표시 중인 곡 선택","en":"Select visible","zh-TW":"選取目前顯示"},"選択解除":{"ko":"선택 해제","en":"Clear selection","zh-TW":"取消選取"},"担当パートを指定":{"ko":"연주 파트 선택","en":"Select instrument","zh-TW":"選擇演奏樂器"},"パートON":{"ko":"파트 켜기","en":"Part ON","zh-TW":"啟用樂器"},"パートOFF":{"ko":"파트 끄기","en":"Part OFF","zh-TW":"停用樂器"},"Keyを指定":{"ko":"키 선택","en":"Select key","zh-TW":"選擇調性"},"選択曲に適用":{"ko":"선택한 곡에 적용","en":"Apply to selected","zh-TW":"套用至所選歌曲"},"選択曲を削除":{"ko":"선택한 곡 삭제","en":"Remove selected songs","zh-TW":"移除所選歌曲"},"Firebaseから楽曲データを取得中...":{"ko":"스프레드시트에서 데이터를 불러오는 중...","en":"Loading spreadsheet data...","zh-TW":"正在載入試算表資料…"},"曲名":{"ko":"곡명","en":"Song title","zh-TW":"歌名"},"アーティスト名":{"ko":"아티스트 이름","en":"Artist name","zh-TW":"藝人名稱"},"アーティスト":{"ko":"아티스트","en":"Artist","zh-TW":"藝人"},"作詞者":{"ko":"작사가","en":"Lyricist","zh-TW":"作詞者"},"作曲者":{"ko":"작곡가","en":"Composer","zh-TW":"作曲者"},"編曲者":{"ko":"편곡자","en":"Arranger","zh-TW":"編曲者"},"ジャンル①":{"ko":"장르 ①","en":"Genre 1","zh-TW":"曲風①"},"ジャンル②":{"ko":"장르 ②","en":"Genre 2","zh-TW":"曲風②"},"タイアップ":{"ko":"타이업 / 작품명","en":"Related work","zh-TW":"搭配作品"},"マイリストから解除しますか？":{"ko":"마이리스트에서 삭제할까요?","en":"Remove from your list?","zh-TW":"確定從清單移除嗎？"},"いいえ":{"ko":"아니요","en":"No","zh-TW":"否"},"はい":{"ko":"예","en":"Yes","zh-TW":"是"},"閉じる":{"ko":"닫기","en":"Close","zh-TW":"關閉"},"フレンド管理":{"ko":"친구 관리","en":"Manage friends","zh-TW":"好友管理"},"フレンド一覧":{"ko":"친구 목록","en":"Friend list","zh-TW":"好友清單"},"一覧を更新":{"ko":"목록 새로고침","en":"Refresh list","zh-TW":"重新整理清單"},"フレンド検索・新規追加":{"ko":"친구 검색 및 추가","en":"Find / add friends","zh-TW":"搜尋／新增好友"},"相手のフレンドIDを入力して申請します。表示名検索ではなくID検索です。":{"ko":"상대방의 친구 ID를 입력해 신청하세요. 이름이 아닌 ID로 검색합니다.","en":"Enter a friend's ID to send a request. Search uses IDs, not display names.","zh-TW":"輸入對方的好友 ID 送出邀請；此功能依 ID 搜尋，而非暱稱。"},"自分のフレンドID":{"ko":"내 친구 ID","en":"My friend ID","zh-TW":"我的好友 ID"},"友達のフレンドID":{"ko":"상대방의 친구 ID","en":"Friend's ID","zh-TW":"好友的 ID"},"コピー":{"ko":"복사","en":"Copy","zh-TW":"複製"},"申請":{"ko":"신청","en":"Send request","zh-TW":"送出邀請"},"届いた申請":{"ko":"받은 신청","en":"Incoming requests","zh-TW":"收到的邀請"},"送った申請":{"ko":"보낸 신청","en":"Sent requests","zh-TW":"已送出的邀請"},"フレンドのマイリスト":{"ko":"친구의 마이리스트","en":"Friend's list","zh-TW":"好友的清單"},"自分との共通曲のみ":{"ko":"나와 겹치는 곡만","en":"Common songs only","zh-TW":"僅顯示共同歌曲"},"マイリストを見る":{"ko":"마이리스트 보기","en":"View list","zh-TW":"查看清單"},"解除":{"ko":"해제","en":"Remove","zh-TW":"移除"},"申請中":{"ko":"신청 중","en":"Pending","zh-TW":"申請中"},"承認":{"ko":"수락","en":"Accept","zh-TW":"接受"},"拒否":{"ko":"거절","en":"Decline","zh-TW":"拒絕"},"フレンドとマイリストを共有！ 共通の登録曲を自動抽出し、お互いのKey・担当パートも確認できます。":{"ko":"친구와 마이리스트를 공유하고 공통곡, 키와 연주 파트를 확인할 수 있어요!","en":"Share lists with friends, detect common songs and see each other's key and instruments.","zh-TW":"與好友分享歌單，自動找出共同歌曲，並查看彼此的調性與演奏樂器！"},"現在のルーム用URL":{"ko":"현재 방 URL","en":"Current room URL","zh-TW":"目前房間網址"},"表示を確認":{"ko":"미리보기","en":"Preview","zh-TW":"預覽畫面"},"OBSに映るセットリストのデザイン":{"ko":"OBS에 표시할 세트리스트 디자인","en":"OBS setlist design","zh-TW":"OBS 歌單外觀"},"枠色":{"ko":"테두리 색","en":"Border color","zh-TW":"邊框顏色"},"文字色":{"ko":"글자 색","en":"Text color","zh-TW":"文字顏色"},"背景色":{"ko":"배경 색","en":"Background color","zh-TW":"背景顏色"},"背景透明度（0%：不透明 / 100%：透明）":{"ko":"배경 투명도 (0% 불투명 / 100% 투명)","en":"Background transparency (0% opaque / 100% clear)","zh-TW":"背景透明度（0% 不透明／100% 全透明）"},"① 確定":{"ko":"① 적용","en":"① Apply","zh-TW":"① 確認"},"② CSS生成":{"ko":"② CSS 생성","en":"② Generate CSS","zh-TW":"② 產生 CSS"},"③ 📋 CSSをコピー":{"ko":"③ 📋 CSS 복사","en":"③ 📋 Copy CSS","zh-TW":"③ 📋 複製 CSS"},"CSS生成":{"ko":"CSS 생성","en":"Generate CSS","zh-TW":"產生 CSS"},"CSSをコピー":{"ko":"CSS 복사","en":"Copy CSS","zh-TW":"複製 CSS"},"生成されたOBSカスタムCSS":{"ko":"생성된 OBS 사용자 CSS","en":"Generated OBS custom CSS","zh-TW":"已產生的 OBS 自訂 CSS"},"色と透明度を選択して「確定」を押してください。":{"ko":"색과 투명도를 선택하고 '적용'을 누르세요.","en":"Choose colors and transparency, then press Apply.","zh-TW":"選擇顏色及透明度後，按下「確認」。"},"①確定後に「表示を確認」で選んだ配色をプレビューできます。OBS本番へ適用する際は、②CSS生成 → ③CSSをコピーしてブラウザソースに貼り付けてください。":{"ko":"① 적용 후 미리보기로 확인하세요. OBS에 적용하려면 ② CSS 생성 → ③ 복사 후 브라우저 소스에 붙여넣으세요.","en":"After applying, use Preview to check the colors. For OBS, generate and copy CSS, then paste into the browser source.","zh-TW":"按下①確認後可預覽配色；如要套用至 OBS，請依序產生 CSS、複製，並貼至瀏覽器來源。"},"前へ":{"ko":"이전","en":"Previous","zh-TW":"上一頁"},"次へ":{"ko":"다음","en":"Next","zh-TW":"下一頁"},"楽曲を追加":{"ko":"곡 추가","en":"Add a song","zh-TW":"新增歌曲"},"登録申請を管理者へ送信します。承認されるまで公開マスターは変更されません。":{"ko":"입력한 내용은 공개 곡 목록에 등록됩니다. 공개 가능한 정보만 입력하세요.","en":"Submitted information will be added to the shared song catalog. Enter public information only.","zh-TW":"資料將加入公開歌曲清單，請僅填寫可公開的資訊。"},"曲名 *":{"ko":"곡명 *","en":"Song title *","zh-TW":"歌名 *"},"アーティスト名 *":{"ko":"아티스트 이름 *","en":"Artist name *","zh-TW":"藝人名稱 *"},"ChordWiki 原曲URL *":{"ko":"ChordWiki 원곡 URL *","en":"Original ChordWiki URL *","zh-TW":"ChordWiki 原曲網址 *"},"BPM（任意）":{"ko":"BPM (선택)","en":"BPM (optional)","zh-TW":"BPM（選填）"},"ジャンル *":{"ko":"장르 *","en":"Genre *","zh-TW":"曲風 *"},"ジャンル②（任意）":{"ko":"장르 ② (선택)","en":"Genre 2 (optional)","zh-TW":"曲風②（選填）"},"キャンセル":{"ko":"취소","en":"Cancel","zh-TW":"取消"},"スプレッドシートに登録":{"ko":"스프레드시트에 등록","en":"Submit to spreadsheet","zh-TW":"新增至試算表"},"ユーザー名と基本担当パートを設定します。Googleログイン中はアカウントに保存されます。":{"ko":"사용자 이름과 기본 연주 파트를 설정합니다. Google 로그인 시 계정에 저장됩니다.","en":"Set your username and default instrument. Saved to your account when signed in with Google.","zh-TW":"設定使用者名稱及預設演奏樂器；使用 Google 登入時會儲存至帳戶。"},"ユーザー名 (セッション用)":{"ko":"사용자 이름 (세션용)","en":"Session username","zh-TW":"使用者名稱（連線用）"},"変更":{"ko":"변경","en":"Change","zh-TW":"變更"},"アカウントの基本担当パート":{"ko":"기본 연주 파트","en":"Default instrument","zh-TW":"預設演奏樂器"},"未設定":{"ko":"미설정","en":"Not set","zh-TW":"未設定"},"ボーカル":{"ko":"보컬","en":"Vocals","zh-TW":"主唱"},"ギター・ベース":{"ko":"기타 · 베이스","en":"Guitar / bass","zh-TW":"吉他／貝斯"},"打楽器":{"ko":"타악기","en":"Percussion","zh-TW":"打擊樂"},"鍵盤":{"ko":"건반","en":"Keyboard","zh-TW":"鍵盤"},"管楽器":{"ko":"관악기","en":"Wind instruments","zh-TW":"管樂"},"弦楽器":{"ko":"현악기","en":"String instruments","zh-TW":"弦樂"},"笛":{"ko":"피리","en":"Flute","zh-TW":"笛類"},"ドラム・パーカッション":{"ko":"드럼 · 퍼커션","en":"Drums / percussion","zh-TW":"鼓／打擊樂"},"キーボード・シンセ":{"ko":"키보드 · 신스","en":"Keyboard / synth","zh-TW":"鍵盤／合成器"},"木管・金管":{"ko":"목관 · 금관","en":"Woodwind / brass","zh-TW":"木管／銅管"},"バイオリン・チェロなど":{"ko":"바이올린 · 첼로 등","en":"Violin / cello, etc.","zh-TW":"小提琴／大提琴等"},"リコーダー・尺八など":{"ko":"리코더 · 샤쿠하치 등","en":"Recorder / shakuhachi, etc.","zh-TW":"直笛／尺八等"},"保存":{"ko":"저장","en":"Save","zh-TW":"儲存"},"今後新たに登録する曲へ自動適用します。登録済みの曲は変更しません。":{"ko":"앞으로 등록하는 곡에 자동 적용됩니다. 기존 곡은 변경되지 않습니다.","en":"Applies automatically to newly saved songs. Existing songs stay unchanged.","zh-TW":"自動套用至往後新增的歌曲，不會變更既有歌曲。"},"UIカラーテーマ":{"ko":"UI 색상 테마","en":"UI color theme","zh-TW":"UI 色彩主題"},"ダーク (ダーク)":{"ko":"다크","en":"Dark","zh-TW":"深色"},"ホワイト":{"ko":"화이트","en":"White","zh-TW":"白色"},"初号機":{"ko":"초호기","en":"EVA Unit-01","zh-TW":"初號機"},"弐号機":{"ko":"2호기","en":"EVA Unit-02","zh-TW":"貳號機"},"零号機":{"ko":"0호기","en":"EVA Unit-00","zh-TW":"零號機"},"八号機":{"ko":"8호기","en":"EVA Unit-08","zh-TW":"八號機"},"フォント変更":{"ko":"글꼴 변경","en":"Change font","zh-TW":"更換字型"},"標準（システム）":{"ko":"기본 (시스템)","en":"Default (system)","zh-TW":"預設（系統）"},"ゴシック":{"ko":"고딕","en":"Gothic / sans serif","zh-TW":"黑體"},"丸ゴシック":{"ko":"둥근 고딕","en":"Rounded Gothic","zh-TW":"圓體"},"明朝":{"ko":"명조","en":"Mincho / serif","zh-TW":"明體"},"端末に入っているフォントを使用します。環境によって見た目が異なります。":{"ko":"기기에 설치된 글꼴을 사용합니다. 환경에 따라 다르게 표시될 수 있어요.","en":"Uses installed device fonts. Appearance varies by device.","zh-TW":"使用裝置已安裝的字型，外觀可能因裝置而異。"},"最新情報を再読み込み":{"ko":"최신 정보 새로고침","en":"Reload latest data","zh-TW":"重新載入最新資料"},"表示が古いときに使います。マイリスト・フレンド・ログイン情報は削除しません。":{"ko":"화면이 오래되었을 때 사용하세요. 마이리스트, 친구, 로그인 정보는 삭제되지 않습니다.","en":"Use if displayed data is stale. Your lists, friends, and sign-in are not deleted.","zh-TW":"顯示資料過舊時可使用，不會刪除歌單、好友或登入資訊。"},"自分用Key（原曲を0として半音単位）":{"ko":"내 키 (원곡 0, 반음 단위)","en":"My key (original = 0; semitones)","zh-TW":"個人調性（原調 0，以半音為單位）"},"選択したKeyでChordWikiを開く ↗":{"ko":"선택한 키로 ChordWiki 열기 ↗","en":"Open ChordWiki in selected key ↗","zh-TW":"以所選調性開啟 ChordWiki ↗"},"自分用Keyの変更です。マスターのChordWiki原曲URLは変更しません。":{"ko":"내 키만 바뀌며 스프레드시트 원본 URL은 변경되지 않습니다.","en":"Changes only your key; the original spreadsheet URL stays unchanged.","zh-TW":"僅修改個人調性，不會變更試算表原始網址。"},"ルーム内でこの曲を登録しているメンバー":{"ko":"방에서 이 곡을 등록한 멤버","en":"Members who saved this song","zh-TW":"房間內收藏此歌曲的成員"},"マイリスト登録（本人のみ）":{"ko":"마이리스트 등록 (본인만)","en":"My list registration (owner only)","zh-TW":"加入個人清單（僅限本人）"},"変更は自動保存されます。":{"ko":"변경 사항은 자동 저장됩니다.","en":"Changes are saved automatically.","zh-TW":"變更將自動儲存。"},"予約一覧":{"ko":"예약 목록","en":"Queued songs","zh-TW":"預約清單"},"演奏リスト":{"ko":"연주 목록","en":"Performance list","zh-TW":"演奏清單"},"今から演奏する確定済みの曲です。":{"ko":"곧 연주할 확정된 곡입니다.","en":"Confirmed songs ready to play.","zh-TW":"即將演奏的已確認歌曲。"},"本日のセットリスト":{"ko":"오늘의 세트리스트","en":"Today's setlist","zh-TW":"今日演出歌單"},"画像として保存する":{"ko":"이미지로 저장","en":"Save as image","zh-TW":"儲存為圖片"},"セッションの流れ":{"ko":"세션 진행 순서","en":"Session flow","zh-TW":"Session 流程"},"Key変更のコツ":{"ko":"키 변경 팁","en":"Key change tip","zh-TW":"變調小提示"},"検索のヒント":{"ko":"검색 팁","en":"Search tips","zh-TW":"搜尋小提示"},"フレンド機能":{"ko":"친구 기능","en":"Friends feature","zh-TW":"好友功能"},"OBS配信":{"ko":"OBS 방송","en":"OBS streaming","zh-TW":"OBS 直播"},"複数パート対応":{"ko":"복수 파트 지원","en":"Multiple instruments","zh-TW":"支援多種樂器"},"ルームの共通曲":{"ko":"방의 공통곡","en":"Room common songs","zh-TW":"房間共同歌曲"},"付箋を隠す":{"ko":"도움말 숨기기","en":"Hide tips","zh-TW":"隱藏提示"},"付箋を戻す":{"ko":"도움말 표시","en":"Show tips","zh-TW":"顯示提示"},"追加":{"ko":"추가","en":"Add","zh-TW":"加入"},"登録":{"ko":"등록","en":"Save","zh-TW":"加入清單"},"曲":{"ko":"곡","en":"songs","zh-TW":"首"},"自分":{"ko":"나","en":"Mine","zh-TW":"自己"},"共通曲":{"ko":"공통곡","en":"Common songs","zh-TW":"共同歌曲"},"全曲":{"ko":"전체 곡","en":"All songs","zh-TW":"所有歌曲"},"すべて":{"ko":"전체","en":"All","zh-TW":"全部"},"パート未設定":{"ko":"파트 미설정","en":"No instrument set","zh-TW":"未設定樂器"},"Googleログイン後に利用できます。":{"ko":"Google 로그인 후 이용할 수 있습니다.","en":"Available after Google sign-in.","zh-TW":"請先使用 Google 登入。"},"マイリストはGoogleログイン後に利用できます。":{"ko":"마이리스트는 Google 로그인 후 이용할 수 있습니다.","en":"Sign in with Google to use My list.","zh-TW":"請先使用 Google 登入以使用個人清單。"},"演奏候補を「予約」→曲を決めて「確定」→演奏したら「完了」。ルーム全員にリアルタイム反映！":{"ko":"연주 후보를 예약 → 확정 → 완료 순으로 진행하세요. 모든 멤버에게 실시간 반영됩니다!","en":"Queue → Confirm → Complete. Everyone in the room sees changes live!","zh-TW":"候選歌曲依序「預約 → 確認 → 完成」，全房成員即時同步！"},"Keyを選んでから予約すると、予約時のKeyを保持。ChordWikiリンクにも選んだKeyを反映します。マイリスト登録も同様です。":{"ko":"키를 선택한 후 예약하면 해당 키가 저장되고 ChordWiki 링크에도 적용됩니다. 마이리스트 등록도 마찬가지예요.","en":"Choose a key before queuing. The key is saved and applied to the ChordWiki link, also when adding to My list.","zh-TW":"選好調性再預約，系統會保留調性並套用至 ChordWiki 連結；加入個人清單亦同。"},"曲名・略称（検索登録語）・アーティスト・タイアップ・作詞・作曲・編曲など、いろいろな言葉で検索できます。":{"ko":"곡명, 약칭, 아티스트, 관련 작품명, 작사·작곡·편곡 등 다양한 단어로 검색할 수 있어요.","en":"Search by title, abbreviation, artist, related work, lyricist, composer, arranger and more.","zh-TW":"可依歌名、簡稱、歌手、作品名稱、作詞、作曲、編曲等搜尋。"},"ルーム内の「OBSカスタムCSS」から色や透明度を設定。完了曲を配信画面へ表示できます。":{"ko":"방의 OBS 사용자 CSS에서 색상과 투명도를 설정하고 완료된 곡을 방송에 표시할 수 있어요.","en":"Set colors and transparency through OBS custom CSS and show completed songs on stream.","zh-TW":"從房間的 OBS 自訂 CSS 設定顏色及透明度，將已完成歌曲顯示於直播畫面。"},"マイリストで担当楽器を複数選択OK。マルチプレイヤーの登録曲もまとめて管理できます。":{"ko":"한 곡에 여러 연주 파트를 지정할 수 있어요. 멀티 연주자의 곡도 편하게 관리하세요.","en":"Assign multiple instruments per song and manage multi-instrument performance lists.","zh-TW":"每首歌都能設定多種演奏樂器，方便管理多樂器演出曲目。"},"「共通曲」から比較したいメンバーを2人以上選ぶと、選択した全員が登録している曲だけを表示できます。メンバー別の一覧にも切り替えられます。":{"ko":"Google 로그인 멤버 2명 이상에게 겹치는 곡이 있으면 색상으로 표시됩니다. 멤버별 목록도 전환할 수 있어요.","en":"Songs saved by two or more signed-in members are highlighted; switch freely between member lists.","zh-TW":"兩位以上 Google 登入成員收藏同一首歌時會標色，也可切換檢視各成員清單。"},"Googleログインしたユーザー同士で友達申請できます。承認済みの友達のマイリストを閲覧できます。":{"ko":"Google 로그인 사용자끼리 친구 신청하고 승인된 친구의 마이리스트를 볼 수 있어요.","en":"Google users can send friend requests and view accepted friends' lists.","zh-TW":"Google 登入使用者可互加好友，並查看已接受邀請好友的清單。"}};
+    const UI_I18N = {"↺ Key一括リセット":{"ko":"↺ 키 일괄 초기화","en":"↺ Reset all keys","zh-TW":"↺ 批次重設調性"},"登録済み・未登録を含む全曲のKeyを0（原曲）に戻しました。":{"ko":"등록 여부와 관계없이 모든 곡의 키를 원곡(0)으로 초기화했습니다.","en":"All keys, including saved and unsaved songs, were reset to the original key (0).","zh-TW":"所有歌曲（含已加入與未加入清單）的調性均已重設為原調（0）。"},"📁 マイリスト登録済みを除外":{"ko":"📁 마이리스트 등록곡 제외","en":"📁 Hide songs in My list","zh-TW":"📁 排除已加入個人清單的歌曲"},"Googleでログイン":{"ko":"Google로 로그인","en":"Sign in with Google","zh-TW":"使用 Google 登入"},"ゲスト利用中":{"ko":"게스트로 이용 중","en":"Using as guest","zh-TW":"訪客模式"},"ログイン中":{"ko":"로그인 중","en":"Signed in","zh-TW":"已登入"},"Googleログイン中":{"ko":"Google 로그인 중","en":"Google signed in","zh-TW":"已透過 Google 登入"},"ログアウト":{"ko":"로그아웃","en":"Sign out","zh-TW":"登出"},"ログアウトしますか？":{"ko":"로그아웃할까요?","en":"Do you want to sign out?","zh-TW":"確定要登出嗎？"},"ログアウトできませんでした。":{"ko":"로그아웃하지 못했습니다.","en":"Could not sign out.","zh-TW":"無法登出。"},"全曲一覧":{"ko":"全部 곡","en":"All songs","zh-TW":"所有歌曲"},"総登録楽曲数":{"ko":"총 등록 곡 수","en":"Total registered songs","zh-TW":"歌曲總登錄數"},"自分のマイリスト":{"ko":"내 곡 목록","en":"My song list","zh-TW":"我的歌曲清單"},"マイリスト":{"ko":"마이리스트","en":"My list","zh-TW":"我的清單"},"ルームを作る":{"ko":"방 만들기","en":"Create room","zh-TW":"建立房間"},"楽曲追加":{"ko":"곡 추가","en":"Add song","zh-TW":"新增歌曲"},"OBSカスタムCSS":{"ko":"OBS 사용자 CSS","en":"OBS custom CSS","zh-TW":"OBS 自訂 CSS"},"マイページ":{"ko":"마이페이지","en":"My page","zh-TW":"個人頁面"},"マイアカウント":{"ko":"내 계정","en":"My account","zh-TW":"我的帳戶"},"フレンド":{"ko":"친구","en":"Friends","zh-TW":"好友"},"使い方ガイド":{"ko":"사용 가이드","en":"User guide","zh-TW":"使用指南"},"設定":{"ko":"설정","en":"Settings","zh-TW":"設定"},"言語 / Language":{"ko":"언어 / Language","en":"Language","zh-TW":"語言 / Language"},"日本語":{"ko":"일본어","en":"Japanese","zh-TW":"日文"},"韓国語（ハングル）":{"ko":"한국어","en":"Korean (Hangul)","zh-TW":"韓文"},"英語":{"ko":"영어","en":"English","zh-TW":"英文"},"台湾華語（繁体字）":{"ko":"繁體中文（台灣）","en":"Traditional Chinese (Taiwan)","zh-TW":"繁體中文（台灣）"},"ルーム退出":{"ko":"방 나가기","en":"Leave room","zh-TW":"離開房間"},"退出":{"ko":"나가기","en":"Leave","zh-TW":"離開"},"ルームURLをコピー":{"ko":"방 URL 복사","en":"Copy room URL","zh-TW":"複製房間網址"},"URLをコピー":{"ko":"URL 복사","en":"Copy URL","zh-TW":"複製網址"},"参加中:":{"ko":"참가 중:","en":"Participants:","zh-TW":"參與者："},"読み込み中...":{"ko":"불러오는 중...","en":"Loading...","zh-TW":"載入中..."},"読み込み中…":{"ko":"불러오는 중…","en":"Loading…","zh-TW":"載入中…"},"ルームの共有マイリストを読み込み中…":{"ko":"방 공유 목록을 불러오는 중…","en":"Loading shared room lists…","zh-TW":"正在載入房間共享清單…"},"検索":{"ko":"검색","en":"Search","zh-TW":"搜尋"},"曲名、アーティスト、アニメ名などで検索...":{"ko":"곡명, 아티스트, 애니메이션 등으로 검색...","en":"Search titles, artists, anime, etc...","zh-TW":"搜尋歌名、歌手、動畫名稱等…"},"予約":{"ko":"예약","en":"Queue","zh-TW":"預約"},"確定":{"ko":"확정","en":"Confirm","zh-TW":"確認"},"完了":{"ko":"완료","en":"Completed","zh-TW":"完成"},"表示中: 0 曲":{"ko":"표시 중: 0곡","en":"Showing: 0 songs","zh-TW":"顯示中：0 首"},"表示中:":{"ko":"표시 중:","en":"Showing:","zh-TW":"顯示中："},"アーティスト：":{"ko":"아티스트:","en":"Artist:","zh-TW":"藝人："},"絞り込み解除":{"ko":"필터 해제","en":"Clear filter","zh-TW":"清除篩選"},"ジャンル":{"ko":"장르","en":"Genre","zh-TW":"曲風"},"選択：0曲":{"ko":"선택: 0곡","en":"Selected: 0 songs","zh-TW":"已選：0 首"},"選択：":{"ko":"선택:","en":"Selected:","zh-TW":"已選："},"表示中を選択":{"ko":"표시 중인 곡 선택","en":"Select visible","zh-TW":"選取目前顯示"},"選択解除":{"ko":"선택 해제","en":"Clear selection","zh-TW":"取消選取"},"担当パートを指定":{"ko":"연주 파트 선택","en":"Select instrument","zh-TW":"選擇演奏樂器"},"パートON":{"ko":"파트 켜기","en":"Part ON","zh-TW":"啟用樂器"},"パートOFF":{"ko":"파트 끄기","en":"Part OFF","zh-TW":"停用樂器"},"Keyを指定":{"ko":"키 선택","en":"Select key","zh-TW":"選擇調性"},"選択曲に適用":{"ko":"선택한 곡에 적용","en":"Apply to selected","zh-TW":"套用至所選歌曲"},"選択曲を削除":{"ko":"선택한 곡 삭제","en":"Remove selected songs","zh-TW":"移除所選歌曲"},"データ所得中":{"ko":"스프레드시트에서 데이터를 불러오는 중...","en":"Loading spreadsheet data...","zh-TW":"正在載入試算表資料…"},"曲名":{"ko":"곡명","en":"Song title","zh-TW":"歌名"},"アーティスト名":{"ko":"아티스트 이름","en":"Artist name","zh-TW":"藝人名稱"},"アーティスト":{"ko":"아티스트","en":"Artist","zh-TW":"藝人"},"作詞者":{"ko":"작사가","en":"Lyricist","zh-TW":"作詞者"},"作曲者":{"ko":"작곡가","en":"Composer","zh-TW":"作曲者"},"編曲者":{"ko":"편곡자","en":"Arranger","zh-TW":"編曲者"},"ジャンル①":{"ko":"장르 ①","en":"Genre 1","zh-TW":"曲風①"},"ジャンル②":{"ko":"장르 ②","en":"Genre 2","zh-TW":"曲風②"},"タイアップ":{"ko":"타이업 / 작품명","en":"Related work","zh-TW":"搭配作品"},"マイリストから解除しますか？":{"ko":"마이리스트에서 삭제할까요?","en":"Remove from your list?","zh-TW":"確定從清單移除嗎？"},"いいえ":{"ko":"아니요","en":"No","zh-TW":"否"},"はい":{"ko":"예","en":"Yes","zh-TW":"是"},"閉じる":{"ko":"닫기","en":"Close","zh-TW":"關閉"},"フレンド管理":{"ko":"친구 관리","en":"Manage friends","zh-TW":"好友管理"},"フレンド一覧":{"ko":"친구 목록","en":"Friend list","zh-TW":"好友清單"},"一覧を更新":{"ko":"목록 새로고침","en":"Refresh list","zh-TW":"重新整理清單"},"フレンド検索・新規追加":{"ko":"친구 검색 및 추가","en":"Find / add friends","zh-TW":"搜尋／新增好友"},"相手のフレンドIDを入力して申請します。表示名検索ではなくID検索です。":{"ko":"상대방의 친구 ID를 입력해 신청하세요. 이름이 아닌 ID로 검색합니다.","en":"Enter a friend's ID to send a request. Search uses IDs, not display names.","zh-TW":"輸入對方的好友 ID 送出邀請；此功能依 ID 搜尋，而非暱稱。"},"自分のフレンドID":{"ko":"내 친구 ID","en":"My friend ID","zh-TW":"我的好友 ID"},"友達のフレンドID":{"ko":"상대방의 친구 ID","en":"Friend's ID","zh-TW":"好友的 ID"},"コピー":{"ko":"복사","en":"Copy","zh-TW":"複製"},"申請":{"ko":"신청","en":"Send request","zh-TW":"送出邀請"},"届いた申請":{"ko":"받은 신청","en":"Incoming requests","zh-TW":"收到的邀請"},"送った申請":{"ko":"보낸 신청","en":"Sent requests","zh-TW":"已送出的邀請"},"フレンドのマイリスト":{"ko":"친구의 마이리스트","en":"Friend's list","zh-TW":"好友的清單"},"自分との共通曲のみ":{"ko":"나와 겹치는 곡만","en":"Common songs only","zh-TW":"僅顯示共同歌曲"},"マイリストを見る":{"ko":"마이리스트 보기","en":"View list","zh-TW":"查看清單"},"解除":{"ko":"해제","en":"Remove","zh-TW":"移除"},"申請中":{"ko":"신청 중","en":"Pending","zh-TW":"申請中"},"承認":{"ko":"수락","en":"Accept","zh-TW":"接受"},"拒否":{"ko":"거절","en":"Decline","zh-TW":"拒絕"},"フレンドとマイリストを共有！ 共通の登録曲を自動抽出し、お互いのKey・担当パートも確認できます。":{"ko":"친구와 마이리스트를 공유하고 공통곡, 키와 연주 파트를 확인할 수 있어요!","en":"Share lists with friends, detect common songs and see each other's key and instruments.","zh-TW":"與好友分享歌單，自動找出共同歌曲，並查看彼此的調性與演奏樂器！"},"現在のルーム用URL":{"ko":"현재 방 URL","en":"Current room URL","zh-TW":"目前房間網址"},"表示を確認":{"ko":"미리보기","en":"Preview","zh-TW":"預覽畫面"},"OBSに映るセットリストのデザイン":{"ko":"OBS에 표시할 세트리스트 디자인","en":"OBS setlist design","zh-TW":"OBS 歌單外觀"},"枠色":{"ko":"테두리 색","en":"Border color","zh-TW":"邊框顏色"},"文字色":{"ko":"글자 색","en":"Text color","zh-TW":"文字顏色"},"背景色":{"ko":"배경 색","en":"Background color","zh-TW":"背景顏色"},"背景透明度（0%：不透明 / 100%：透明）":{"ko":"배경 투명도 (0% 불투명 / 100% 투명)","en":"Background transparency (0% opaque / 100% clear)","zh-TW":"背景透明度（0% 不透明／100% 全透明）"},"① 確定":{"ko":"① 적용","en":"① Apply","zh-TW":"① 確認"},"② CSS生成":{"ko":"② CSS 생성","en":"② Generate CSS","zh-TW":"② 產生 CSS"},"③ 📋 CSSをコピー":{"ko":"③ 📋 CSS 복사","en":"③ 📋 Copy CSS","zh-TW":"③ 📋 複製 CSS"},"CSS生成":{"ko":"CSS 생성","en":"Generate CSS","zh-TW":"產生 CSS"},"CSSをコピー":{"ko":"CSS 복사","en":"Copy CSS","zh-TW":"複製 CSS"},"生成されたOBSカスタムCSS":{"ko":"생성된 OBS 사용자 CSS","en":"Generated OBS custom CSS","zh-TW":"已產生的 OBS 自訂 CSS"},"色と透明度を選択して「確定」を押してください。":{"ko":"색과 투명도를 선택하고 '적용'을 누르세요.","en":"Choose colors and transparency, then press Apply.","zh-TW":"選擇顏色及透明度後，按下「確認」。"},"①確定後に「表示を確認」で選んだ配色をプレビューできます。OBS本番へ適用する際は、②CSS生成 → ③CSSをコピーしてブラウザソースに貼り付けてください。":{"ko":"① 적용 후 미리보기로 확인하세요. OBS에 적용하려면 ② CSS 생성 → ③ 복사 후 브라우저 소스에 붙여넣으세요.","en":"After applying, use Preview to check the colors. For OBS, generate and copy CSS, then paste into the browser source.","zh-TW":"按下①確認後可預覽配色；如要套用至 OBS，請依序產生 CSS、複製，並貼至瀏覽器來源。"},"前へ":{"ko":"이전","en":"Previous","zh-TW":"上一頁"},"次へ":{"ko":"다음","en":"Next","zh-TW":"下一頁"},"楽曲を追加":{"ko":"곡 추가","en":"Add a song","zh-TW":"新增歌曲"},"登録申請を管理者へ送信します。承認されるまで公開マスターは変更されません。":{"ko":"입력한 내용은 공개 곡 목록에 등록됩니다. 공개 가능한 정보만 입력하세요.","en":"Submitted information will be added to the shared song catalog. Enter public information only.","zh-TW":"資料將加入公開歌曲清單，請僅填寫可公開的資訊。"},"曲名 *":{"ko":"곡명 *","en":"Song title *","zh-TW":"歌名 *"},"アーティスト名 *":{"ko":"아티스트 이름 *","en":"Artist name *","zh-TW":"藝人名稱 *"},"ChordWiki 原曲URL *":{"ko":"ChordWiki 원곡 URL *","en":"Original ChordWiki URL *","zh-TW":"ChordWiki 原曲網址 *"},"BPM（任意）":{"ko":"BPM (선택)","en":"BPM (optional)","zh-TW":"BPM（選填）"},"ジャンル *":{"ko":"장르 *","en":"Genre *","zh-TW":"曲風 *"},"ジャンル②（任意）":{"ko":"장르 ② (선택)","en":"Genre 2 (optional)","zh-TW":"曲風②（選填）"},"キャンセル":{"ko":"취소","en":"Cancel","zh-TW":"取消"},"スプレッドシートに登録":{"ko":"스프레드시트에 등록","en":"Submit to spreadsheet","zh-TW":"新增至試算表"},"ユーザー名と基本担当パートを設定します。Googleログイン中はアカウントに保存されます。":{"ko":"사용자 이름과 기본 연주 파트를 설정합니다. Google 로그인 시 계정에 저장됩니다.","en":"Set your username and default instrument. Saved to your account when signed in with Google.","zh-TW":"設定使用者名稱及預設演奏樂器；使用 Google 登入時會儲存至帳戶。"},"ユーザー名 (セッション用)":{"ko":"사용자 이름 (세션용)","en":"Session username","zh-TW":"使用者名稱（連線用）"},"変更":{"ko":"변경","en":"Change","zh-TW":"變更"},"アカウントの基本担当パート":{"ko":"기본 연주 파트","en":"Default instrument","zh-TW":"預設演奏樂器"},"未設定":{"ko":"미설정","en":"Not set","zh-TW":"未設定"},"ボーカル":{"ko":"보컬","en":"Vocals","zh-TW":"主唱"},"ギター・ベース":{"ko":"기타 · 베이스","en":"Guitar / bass","zh-TW":"吉他／貝斯"},"打楽器":{"ko":"타악기","en":"Percussion","zh-TW":"打擊樂"},"鍵盤":{"ko":"건반","en":"Keyboard","zh-TW":"鍵盤"},"管楽器":{"ko":"관악기","en":"Wind instruments","zh-TW":"管樂"},"弦楽器":{"ko":"현악기","en":"String instruments","zh-TW":"弦樂"},"笛":{"ko":"피리","en":"Flute","zh-TW":"笛類"},"ドラム・パーカッション":{"ko":"드럼 · 퍼커션","en":"Drums / percussion","zh-TW":"鼓／打擊樂"},"キーボード・シンセ":{"ko":"키보드 · 신스","en":"Keyboard / synth","zh-TW":"鍵盤／合成器"},"木管・金管":{"ko":"목관 · 금관","en":"Woodwind / brass","zh-TW":"木管／銅管"},"バイオリン・チェロなど":{"ko":"바이올린 · 첼로 등","en":"Violin / cello, etc.","zh-TW":"小提琴／大提琴等"},"リコーダー・尺八など":{"ko":"리코더 · 샤쿠하치 등","en":"Recorder / shakuhachi, etc.","zh-TW":"直笛／尺八等"},"保存":{"ko":"저장","en":"Save","zh-TW":"儲存"},"今後新たに登録する曲へ自動適用します。登録済みの曲は変更しません。":{"ko":"앞으로 등록하는 곡에 자동 적용됩니다. 기존 곡은 변경되지 않습니다.","en":"Applies automatically to newly saved songs. Existing songs stay unchanged.","zh-TW":"自動套用至往後新增的歌曲，不會變更既有歌曲。"},"UIカラーテーマ":{"ko":"UI 색상 테마","en":"UI color theme","zh-TW":"UI 色彩主題"},"ダーク (ダーク)":{"ko":"다크","en":"Dark","zh-TW":"深色"},"ホワイト":{"ko":"화이트","en":"White","zh-TW":"白色"},"初号機":{"ko":"초호기","en":"EVA Unit-01","zh-TW":"初號機"},"弐号機":{"ko":"2호기","en":"EVA Unit-02","zh-TW":"貳號機"},"零号機":{"ko":"0호기","en":"EVA Unit-00","zh-TW":"零號機"},"八号機":{"ko":"8호기","en":"EVA Unit-08","zh-TW":"八號機"},"フォント変更":{"ko":"글꼴 변경","en":"Change font","zh-TW":"更換字型"},"標準（システム）":{"ko":"기본 (시스템)","en":"Default (system)","zh-TW":"預設（系統）"},"ゴシック":{"ko":"고딕","en":"Gothic / sans serif","zh-TW":"黑體"},"丸ゴシック":{"ko":"둥근 고딕","en":"Rounded Gothic","zh-TW":"圓體"},"明朝":{"ko":"명조","en":"Mincho / serif","zh-TW":"明體"},"端末に入っているフォントを使用します。環境によって見た目が異なります。":{"ko":"기기에 설치된 글꼴을 사용합니다. 환경에 따라 다르게 표시될 수 있어요.","en":"Uses installed device fonts. Appearance varies by device.","zh-TW":"使用裝置已安裝的字型，外觀可能因裝置而異。"},"最新情報を再読み込み":{"ko":"최신 정보 새로고침","en":"Reload latest data","zh-TW":"重新載入最新資料"},"表示が古いときに使います。マイリスト・フレンド・ログイン情報は削除しません。":{"ko":"화면이 오래되었을 때 사용하세요. 마이리스트, 친구, 로그인 정보는 삭제되지 않습니다.","en":"Use if displayed data is stale. Your lists, friends, and sign-in are not deleted.","zh-TW":"顯示資料過舊時可使用，不會刪除歌單、好友或登入資訊。"},"自分用Key（原曲を0として半音単位）":{"ko":"내 키 (원곡 0, 반음 단위)","en":"My key (original = 0; semitones)","zh-TW":"個人調性（原調 0，以半音為單位）"},"選択したKeyでChordWikiを開く ↗":{"ko":"선택한 키로 ChordWiki 열기 ↗","en":"Open ChordWiki in selected key ↗","zh-TW":"以所選調性開啟 ChordWiki ↗"},"自分用Keyの変更です。マスターのChordWiki原曲URLは変更しません。":{"ko":"내 키만 바뀌며 스프레드시트 원본 URL은 변경되지 않습니다.","en":"Changes only your key; the original spreadsheet URL stays unchanged.","zh-TW":"僅修改個人調性，不會變更試算表原始網址。"},"ルーム内でこの曲を登録しているメンバー":{"ko":"방에서 이 곡을 등록한 멤버","en":"Members who saved this song","zh-TW":"房間內收藏此歌曲的成員"},"マイリスト登録（本人のみ）":{"ko":"마이리스트 등록 (본인만)","en":"My list registration (owner only)","zh-TW":"加入個人清單（僅限本人）"},"変更は自動保存されます。":{"ko":"변경 사항은 자동 저장됩니다.","en":"Changes are saved automatically.","zh-TW":"變更將自動儲存。"},"予約一覧":{"ko":"예약 목록","en":"Queued songs","zh-TW":"預約清單"},"演奏リスト":{"ko":"연주 목록","en":"Performance list","zh-TW":"演奏清單"},"今から演奏する確定済みの曲です。":{"ko":"곧 연주할 확정된 곡입니다.","en":"Confirmed songs ready to play.","zh-TW":"即將演奏的已確認歌曲。"},"本日のセットリスト":{"ko":"오늘의 세트리스트","en":"Today's setlist","zh-TW":"今日演出歌單"},"画像として保存する":{"ko":"이미지로 저장","en":"Save as image","zh-TW":"儲存為圖片"},"セッションの流れ":{"ko":"세션 진행 순서","en":"Session flow","zh-TW":"Session 流程"},"Key変更のコツ":{"ko":"키 변경 팁","en":"Key change tip","zh-TW":"變調小提示"},"検索のヒント":{"ko":"검색 팁","en":"Search tips","zh-TW":"搜尋小提示"},"フレンド機能":{"ko":"친구 기능","en":"Friends feature","zh-TW":"好友功能"},"OBS配信":{"ko":"OBS 방송","en":"OBS streaming","zh-TW":"OBS 直播"},"複数パート対応":{"ko":"복수 파트 지원","en":"Multiple instruments","zh-TW":"支援多種樂器"},"ルームの共通曲":{"ko":"방의 공통곡","en":"Room common songs","zh-TW":"房間共同歌曲"},"付箋を隠す":{"ko":"도움말 숨기기","en":"Hide tips","zh-TW":"隱藏提示"},"付箋を戻す":{"ko":"도움말 표시","en":"Show tips","zh-TW":"顯示提示"},"追加":{"ko":"추가","en":"Add","zh-TW":"加入"},"登録":{"ko":"등록","en":"Save","zh-TW":"加入清單"},"曲":{"ko":"곡","en":"songs","zh-TW":"首"},"自分":{"ko":"나","en":"Mine","zh-TW":"自己"},"共通曲":{"ko":"공통곡","en":"Common songs","zh-TW":"共同歌曲"},"全曲":{"ko":"전체 곡","en":"All songs","zh-TW":"所有歌曲"},"すべて":{"ko":"전체","en":"All","zh-TW":"全部"},"パート未設定":{"ko":"파트 미설정","en":"No instrument set","zh-TW":"未設定樂器"},"Googleログイン後に利用できます。":{"ko":"Google 로그인 후 이용할 수 있습니다.","en":"Available after Google sign-in.","zh-TW":"請先使用 Google 登入。"},"マイリストはGoogleログイン後に利用できます。":{"ko":"마이리스트는 Google 로그인 후 이용할 수 있습니다.","en":"Sign in with Google to use My list.","zh-TW":"請先使用 Google 登入以使用個人清單。"},"演奏候補を「予約」→曲を決めて「確定」→演奏したら「完了」。ルーム全員にリアルタイム反映！":{"ko":"연주 후보를 예약 → 확정 → 완료 순으로 진행하세요. 모든 멤버에게 실시간 반영됩니다!","en":"Queue → Confirm → Complete. Everyone in the room sees changes live!","zh-TW":"候選歌曲依序「預約 → 確認 → 完成」，全房成員即時同步！"},"Keyを選んでから予約すると、予約時のKeyを保持。ChordWikiリンクにも選んだKeyを反映します。マイリスト登録も同様です。":{"ko":"키를 선택한 후 예약하면 해당 키가 저장되고 ChordWiki 링크에도 적용됩니다. 마이리스트 등록도 마찬가지예요.","en":"Choose a key before queuing. The key is saved and applied to the ChordWiki link, also when adding to My list.","zh-TW":"選好調性再預約，系統會保留調性並套用至 ChordWiki 連結；加入個人清單亦同。"},"曲名・略称（検索登録語）・アーティスト・タイアップ・作詞・作曲・編曲など、いろいろな言葉で検索できます。":{"ko":"곡명, 약칭, 아티스트, 관련 작품명, 작사·작곡·편곡 등 다양한 단어로 검색할 수 있어요.","en":"Search by title, abbreviation, artist, related work, lyricist, composer, arranger and more.","zh-TW":"可依歌名、簡稱、歌手、作品名稱、作詞、作曲、編曲等搜尋。"},"ルーム内の「OBSカスタムCSS」から色や透明度を設定。完了曲を配信画面へ表示できます。":{"ko":"방의 OBS 사용자 CSS에서 색상과 투명도를 설정하고 완료된 곡을 방송에 표시할 수 있어요.","en":"Set colors and transparency through OBS custom CSS and show completed songs on stream.","zh-TW":"從房間的 OBS 自訂 CSS 設定顏色及透明度，將已完成歌曲顯示於直播畫面。"},"マイリストで担当楽器を複数選択OK。マルチプレイヤーの登録曲もまとめて管理できます。":{"ko":"한 곡에 여러 연주 파트를 지정할 수 있어요. 멀티 연주자의 곡도 편하게 관리하세요.","en":"Assign multiple instruments per song and manage multi-instrument performance lists.","zh-TW":"每首歌都能設定多種演奏樂器，方便管理多樂器演出曲目。"},"「共通曲」から比較したいメンバーを2人以上選ぶと、選択した全員が登録している曲だけを表示できます。メンバー別の一覧にも切り替えられます。":{"ko":"Google 로그인 멤버 2명 이상에게 겹치는 곡이 있으면 색상으로 표시됩니다. 멤버별 목록도 전환할 수 있어요.","en":"Songs saved by two or more signed-in members are highlighted; switch freely between member lists.","zh-TW":"兩位以上 Google 登入成員收藏同一首歌時會標色，也可切換檢視各成員清單。"},"Googleログインしたユーザー同士で友達申請できます。承認済みの友達のマイリストを閲覧できます。":{"ko":"Google 로그인 사용자끼리 친구 신청하고 승인된 친구의 마이리스트를 볼 수 있어요.","en":"Google users can send friend requests and view accepted friends' lists.","zh-TW":"Google 登入使用者可互加好友，並查看已接受邀請好友的清單。"}};
     const LANGUAGE_STORAGE = 'sharelistscore_language';
     const LANGUAGE_IDS = ['ja','ko','en','zh-TW'];
     let activeLanguage = 'ja', languageLoadVersion = 0, languageObserver = null, languageFontReady = false, languageManualReady = false, languageAppReady = false;
@@ -4799,7 +4835,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         } catch(error) {
             console.error('担当パートの保存に失敗:',error);
             document.getElementById('defaultPartSelect').value = defaultPart;
-            alert('保存できませんでした。Firebaseのアクセス権限を確認してください。');
+            alert('保存できませんでした。データのアクセス権限を確認してください。');
         }
     }
     let personalSongs = {};
@@ -4884,7 +4920,12 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     // 編集後は短時間まとめて自動保存。バーや保存ボタンは表示しない。
     let autoSaveTimer = null;
     let saveInFlight = null;
+    function slShowMySaveError(show) {
+        const notice=document.getElementById('slMySaveNotice');
+        if (notice) notice.style.display=show?'flex':'none';
+    }
     function updateMyListBar() {
+        slShowMySaveError(false);
         clearTimeout(autoSaveTimer);
         autoSaveTimer = null;
         if (!signedInUser) return;
@@ -4896,6 +4937,8 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         myListMode = false;
         myListPartialMode = false;
         myListSongLoadUid = '';
+        slShowMySaveError(false);
+        clearTimeout(autoSaveTimer); autoSaveTimer=null;
         personalSongs = {}; favoriteArtists = {}; pendingSongs = {}; pendingArtists = {}; draftRegistrationKeys = {}; defaultPart='';
         selectedMySongIds.clear();lastMySelectionAnchorId=null;updateSelectedMySongCount();
         document.getElementById('defaultPartSelect').value='';
@@ -4921,10 +4964,15 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             if (legacyDeletedSongIds.length) {
                 const cleanup = {};
                 legacyDeletedSongIds.forEach(id => { cleanup[`users/${user.uid}/songs/${id}`] = null; });
-                await db.ref().update(cleanup);
+                // 読み取りは成功しているため、旧データの掃除が失敗しても閲覧を妨げない。
+                try {
+                    await db.ref().update(cleanup);
+                    console.info(`旧マイリスト削除データを${legacyDeletedSongIds.length}件削除しました。`);
+                } catch(cleanupError) {
+                    console.warn('旧マイリストデータの整理に失敗（閲覧は継続）:',cleanupError);
+                }
                 if (version !== myListLoadVersion || auth.currentUser?.uid !== user.uid) return;
                 legacyDeletedSongIds.forEach(id => delete personalSongs[id]);
-                console.info(`旧マイリスト削除データを${legacyDeletedSongIds.length}件削除しました。`);
             }
 
             favoriteArtists = artistsSnapshot.val() || {};
@@ -4937,7 +4985,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             if (allData.length) renderTable();
         } catch (error) {
             console.error('マイリストの読み込みに失敗:',error);
-            if (version === myListLoadVersion) alert('マイリストを読み込めませんでした。Firebaseの users への権限を確認してください。');
+            if (version === myListLoadVersion) alert('マイリストを読み込めませんでした。データの users への権限を確認してください。');
         }
     }
     async function toggleMyList() {
@@ -5174,10 +5222,12 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
                 void queueFriendSharedSync(user.uid);
                 if (friendSharedUid) renderFriendFavoriteArtists();
                 // 変更途中のスクロール位置・複数選択状態を壊さず、残りは次の保存へ。
+                slShowMySaveError(false);
                 return true;
             } catch (error) {
                 console.error('マイリスト自動保存失敗:',error);
-                alert('マイリストを自動保存できませんでした。通信やFirebaseのアクセス権限を確認してください。編集内容は画面に残しています。再度編集すると保存を再試行します。');
+                // 編集内容を残し、通知から明示的に再試行できるようにする。
+                if (auth.currentUser?.uid===user.uid) slShowMySaveError(true);
                 return false;
             } finally {
                 saveInFlight = null;
@@ -5321,7 +5371,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             console.error('UIカラーの読込に失敗:', error);
             if (version === themeLoadVersion && auth.currentUser?.uid === user.uid) {
                 applyTheme('dark');
-                alert('保存済みのUIカラーを読み込めませんでした。Firebaseのアクセス権限をご確認ください。');
+                alert('保存済みのUIカラーを読み込めませんでした。データのアクセス権限をご確認ください。');
             }
         }
     });
@@ -5355,6 +5405,9 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     let roomPresenceRef = null;
     let roomPresenceConnectionRef = null;
     let roomPresenceConnectionHandler = null;
+    let roomPresenceClockRef = null;
+    let roomPresenceClockHandler = null;
+    let roomPresenceVisibilityHandler = null;
     let roomPresenceHeartbeatTimer = null;
     let roomPresenceExpiryTimer = null;
     let roomPresenceConnected = false;
@@ -5392,16 +5445,24 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         if (roomPresenceExpiryTimer) clearInterval(roomPresenceExpiryTimer);
         if (roomPresenceConnectionRef && roomPresenceConnectionHandler)
             roomPresenceConnectionRef.off('value', roomPresenceConnectionHandler);
+        if (roomPresenceClockRef && roomPresenceClockHandler)
+            roomPresenceClockRef.off('value', roomPresenceClockHandler);
+        if (roomPresenceVisibilityHandler)
+            document.removeEventListener('visibilitychange', roomPresenceVisibilityHandler);
+        roomPresenceClockRef = roomPresenceClockHandler = roomPresenceVisibilityHandler = null;
+        roomPresenceRegisterBusy = false;
         roomPresenceHeartbeatTimer = roomPresenceExpiryTimer = null;
         roomPresenceConnectionRef = roomPresenceConnectionHandler = roomPresenceRef = null;
         roomPresenceConnected = false;
     }
     function startRoomPresence(memberRef, sessionId) {
         stopRoomPresence();
-        db.ref('.info/serverTimeOffset').on('value', snapshot => {
+        roomPresenceClockRef = db.ref('.info/serverTimeOffset');
+        roomPresenceClockHandler = snapshot => {
             roomServerClockOffset = Number(snapshot.val()) || 0;
             refreshVisibleRoomMembers();
-        });
+        };
+        roomPresenceClockRef.on('value', roomPresenceClockHandler);
         roomPresenceRef = memberRef;
         roomPresenceConnectionRef = db.ref('.info/connected');
         roomPresenceConnectionHandler = snapshot => {
@@ -5430,12 +5491,13 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         }, ROOM_HEARTBEAT_MS);
         roomPresenceExpiryTimer = setInterval(refreshVisibleRoomMembers, ROOM_HEARTBEAT_MS);
         // アプリ内ブラウザから戻ったときは、タイマー停止中の時間を補正する。
-        document.addEventListener('visibilitychange', () => {
+        roomPresenceVisibilityHandler = () => {
             if (!document.hidden && roomPresenceConnected && mySessionId === sessionId) {
                 memberRef.update({lastSeen: firebase.database.ServerValue.TIMESTAMP})
                     .catch(error => console.warn('参加状態の復帰更新に失敗:', error));
             }
-        });
+        };
+        document.addEventListener('visibilitychange', roomPresenceVisibilityHandler);
     }
     // STEP 3-3: Room list snapshots are separate from users/{UID} private records.
     const ROOM_LIST_BASE = 'roomSharedLists';
@@ -5697,7 +5759,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     function startRoomSharedListeners() {
         if(!currentRoomId || roomSharesListenerRef)return;
         roomSharesListenerRef=db.ref(`${ROOM_LIST_BASE}/${currentRoomId}`);
-        roomSharesListenerRef.on('value',snap=>{roomRawShares=snap.val()||{};rebuildRoomSharedLists();const sharing=Object.keys(roomSharedLists).length;setRoomShareMessage(sharing<2 ? `現在${sharing}人の保存済みマイリストを共有中。共通曲の色付けにはGoogleログイン済みの2人以上が必要です。` : '保存済みの曲・Key・担当パートを共有中。緑色は2人以上の共通曲です。');},err=>{console.error('ルーム共有閲覧失敗',err);setRoomShareMessage('共有リストを表示できません。Firebaseルールを確認してください。');});
+        roomSharesListenerRef.on('value',snap=>{roomRawShares=snap.val()||{};rebuildRoomSharedLists();const sharing=Object.keys(roomSharedLists).length;setRoomShareMessage(sharing<2 ? `現在${sharing}人の保存済みマイリストを共有中。共通曲の色付けにはGoogleログイン済みの2人以上が必要です。` : '保存済みの曲・Key・担当パートを共有中。緑色は2人以上の共通曲です。');},err=>{console.error('ルーム共有閲覧失敗',err);setRoomShareMessage('共有リストを表示できません。データルールを確認してください。');});
         roomMemberListRef=db.ref(`rooms/${currentRoomId}/members`);
         roomMemberListRef.on('value',snap=>{roomMembersRaw=snap.val()||{};refreshVisibleRoomMembers();void rememberSessionGoogleUsers();const sharing=Object.keys(roomSharedLists).length;if(sharing<2)setRoomShareMessage(`現在${sharing}人の保存済みマイリストを共有中。共通曲の色付けにはGoogleログイン済みの2人以上が必要です。`);});
         startRoomOwnPublishing();
@@ -5717,6 +5779,34 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     }
 
 
+    // ルームは作成時刻から12時間。判定時刻はRTDBサーバー時刻との差分を使用。
+    const ROOM_LIFETIME_MS = 12 * 60 * 60 * 1000;
+    let roomServerOffset = 0;
+    let roomExpiryTimer = null;
+    let roomExpiryWatcher = null;
+    let roomExpiredNotified = false;
+    const roomServerNow = () => Date.now() + roomServerOffset;
+    function redirectExpiredRoom() {
+        if (roomExpiredNotified) return;
+        roomExpiredNotified = true;
+        if (roomExpiryTimer) { clearInterval(roomExpiryTimer); roomExpiryTimer = null; }
+        alert('このルームは作成から12時間が経過したため、自動解体されました。');
+        window.location.replace(window.location.pathname);
+    }
+    function checkRoomExpiry(settings) {
+        if (!currentRoomId || roomExpiredNotified) return false;
+        // 古いルームもcreatedAtがあれば12時間で期限切れになる。
+        if (!settings || typeof settings !== 'object') { redirectExpiredRoom(); return false; }
+        const createdAt = Number(settings.createdAt);
+        const expiresAt = Number(settings.expiresAt) || (createdAt > 0 ? createdAt + ROOM_LIFETIME_MS : 0);
+        if (!expiresAt || !Number.isFinite(expiresAt)) { redirectExpiredRoom(); return false; }
+        if (roomServerNow() >= expiresAt) { redirectExpiredRoom(); return false; }
+        return true;
+    }
+    async function ensureRoomNotExpired() {
+        const snap = await db.ref(`rooms/${currentRoomId}/settings`).once('value');
+        return checkRoomExpiry(snap.val());
+    }
     async function initRoomUI() {
         const roomWrapper = document.getElementById('roomStatusWrapper');
         const createBtn = document.getElementById('createRoomBtn');
@@ -5737,6 +5827,16 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
                 alert('ルームに接続できませんでした。通信状況を確認して再読み込みしてください。');
                 return false;
             }
+            // 参加者データを書き込む前に期限を確認する。
+            try {
+                const offsetSnap = await db.ref('.info/serverTimeOffset').once('value');
+                roomServerOffset = Number(offsetSnap.val()) || 0;
+                if (!(await ensureRoomNotExpired())) return false;
+            } catch (error) {
+                console.error('ルームの有効期限を確認できません:', error);
+                alert('ルームの期限を確認できませんでした。通信状況を確認して再読み込みしてください。');
+                return false;
+            }
             document.body.classList.add('in-room');
             if (isUnsetGuestName(myName) || (roomUser.isAnonymous && myName === roomUser.uid && isUnsetGuestName(storedRoomName))) {
                 const enteredName = prompt("セッションルームで表示する『あなたの名前』を入力してください\n（空欄の場合はユーザーIDの先頭5文字を表示します）");
@@ -5754,6 +5854,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             document.getElementById('myListSwitchBtn').style.display = 'none';
             db.ref(`rooms/${currentRoomId}/settings`).on('value', snap => {
                 const settings = snap.val();
+                if (!checkRoomExpiry(settings)) return;
                 roomSongScope = settings && settings.source === 'mylist' ? 'mylist' : 'master';
                 roomScopedSongIds = new Set(roomSongScope === 'mylist' && Array.isArray(settings.songIds) ? settings.songIds : []);
                 roomSongScopeLoaded = true;
@@ -5782,6 +5883,12 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             }
 
             startRoomPresence(myMemberRef, mySessionId);
+            // ルーム設定の削除と期限到来のどちらでも全参加者をトップへ戻す。
+            roomExpiryTimer = setInterval(() => {
+                if (!currentRoomId || roomExpiredNotified) return;
+                void ensureRoomNotExpired().catch(error => console.warn('ルーム期限チェック失敗', error));
+            }, 30000);
+            window.addEventListener('pagehide', () => { if (roomExpiryTimer) clearInterval(roomExpiryTimer); }, {once:true});
             renderRoomListTabs();
             startRoomSharedListeners();
 
@@ -5809,7 +5916,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
                 if (auth.currentUser?.uid !== user.uid) return;
             } catch(error) {
                 console.error('ユーザー名の保存に失敗:', error);
-                alert('ユーザー名を保存できませんでした。Firebaseの本人用アクセス権限を確認してください。');
+                alert('ユーザー名を保存できませんでした。データの本人用アクセス権限を確認してください。');
                 return;
             }
         } else {
@@ -5849,6 +5956,8 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         status.textContent = 'ルームを作成しています…';
         try {
             const roomUser = await ensureRoomAuth();
+            const offsetSnap = await db.ref('.info/serverTimeOffset').once('value');
+            const serverNow = Date.now() + (Number(offsetSnap.val()) || 0);
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             // Firebaseの既存ルームを誤って上書きしないようtransactionで新規作成。
             let newRoomId = '';
@@ -5859,7 +5968,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
                 const settingsRef = db.ref(`rooms/${candidate}/settings`);
                 const result = await settingsRef.transaction(existing => {
                     if (existing !== null) return;
-                    return {source:'master',songIds:[],createdAt:firebase.database.ServerValue.TIMESTAMP,createdByUid:roomUser.uid};
+                    return {source:'master',songIds:[],createdAt:firebase.database.ServerValue.TIMESTAMP,expiresAt:serverNow + ROOM_LIFETIME_MS,createdByUid:roomUser.uid};
                 }, undefined, false);
                 if (result.committed) { newRoomId = candidate; break; }
             }
@@ -5868,7 +5977,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
             window.location.replace(window.location.pathname + '?room=' + encodeURIComponent(newRoomId));
         } catch (error) {
             console.error('ルーム作成に失敗:', error);
-            status.textContent = 'ルームを作成できませんでした。通信状況とFirebaseの権限を確認し、再試行してください。';
+            status.textContent = 'ルームを作成できませんでした。通信状況とデータの権限を確認し、再試行してください。';
             button.disabled = false;
             if (cancel) cancel.disabled = false;
         } finally {
@@ -5880,7 +5989,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     let slLeavingRoom = false;
     function slConfirmLeaveRoom() {
         if (!currentRoomId || slLeavingRoom) return;
-        if (!window.confirm('このルームから退室しますか？\n予約・確定・完了の曲は削除されません。')) return;
+        if (!window.confirm('このルームから退室しますか？\n最後の参加者が退室すると、ルームとセットリストは削除されます。')) return;
         slLeavingRoom = true;
         const button = document.getElementById('slRoomLeaveBtn');
         if (button) { button.disabled = true; button.textContent = '退室中…'; }
@@ -5892,11 +6001,54 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         });
     }
 
+    // 最終参加者が「退室」を明示的に実行した場合のみ、ルーム全体を条件付き削除。
+    // メンバー数を事前に読むだけでは同時入退室で競合するため、ルームルートでtransactionを行う。
+    // 他のメンバーがいる場合、あるいは入室が競合した場合は削除しない。
+    // Firebase Realtime Databaseルールがルームルートの読み書きを許可していることが必要。
+    async function cleanupRoomAfterLastLeave(roomId) {
+        if (!roomId) return false;
+        const root = db.ref(`rooms/${roomId}`);
+        let result;
+        try {
+            result = await root.transaction(room => {
+                if (!room || typeof room !== 'object') return; // 無い部屋は対象外
+                if (room.members && Object.keys(room.members).length > 0) return;
+                return null; // 空のルームだけ削除
+            }, undefined, false);
+        } catch (error) {
+            console.warn('最終退室時のルーム削除に失敗（データルールの権限も確認してください）:', error);
+            return false;
+        }
+        if (!result.committed) return false;
+        // 本体削除が確定してから、このルームに紐づく一時共有リストのみ削除。
+        try {
+            await db.ref(`${ROOM_LIST_BASE}/${roomId}`).remove();
+        } catch (error) {
+            console.warn('ルーム共有データの削除に失敗:', error);
+            return false;
+        }
+        return true;
+    }
+
     async function leaveRoom() {
+        const leavingRoomId = currentRoomId;
+        const leavingSessionId = mySessionId;
         stopRoomPresence();
         await removeOwnRoomShare();
-        if (currentRoomId && mySessionId) {
-            try { await db.ref(`rooms/${currentRoomId}/members/${mySessionId}`).remove(); } catch(err){console.warn('退出時の参加者情報削除失敗',err);}
+        let memberRemoved = !leavingSessionId;
+        if (leavingRoomId && leavingSessionId) {
+            try {
+                await db.ref(`rooms/${leavingRoomId}/members/${leavingSessionId}`).remove();
+                memberRemoved = true;
+            } catch(err) {
+                console.warn('退出時の参加者情報削除失敗', err);
+            }
+        }
+        if (leavingRoomId && memberRemoved) {
+            const removed = await cleanupRoomAfterLastLeave(leavingRoomId);
+            // 接続断やDBルールの拒否ではサーバー削除を保証できない。
+            // 誤って成功を通知しないため、成功した場合にのみ画面へ反映。
+            if (removed) console.info('最後の参加者が退室したため、ルームデータを削除しました。');
         }
         window.location.replace(window.location.pathname);
     }
@@ -5918,7 +6070,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     }
 
     // ルームを表示していたページから別URLへ離れる際は、Firebase接続を明示的に切断する。
-    // onDisconnect に登録済みの参加者と共有マイリストが削除される。ルーム本体や予約は消さない。
+    // onDisconnect は参加者と共有マイリストのみ削除。明示的な最終退室時はルーム本体も条件付き削除。
     if (currentRoomId) {
         window.addEventListener('pagehide', () => {
             stopRoomPresence();
@@ -6033,6 +6185,10 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
     let serverSearchBusy = false;
     let serverSearchIndexKey = '';
     let serverSearchRequestSeq = 0;
+    let serverSearchPage = 1;
+    let serverSearchHasNext = false;
+    let serverSearchHistory = [{cursor:'', seen:[]}];
+    let serverSearchActiveQuery = '';
 
     let allData = [];
     let roomQueue = {}; 
@@ -6146,7 +6302,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         attachFriendListener(`userFavorites/${user.uid}`,user.uid);
         attachFriendListener(`users/${user.uid}/sessionUsers`,user.uid);
         void refreshFriendsPanel();
-      }catch(err){console.error('ユーザーお気に入り初期化失敗',err);friendNotice('ユーザー情報の準備に失敗しました。Firebaseルールを確認してください。',true);}
+      }catch(err){console.error('ユーザーお気に入り初期化失敗',err);friendNotice('ユーザー情報の準備に失敗しました。データルールを確認してください。',true);}
     }
     function updateFriendCount(count){const n=count===null?'−':String(count);const h=document.getElementById('homeFriendCount');if(h)h.textContent=`(${n}人)`;const t=document.getElementById('friendsListHeading');if(t)t.textContent=`👥 フレンド（${n}人）`;}
     function openFriendsModal(){friendNotice('');renderFriendSyncStatus();openModal('friendsModal');const u=friendUser();document.getElementById('myFriendCode').value=u?(friendCodeForUser||'取得中…'):'Googleログイン後に表示';void refreshFriendsPanel();}
@@ -6191,7 +6347,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         updateFriendCount(ids.length);
         hist.replaceChildren(...Object.entries(history).filter(([id,v])=>id!==u?.uid&&v&&profiles[id]).sort((a,b)=>(b[1].lastSeen||0)-(a[1].lastSeen||0)).slice(0,100).map(([id])=>favoriteUserRow(id,profiles,favorites,true)));
         if(!hist.childElementCount)hist.textContent=u?'セッション履歴はまだありません。':'履歴はGoogleログイン後に表示されます。';
-      }catch(err){if(isLatest()){console.warn('お気に入りユーザー取得失敗',err);friendNotice('ユーザー情報を取得できませんでした。Firebaseルールを確認してください。',true);}}
+      }catch(err){if(isLatest()){console.warn('お気に入りユーザー取得失敗',err);friendNotice('ユーザー情報を取得できませんでした。データルールを確認してください。',true);}}
     }
     async function sendFriendRequest(){
       const raw=String(document.getElementById('friendCodeInput').value||'').trim();const panel=document.getElementById('publicProfilesList');panel.textContent='検索中…';
@@ -6331,7 +6487,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
                 });
                 if(friendUser()?.uid===uid) setFriendSyncState('error',
                     String(err?.code||'').toUpperCase().includes('PERMISSION_DENIED') || /permission.denied/i.test(err?.message||'')
-                    ? 'Firebaseの権限検証で共有同期が拒否されました。個人マイリストは保持されています。ルールと送信形式を確認してください。'
+                    ? 'データの権限検証で共有同期が拒否されました。個人マイリストは保持されています。ルールと送信形式を確認してください。'
                     : 'フレンド共有情報を同期できませんでした。個人マイリストは保持されています。');
             }
         });
@@ -6382,7 +6538,7 @@ body.sl-redesign.sl-room-mylist #slFavArtistsShortcut{display:inline-flex;align-
         friendSharedRef.on('value',friendSharedListener,err=>{
             if(version!==friendSharedVersion)return;
             console.warn('共有マイリスト読込失敗',err);
-            document.getElementById('friendSharedMeta').textContent='公開リストを読み込めません。ネットワークまたはFirebaseルールを確認してください。';
+            document.getElementById('friendSharedMeta').textContent='公開リストを読み込めません。ネットワークまたはデータルールを確認してください。';
             document.getElementById('friendSharedSongs').replaceChildren();
         });
     }
@@ -6837,7 +6993,7 @@ html, body { background: transparent !important; color: ${text} !important; }
             await db.ref(`users/${uid}/preferences/theme`).set(selected);
         } catch (error) {
             console.error('UIカラーの保存に失敗:', error);
-            alert('UIカラーを保存できませんでした。Firebaseのアクセス権限をご確認ください。');
+            alert('UIカラーを保存できませんでした。データのアクセス権限をご確認ください。');
         }
     }
 
@@ -7260,10 +7416,10 @@ html, body { background: transparent !important; color: ${text} !important; }
           }
         }
         closeModal(null,'clipboardConfirmModal');closeModal(null,'clipboardImportModal');
-        const extra=artistRows.length?`\nアーティスト補完申請：送信成功 ${proposed}曲 / 失敗 ${proposalErrors.length}曲（承認後にマスターへ反映）${proposalErrors.length?'\n⚠ 未送信：'+proposalErrors.join('、')+'。マイリスト登録は完了済みです。Firebaseの申請用ルールを確認してください。':''}`:'';
-        document.getElementById('clipboardImportResult').textContent=`✅ Firebaseへのマイリスト保存が完了しました。\n新規マイリスト登録：${added}曲\n既存曲のKey更新：${updated}曲\n登録対象外（未一致・エラー・重複）：${clipboardImportRows.length-candidates.length}曲\n担当パートは既存の設定を維持しています。${extra}`;
+        const extra=artistRows.length?`\nアーティスト補完申請：送信成功 ${proposed}曲 / 失敗 ${proposalErrors.length}曲（承認後にマスターへ反映）${proposalErrors.length?'\n⚠ 未送信：'+proposalErrors.join('、')+'。マイリスト登録は完了済みです。データの申請用ルールを確認してください。':''}`:'';
+        document.getElementById('clipboardImportResult').textContent=`✅ データへのマイリスト保存が完了しました。\n新規マイリスト登録：${added}曲\n既存曲のKey更新：${updated}曲\n登録対象外（未一致・エラー・重複）：${clipboardImportRows.length-candidates.length}曲\n担当パートは既存の設定を維持しています。${extra}`;
         openModal('clipboardResultModal');
-      }catch(error){console.error('クリップボード一括登録失敗',error);feedback.textContent=`❌ 登録できませんでした：${error.message||'通信やFirebaseの権限を確認してください。'}（再試行できます）`;}
+      }catch(error){console.error('クリップボード一括登録失敗',error);feedback.textContent=`❌ 登録できませんでした：${error.message||'通信やデータの権限を確認してください。'}（再試行できます）`;}
       finally{clipboardImportBusy=false;button.disabled=false;}
     }
     function clipboardFinish(){closeModal(null,'clipboardResultModal');clipboardImportRows=[];clipboardImportText='';}
@@ -7547,7 +7703,8 @@ html, body { background: transparent !important; color: ${text} !important; }
         
         if (currentRoomId && !window._firebaseListenerInitialized) {
             window._firebaseListenerInitialized = true;
-            db.ref('rooms/' + currentRoomId + '/queue').on('value', (snapshot) => {
+            const queueRef=db.ref('rooms/' + currentRoomId + '/queue');
+            queueRef.on('value', (snapshot) => {
                 roomQueue = snapshot.val() || {};
                 renderTable();
                 updateQueueUI();
@@ -7557,6 +7714,14 @@ html, body { background: transparent !important; color: ${text} !important; }
                 }).catch(error => {
                     console.warn('セットリスト曲の補完取得に失敗:', error);
                 });
+            }, error => {
+                console.error('セットリスト同期エラー:',error);
+                const feedback=document.getElementById('slDockFeedback');
+                if(feedback){
+                    feedback.textContent='セットリストの同期が停止しました。通信状況とデータのアクセス権限を確認して、ページを再読み込みしてください。';
+                    feedback.classList.add('error');
+                    feedback.hidden=false;
+                }
             });
         } else {
             renderTable(); updateQueueUI();
@@ -7724,7 +7889,8 @@ html, body { background: transparent !important; color: ${text} !important; }
                     serverPageNumber = Math.max(1, serverPageNumber - 1);
                 }
 
-                const snapshot = await query.limitToFirst(SERVER_MASTER_PAGE_SIZE).once('value');
+                // 101件目を余分に取得し、次ページの有無を正確に判定する。
+                const snapshot = await query.limitToFirst(SERVER_MASTER_PAGE_SIZE + 1).once('value');
 
                 const rowKeys = [];
                 const ids = [];
@@ -7733,6 +7899,9 @@ html, body { background: transparent !important; color: ${text} !important; }
                     const id = String(child.val() || '');
                     if (/^[A-Za-z0-9_-]{1,80}$/.test(id)) ids.push(id);
                 });
+                const hasNextGenrePage = rowKeys.length > SERVER_MASTER_PAGE_SIZE;
+                rowKeys.length = Math.min(rowKeys.length, SERVER_MASTER_PAGE_SIZE);
+                ids.length = Math.min(ids.length, SERVER_MASTER_PAGE_SIZE);
 
                 if (!ids.length) {
                     masterLoadNotice(`ジャンル「${genre}」にこれ以上の曲はありません。`);
@@ -7758,7 +7927,7 @@ html, body { background: transparent !important; color: ${text} !important; }
                     serverPageNumber++;
                 }
 
-                serverPageHasOlder = ids.length === SERVER_MASTER_PAGE_SIZE;
+                serverPageHasOlder = hasNextGenrePage;
 
                 masterLoadNotice(
                     `✅ ジャンル「${genre}」：${ids.length}曲だけ取得しました（${serverPageNumber}ページ目）。`
@@ -7864,91 +8033,131 @@ html, body { background: transparent !important; color: ${text} !important; }
         return myListSongLoadPromise;
     }
 
-    async function searchServerIndex(rawQuery) {
+    async function searchServerIndex(rawQuery, direction='first') {
         searchInput.disabled = false;
         searchInput.readOnly = false;
-
         if (masterLoaded) { renderTable(); return; }
 
         const normalized = normalizeServerSearchText(rawQuery);
         const terms = normalized.split(/\s+/u).filter(Boolean);
         if (!terms.length) {
+            serverSearchRequestSeq++;
+            serverSearchBusy = false;
+            serverSearchHasNext = false;
+            serverSearchPage = 1;
+            serverSearchHistory = [{cursor:'', seen:[]}];
+            serverSearchActiveQuery = '';
             if (serverSearchMode) {
                 serverSearchMode = false;
-                serverSearchRequestSeq++;
                 currentSortKey = '';
                 currentSortOrder = 1;
                 updateSortIcons();
                 await loadServerMasterPage('first');
-            } else {
-                renderTable();
-            }
+            } else renderTable();
             return;
         }
 
+        const isSameQuery = normalized === serverSearchActiveQuery && serverSearchMode;
+        if (direction !== 'first' && !isSameQuery) return;
+        if (direction === 'older' && !serverSearchHasNext) return;
+        if (direction === 'newer' && serverSearchPage <= 1) return;
+        if (serverSearchBusy && direction !== 'first') return;
+
         const requestSeq = ++serverSearchRequestSeq;
+        const history = isSameQuery ? serverSearchHistory.slice() : [{cursor:'',seen:[]}];
+        const page = direction === 'older' ? serverSearchPage + 1
+            : direction === 'newer' ? serverSearchPage - 1 : 1;
+        const pageState = direction === 'older'
+            ? {cursor:history[history.length-1].nextCursor,seen:history[history.length-1].nextSeen}
+            : history[page-1] || {cursor:'',seen:[]};
+        if (!pageState || (page > 1 && !pageState.cursor)) return;
+
         serverSearchBusy = true;
         serverPagedMasterMode = true;
         serverSearchMode = true;
         genreServerMode = false;
         currentGenre = 'すべて';
         loadingArea.style.display='flex';
-        loadingArea.innerHTML='<div class="spinner"></div><div>検索インデックスから最大100件だけ取得中...</div>';
+        loadingArea.innerHTML='<div class="spinner"></div><div>検索結果を100曲ずつ取得中...</div>';
+        renderCurrentSongPage();
 
         try {
             const indexKey = await currentServerSearchIndexKey();
             if (!indexKey) throw Error('検索インデックスがまだ作成されていません');
-
             const seed = [...terms].sort((a,b) => b.length - a.length)[0];
             const prefix = serverSearchUtf8Hex(seed);
-
-            const indexSnapshot = await db.ref(`songSearchRows/${indexKey}`)
-                .orderByKey()
-                .startAt(prefix)
-                .endAt(prefix + '\uf8ff')
-                .limitToFirst(100)
-                .once('value');
-
-            if (requestSeq !== serverSearchRequestSeq) return;
-
-            const ids = [];
-            const seen = new Set();
-            indexSnapshot.forEach(child => {
-                const songId = String(child.val() || '');
-                if (/^[A-Za-z0-9_-]{1,80}$/.test(songId) && !seen.has(songId)) {
-                    seen.add(songId);
-                    ids.push(songId);
+            const indexRef = db.ref(`songSearchRows/${indexKey}`);
+            const seen = new Set(pageState.seen || []);
+            const results = {};
+            let cursor = pageState.cursor || '';
+            let nextCursor = '';
+            let nextSeen = [];
+            let hasNext = false;
+            let exhausted = false;
+            let scanned = 0;
+            // A candidate may not match all entered terms. Continue scanning the
+            // index until 100 actual matches plus one look-ahead are found.
+            while (!exhausted && !hasNext) {
+                if (requestSeq !== serverSearchRequestSeq) return;
+                let query = indexRef.orderByKey();
+                if (cursor) query = query.startAfter(cursor);
+                else query = query.startAt(prefix);
+                const snapshot = await query.endAt(prefix + '\uf8ff').limitToFirst(150).once('value');
+                if (requestSeq !== serverSearchRequestSeq) return;
+                const entries=[];
+                snapshot.forEach(child=>entries.push([child.key,String(child.val()||'')]));
+                if (entries.length < 150) exhausted = true;
+                if (!entries.length) break;
+                // Fetch a bounded number of song records in parallel.
+                for (let start=0; start<entries.length && !hasNext; start+=25) {
+                    const chunk=entries.slice(start,start+25);
+                    const candidates=chunk.filter(([,id])=>/^[A-Za-z0-9_-]{1,80}$/.test(id) && !seen.has(id));
+                    const snapshots=await Promise.all(candidates.map(([,id])=>db.ref(`${MASTER_DB_PATH}/${id}`).once('value')));
+                    if (requestSeq !== serverSearchRequestSeq) return;
+                    const songs=new Map(snapshots.map(snap=>[snap.key,snap.val()]));
+                    for (const [rowKey,id] of chunk) {
+                        cursor=rowKey;
+                        if (!/^[A-Za-z0-9_-]{1,80}$/.test(id) || seen.has(id)) continue;
+                        seen.add(id);
+                        const song=songs.get(id);
+                        if (!song || typeof song !== 'object' || Array.isArray(song) ||
+                            typeof song.title !== 'string' || !song.title.trim()) continue;
+                        if (!terms.every(term=>serverSearchSongText(song).includes(term))) continue;
+                        if (Object.keys(results).length === 100) { hasNext=true; break; }
+                        results[id]=song;
+                        nextCursor=rowKey;
+                        nextSeen=[...seen];
+                    }
                 }
-            });
-
-            const snapshots = await Promise.all(ids.map(id => db.ref(`${MASTER_DB_PATH}/${id}`).once('value')));
-            if (requestSeq !== serverSearchRequestSeq) return;
-
-            const matchedMaster = {};
-            for (const snapshot of snapshots) {
-                const song = snapshot.val();
-                if (!song || typeof song !== 'object' || Array.isArray(song) || typeof song.title !== 'string' || !song.title.trim()) continue;
-                const haystack = serverSearchSongText(song);
-                if (!terms.every(term => haystack.includes(term))) continue;
-                matchedMaster[snapshot.key] = song;
+                scanned += entries.length;
+                if (scanned > 200000) throw Error('検索インデックスの走査上限を超えました');
             }
-
-            loadRowsIntoApp(serverSearchMasterToRawRows(matchedMaster));
-            masterLoadNotice(`✅ 検索：インデックス候補${ids.length}曲から ${Object.keys(matchedMaster).length}曲を表示（全曲マスター未取得）。`);
-        } catch (error) {
             if (requestSeq !== serverSearchRequestSeq) return;
-            console.warn('検索インデックスを利用できないため従来検索へ切り替えます:', error);
-            serverSearchMode = false;
-            serverSearchIndexKey = '';
+            if (direction === 'first' || !isSameQuery) history.length=1;
+            if (direction === 'newer') history.length=page;
+            if (direction === 'older') history.push(pageState);
+            history[page-1]={...pageState,nextCursor,nextSeen};
+            serverSearchHistory=history;
+            serverSearchPage=page;
+            serverSearchHasNext=hasNext;
+            serverSearchActiveQuery=normalized;
+            loadRowsIntoApp(serverSearchMasterToRawRows(results));
+            masterLoadNotice(`✅ 検索結果 ${page}ページ：${Object.keys(results).length}曲を表示（100曲ずつ・全曲マスター未取得）。`);
+        } catch(error) {
+            if (requestSeq !== serverSearchRequestSeq) return;
+            console.warn('検索インデックスを利用できないため従来検索へ切り替えます:',error);
+            serverSearchMode=false;
+            serverSearchIndexKey='';
+            serverSearchHasNext=false;
             await promoteServerPageToFullMaster('検索');
             renderTable();
         } finally {
-            if (requestSeq === serverSearchRequestSeq) {
-                serverSearchBusy = false;
+            if(requestSeq===serverSearchRequestSeq){
+                serverSearchBusy=false;
                 loadingArea.style.display='none';
-                searchInput.disabled = false;
-                searchInput.readOnly = false;
-                if (serverSearchMode && !masterLoaded) renderTable();
+                searchInput.disabled=false;
+                searchInput.readOnly=false;
+                if(serverSearchMode && !masterLoaded) renderTable();
             }
         }
     }
@@ -8020,14 +8229,14 @@ html, body { background: transparent !important; color: ${text} !important; }
 
                 serverPageHasOlder=hasOlder;
                 loadRowsIntoApp(rows);
-                masterLoadNotice(`✅ 全曲一覧：Firebaseから${Math.max(0,rows.length-1)}曲だけ取得しました（${serverPageNumber}ページ目）。`);
+                masterLoadNotice(`✅ 全曲一覧：データから${Math.max(0,rows.length-1)}曲だけ取得しました（${serverPageNumber}ページ目）。`);
             }catch(error){
                 allData=previousRows;
                 serverPageNumber=previousPage;
                 serverPageHasOlder=previousHasOlder;
                 serverPagedMasterMode=false;
                 console.error('100件取得モードの読み込みに失敗:',error);
-                showCsvLoadError('Firebaseから100件を読み込めませんでした: '+String(error?.message||error));
+                showCsvLoadError('データから100件を読み込めませんでした: '+String(error?.message||error));
                 throw error;
             }finally{
                 serverPageBusy=false;
@@ -8159,7 +8368,7 @@ html, body { background: transparent !important; color: ${text} !important; }
             }
             rows.push(fields.map(field=>field==='id'?id:String(song[field]??'')));
         }
-        if(skipped)console.warn(`公開マスターの不正な楽曲を ${skipped} 件除外しました。管理者はFirebaseのsongsを確認してください。`);
+        if(skipped)console.warn(`公開マスターの不正な楽曲を ${skipped} 件除外しました。管理者はデータのsongsを確認してください。`);
         if(rows.length<=1)throw Error('有効な楽曲が公開マスターにありません。Realtime Databaseルールとデータを確認してください。');
         return rows;
     }
@@ -8175,7 +8384,7 @@ html, body { background: transparent !important; color: ${text} !important; }
     // 全員がFirebaseから全曲(約27,000曲)を直接取得する事態(通信量・課金)を避ける。
     const STATIC_LAG_TOLERANCE_MS = 30 * 60 * 1000;
     async function readStaticMaster(expectedRevision) {
-        if(!expectedRevision)throw Error('Firebase更新番号が未設定です');
+        if(!expectedRevision)throw Error('データ更新番号が未設定です');
         // revisionをURLにつけ、GitHub Pages/CDN/ブラウザの古いレスポンスを回避する。
         const url=new URL(STATIC_MASTER_URL, location.href);
         url.searchParams.set('revision',expectedRevision);
@@ -8196,7 +8405,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         const age=issuedAt===null?null:Date.now()-issuedAt;
         if(age!==null&&age>=-600000&&age<=STATIC_LAG_TOLERANCE_MS)
             return {revision:payload.revision,master:payload.songs,stale:true};
-        throw Error('静的JSONの版がFirebaseと一致しません（未公開または更新途中）');
+        throw Error('静的JSONの版がデータと一致しません（未公開または更新途中）');
     }
     async function readConsistentFirebaseMaster(initialRevision) {
         // 大きなCSV取込の途中に変更が入った場合は旧版をキャッシュせず、更新後を取り直す。
@@ -8264,11 +8473,11 @@ html, body { background: transparent !important; color: ${text} !important; }
                         result=await readStaticMaster(revision);
                         masterLoadNotice(result.stale?'✅ 公開JSONから取得しました（直近の更新は最大約10分で反映されます）。':'✅ 公開JSONから最新の楽曲マスターを取得しました。');
                     }catch(staticError){
-                        console.warn('公開JSONを利用できないため、Firebaseの最新版へ切り替えます。管理者は public/songs.json の更新を確認してください。',staticError);
+                        console.warn('公開JSONを利用できないため、データの最新版へ切り替えます。管理者は public/songs.json の更新を確認してください。',staticError);
                     }
                 }
                 if(!result){
-                    masterLoadNotice('Firebaseから最新の楽曲マスターを取得中…');
+                    masterLoadNotice('データ所得中…');
                     result=await readConsistentFirebaseMaster(revision);
                 }
                 loadRowsIntoApp(rowsFromFirebaseMaster(result.master));
@@ -8288,7 +8497,7 @@ html, body { background: transparent !important; color: ${text} !important; }
                     return;
                 }
                 console.error('Firebaseマスター取得エラー',error);
-                showCsvLoadError('Firebaseマスターを読み込めませんでした: '+(error.message||'ネットワーク・権限を確認してください。'));
+                showCsvLoadError('データマスターを読み込めませんでした: '+(error.message||'ネットワーク・権限を確認してください。'));
                 throw error;
             }
         })();
@@ -8544,7 +8753,11 @@ html, body { background: transparent !important; color: ${text} !important; }
         const safeKeyOffset = Number.isInteger(selectedKey) && selectedKey >= -5 && selectedKey <= 6 ? selectedKey : 0;
         const data = { songId: String(songId), status: 'reserved', addedBy: String(myName || '').slice(0, 80), order: currentRoomId ? firebase.database.ServerValue.TIMESTAMP : Date.now(), keyOffset: safeKeyOffset };
         if (currentRoomId) {
-            db.ref('rooms/' + currentRoomId + '/queue/' + qId).set(data);
+            db.ref('rooms/' + currentRoomId + '/queue/' + qId).set(data).catch(error => {
+                console.error('楽曲予約の保存に失敗:', error);
+                const feedback=document.getElementById('slDockFeedback');
+                if(feedback){feedback.textContent='楽曲を予約できませんでした。通信状態を確認してください。';feedback.hidden=false;feedback.classList.add('error');}
+            });
         } else {
             roomQueue[qId] = data;
             renderTable(); updateQueueUI();
@@ -8766,10 +8979,10 @@ html, body { background: transparent !important; color: ${text} !important; }
             tableBody.replaceChildren();
             appendRenderedSongRows(cachedFilteredSongRows.slice(0, SONG_PAGE_SIZE), 0);
             songPageStatus.textContent = total
-                ? `検索結果 ${total.toLocaleString()}曲（検索インデックス経由・最大100曲）`
+                ? `検索結果 ${serverSearchPage} ページ（${total.toLocaleString()}曲表示・100曲ずつ）`
                 : '検索結果 0曲';
-            songPrevPageBtn.disabled = true;
-            songNextPageBtn.disabled = true;
+            songPrevPageBtn.disabled = serverSearchBusy || serverSearchPage <= 1;
+            songNextPageBtn.disabled = serverSearchBusy || !serverSearchHasNext;
             if (resetScroll) tableBodyWrapper.scrollTop = 0;
             return;
         }
@@ -8803,8 +9016,13 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
     function changeSongPage(direction) {
         if (!Number.isInteger(direction) || !direction) return;
+        // Firebaseのページ取得中に連打すると表示とカーソルが食い違うため処理しない。
+        if (serverPageBusy || serverSearchBusy) return;
 
-        if(serverSearchMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode) return;
+        if(serverSearchMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode){
+            void searchServerIndex(searchInput.value, direction > 0 ? 'older' : 'newer');
+            return;
+        }
 
         if(genreServerMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode){
             void loadServerGenrePage(currentGenre, direction > 0 ? 'older' : 'newer');
@@ -8877,7 +9095,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         const currentModeLabel = currentRoomId
             ? (roomListView==='all' ? '🌐 ルーム：全曲一覧' : roomListView==='common' ? `🤝 ルーム：${roomCommonSelectionLabel()} の共通曲` : `📁 ルーム：${roomListView===signedInUser?.uid?'自分':roomSharedLists[roomListView]?.name||'メンバー'}のマイリスト`)
             : myListMode ? '📁 自分のマイリスト'
-            : (serverSearchMode && serverPagedMasterMode && !masterLoaded ? '🔎 楽曲検索（最大100件取得）'
+            : (serverSearchMode && serverPagedMasterMode && !masterLoaded ? '🔎 楽曲検索（100件ずつ取得）'
               : genreServerMode && serverPagedMasterMode && !masterLoaded ? `🎼 ジャンル：${currentGenre}（100件ずつ取得）`
               : serverPagedMasterMode && !masterLoaded ? '📚 全曲一覧（100件ずつ取得）'
               : '📚 総登録楽曲数');
@@ -8885,7 +9103,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         songCountDisplay.textContent = (myListPartialMode && myListMode && !masterLoaded && !currentRoomId)
             ? `マイリスト：${filteredData.length} 曲（登録曲だけ取得・全曲マスター未取得）`
             : (serverSearchMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode)
-                ? `検索結果：${filteredData.length} 曲（全曲マスターは未取得）`
+                ? `検索結果：${serverSearchPage}ページ目・${filteredData.length}曲表示（100曲ずつ取得）`
                 : (genreServerMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode)
                     ? `${currentGenre}：${filteredData.length} 曲（データベースより最大100件取得）`
                 : (serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode)
@@ -9545,11 +9763,25 @@ html, body { background: transparent !important; color: ${text} !important; }
     slReorderBusy=true;
     try{
       const roomId=currentRoomId;
-      // Atomic multipath update: no temporary duplicate order between two separate requests.
-      const update={};
-      update[qIdA+'/order']=Number(b.order)||0;
-      update[qIdB+'/order']=Number(a.order)||0;
-      await db.ref('rooms/'+roomId+'/queue').update(update);
+      // 同時編集でも他の参加者の最新順序を上書きしないよう、キュー全体を条件付きで交換する。
+      const originalA=Number(a.order)||0, originalB=Number(b.order)||0;
+      if(originalA===originalB){
+        slDockFeedback('曲順が重複しています。最新の一覧を確認して再操作してください。',true);
+        return;
+      }
+      const result=await db.ref('rooms/'+roomId+'/queue').transaction(current=>{
+        if(!current || !current[qIdA] || !current[qIdB])return;
+        const liveA=current[qIdA],liveB=current[qIdB];
+        if(liveA.status!==a.status || liveB.status!==b.status ||
+          (Number(liveA.order)||0)!==originalA || (Number(liveB.order)||0)!==originalB)return;
+        return {...current,
+          [qIdA]:{...liveA,order:originalB},
+          [qIdB]:{...liveB,order:originalA}};
+      },undefined,false);
+      if(!result.committed){
+        slDockFeedback('別の参加者が曲順を変更しました。最新の並びで再操作してください。',true);
+        return;
+      }
       slDockFeedback('曲順を変更しました');
     }catch(err){
       console.error('順序変更エラー',err);
@@ -9560,8 +9792,13 @@ html, body { background: transparent !important; color: ${text} !important; }
   function slDockReorderDrag(row,item,status){
     row.draggable=true;
     row.dataset.queueId=item.qId;
+    row.dataset.queueStatus=status;
     row.setAttribute('aria-label','ドラッグで曲順を変更: '+String(item.songData?.['曲名']||'曲'));
     row.addEventListener('dragstart',event=>{
+      // Buttons and selects keep their normal click behavior.
+      if(event.target.closest('button,select,input,a')||slReorderBusy||slDockPendingIds.has(item.qId)){
+        event.preventDefault();return;
+      }
       event.dataTransfer.effectAllowed='move';
       event.dataTransfer.setData('text/plain',item.qId);
       row.classList.add('sl-dock-dragging');
@@ -9571,16 +9808,71 @@ html, body { background: transparent !important; color: ${text} !important; }
       document.querySelectorAll('.sl-dock-drop-target').forEach(el=>el.classList.remove('sl-dock-drop-target'));
     });
     row.addEventListener('dragover',event=>{
-      const from=event.dataTransfer.types.includes('text/plain');
-      if(from){event.preventDefault();event.dataTransfer.dropEffect='move';row.classList.add('sl-dock-drop-target');}
+      if(slReorderBusy||slDockPendingIds.has(item.qId))return;
+      const types=Array.from(event.dataTransfer.types||[]);
+      if(!types.includes('text/plain'))return;
+      event.preventDefault();event.dataTransfer.dropEffect='move';
+      row.classList.add('sl-dock-drop-target');
     });
     row.addEventListener('dragleave',()=>row.classList.remove('sl-dock-drop-target'));
     row.addEventListener('drop',async event=>{
-      event.preventDefault();
-      row.classList.remove('sl-dock-drop-target');
+      event.preventDefault();row.classList.remove('sl-dock-drop-target');
       const from=event.dataTransfer.getData('text/plain');
-      if(from!==item.qId) await slDockSwap(from,item.qId);
+      if(from!==item.qId)await slDockSwap(from,item.qId);
     });
+
+    // Touch/pen: long-press the grip, then drag over another song in the same tab.
+    // The rest of the card can still scroll and its action buttons remain clickable.
+    const grip=row.querySelector('.sl-dock-touch-grip');
+    if(!grip)return;
+    let session=null;
+    const cleanup=()=>{
+      if(!session)return;
+      if(session.timer)clearTimeout(session.timer);
+      if(session.target)session.target.classList.remove('sl-dock-drop-target');
+      row.classList.remove('sl-dock-touch-active');
+      try{if(grip.hasPointerCapture(session.id))grip.releasePointerCapture(session.id)}catch(_e){}
+      session=null;
+    };
+    grip.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse'||session||slReorderBusy||slDockPendingIds.has(item.qId)||event.isPrimary===false)return;
+      event.preventDefault();
+      session={id:event.pointerId,x:event.clientX,y:event.clientY,active:false,target:null,timer:null};
+      try{grip.setPointerCapture(event.pointerId)}catch(_e){}
+      const candidate=session;
+      candidate.timer=setTimeout(()=>{
+        if(session!==candidate||slReorderBusy||slDockPendingIds.has(item.qId))return;
+        candidate.active=true;row.classList.add('sl-dock-touch-active');
+      },220);
+    });
+    grip.addEventListener('pointermove',event=>{
+      if(!session||event.pointerId!==session.id)return;
+      if(!session.active){
+        if(Math.hypot(event.clientX-session.x,event.clientY-session.y)>12)cleanup();
+        return;
+      }
+      event.preventDefault();
+      if(session.target)session.target.classList.remove('sl-dock-drop-target');
+      const beneath=document.elementFromPoint(event.clientX,event.clientY);
+      const dest=beneath?.closest('.sl-dock-song');
+      session.target=dest&&dest!==row&&dest.dataset.queueStatus===status&&!dest.classList.contains('sl-dock-pending')?dest:null;
+      if(session.target)session.target.classList.add('sl-dock-drop-target');
+      const viewport=row.closest('.sl-dock-list')?.parentElement;
+      if(viewport){
+        const r=viewport.getBoundingClientRect();
+        if(event.clientY<r.top+35)viewport.scrollTop-=12;
+        else if(event.clientY>r.bottom-35)viewport.scrollTop+=12;
+      }
+    });
+    grip.addEventListener('pointerup',event=>{
+      if(!session||event.pointerId!==session.id)return;
+      const target=session.active?session.target:null;
+      cleanup();
+      if(target?.dataset.queueId)void slDockSwap(item.qId,target.dataset.queueId);
+    });
+    grip.addEventListener('pointercancel',cleanup);
+    grip.addEventListener('lostpointercapture',cleanup);
+    grip.addEventListener('contextmenu',event=>event.preventDefault());
   }
 
   function slActionButton(label,title,cls,handler){
@@ -9606,7 +9898,11 @@ html, body { background: transparent !important; color: ${text} !important; }
 
     items.forEach((item,index)=>{
       const row=document.createElement('div');row.className='sl-dock-song';
-      const no=document.createElement('div');no.className='sl-dock-index';no.textContent=String(index+1);
+      const no=document.createElement('div');no.className='sl-dock-index';
+      const number=document.createElement('span');number.textContent=String(index+1);
+      const grip=document.createElement('span');grip.className='sl-dock-touch-grip';grip.textContent='⠿';
+      grip.setAttribute('aria-label','長押しして曲順を変更');grip.title='長押しして移動';
+      no.append(number,grip);
 
       const main=document.createElement('div');main.className='sl-dock-main';
       const title=document.createElement('div');title.className='sl-dock-title';
