@@ -2898,6 +2898,25 @@ body.sl-redesign #friendsModal .sl-friends-workspace{
  #friendsModal .sl-friends-history{height:235px;flex-shrink:0}
 }
 
+
+/* 2026-10-09: genre buttons, dock collapsed backdrop and compact drag controls */
+#slGenreHost .genre-btn{pointer-events:auto!important;touch-action:manipulation;cursor:pointer!important}
+#slGenreHost .genre-btn:active{filter:brightness(1.15)}
+body.sl-redesign.in-room.sl-room-dock-collapsed::after{
+ content:"";position:fixed;top:0;bottom:0;right:0;width:var(--sl-dock);
+ background:linear-gradient(180deg,#0a172c,#081321);z-index:1850;
+ pointer-events:none;
+ border-left:1px solid rgba(104,137,214,.24);
+}
+body.in-room.sl-room-dock-collapsed #slRoomDock{z-index:2200!important}
+body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
+.sl-dock-song{grid-template-columns:18px minmax(0,1fr) auto!important;cursor:grab}
+.sl-dock-song.sl-dock-dragging{cursor:grabbing}
+.sl-dock-order{display:none!important}
+.sl-dock-actions{gap:4px}
+.sl-dock-actions button{min-width:28px!important;width:29px!important;height:29px!important;padding:0!important;font-size:16px!important;display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:820px){.sl-dock-song{grid-template-columns:16px minmax(0,1fr) auto!important}}
+
 </style>
 </head>
 <body>
@@ -9142,7 +9161,7 @@ html, body { background: transparent !important; color: ${text} !important; }
   }
 
   function slActionButton(label,title,cls,handler){
-    const b=document.createElement('button');b.type='button';b.textContent=label;b.title=title;b.className=cls;b.addEventListener('click',handler);return b;
+    const b=document.createElement('button');b.type='button';b.textContent=label;b.title=title;b.setAttribute('aria-label',title);b.className=cls;b.addEventListener('click',handler);return b;
   }
 
   function slRenderDockList(status,items){
@@ -9177,28 +9196,20 @@ html, body { background: transparent !important; color: ${text} !important; }
       const actions=document.createElement('div');actions.className='sl-dock-actions';
       if(status==='reserved'){
         actions.append(
-          slActionButton('☑️ 確定','演奏確定へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'confirmed')),
-          slActionButton('❎ 削除','予約から削除','sl-act-delete',()=>slDockRemove(item.qId))
+          slActionButton('☑️','演奏確定へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'confirmed')),
+          slActionButton('❎','予約から削除','sl-act-delete',()=>slDockRemove(item.qId))
         );
       }else if(status==='confirmed'){
         actions.append(
-          slActionButton('🔙 戻す','予約へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'reserved')),
-          slActionButton('☑️ 完了','完了へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'completed')),
-          slActionButton('❎ 削除','演奏確定から削除','sl-act-delete',()=>slDockRemove(item.qId))
+          slActionButton('🔙','予約へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'reserved')),
+          slActionButton('✅','完了へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'completed')),
+          slActionButton('❎','演奏確定から削除','sl-act-delete',()=>slDockRemove(item.qId))
         );
       }else{
-        actions.append(slActionButton('🔙 戻す','演奏確定へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'confirmed')));
+        actions.append(slActionButton('🔙','演奏確定へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'confirmed')));
       }
 
-      const position=document.createElement('div');
-      position.className='sl-dock-order';
-      if(index>0){
-        position.append(slActionButton('▲','1曲上に移動','sl-order-btn',()=>slDockSwap(item.qId,items[index-1].qId)));
-      }
-      if(index<items.length-1){
-        position.append(slActionButton('▼','1曲下に移動','sl-order-btn',()=>slDockSwap(item.qId,items[index+1].qId)));
-      }
-      row.append(no,main,position,actions);
+      row.append(no,main,actions);
       slDockReorderDrag(row,item,status);
       list.appendChild(row);
     });
@@ -9321,8 +9332,11 @@ html, body { background: transparent !important; color: ${text} !important; }
     host.addEventListener('pointerdown',event=>{
       if(event.pointerType==='mouse' && event.button!==0) return;
 
+      // Buttons must receive normal pointerup/click events; do not capture them.
+      if(event.target.closest('button,.genre-btn')) return;
       active=true;
       moved=false;
+      suppressClick=false;
       pointerId=event.pointerId;
       startX=event.clientX;
       startScrollLeft=host.scrollLeft;
