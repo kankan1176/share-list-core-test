@@ -3273,23 +3273,15 @@ body.ui-redesign::after{
         for(const el of descendants)translateAttributes(el);
     }
     function applyLanguage(lang) {
-        const previousLanguage = activeLanguage;
         activeLanguage=LANGUAGE_IDS.includes(lang)?lang:'ja';
         document.documentElement.lang=activeLanguage;
         if(languageFontReady)applyFont(document.getElementById('fontSelect')?.value || 'system');
-        const select=document.getElementById('languageSelect');
-        if(select && select.value!==activeLanguage) select.value=activeLanguage;
-
-        // 日本語→日本語の起動時は、500KB超のDOM全体を走査しない。
-        // 他言語への切替、または他言語から日本語へ戻す場合だけ翻訳処理を行う。
-        const needsTranslationPass =
-          activeLanguage !== 'ja' || previousLanguage !== 'ja';
-
-        if(needsTranslationPass){
-          translateUiTree();
-          if(languageAppReady && typeof syncMobileNav==='function')syncMobileNav();
-          if(languageManualReady && document.getElementById('manualModal')?.style.display==='flex')renderManualPage();
-        }
+        const select=document.getElementById('languageSelect');if(select)select.value=activeLanguage;
+        translateUiTree();
+        // Refresh visible live text without disturbing data stored in Japanese.
+        if(languageAppReady && typeof syncMobileNav==='function')syncMobileNav();
+        if(languageManualReady && document.getElementById('manualModal')?.style.display==='flex')renderManualPage();
+        translateUiTree();
     }
     async function changeLanguage() {
         const selected=document.getElementById('languageSelect').value;
@@ -3314,16 +3306,17 @@ body.ui-redesign::after{
         }).catch(err=>console.warn('Language load failed:',err));
     }
     function startI18nObserver() {
-        // 安定化版:
-        // body全体の常時監視は行わない。
-        // 大量のDOM更新と翻訳監視が相互に反応してブラウザを占有するのを防ぐ。
-        return;
+        if(languageObserver)return;
+        languageObserver=new MutationObserver(records=>{
+          for(const r of records){
+            if(r.type==='characterData')translateTextNode(r.target);
+            else if(r.type==='childList')for(const n of r.addedNodes)translateUiTree(n);
+            else if(r.type==='attributes')translateAttributes(r.target);
+          }
+        });
+        languageObserver.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     }
-    (()=>{
-      let stored='ja';
-      try{stored=localStorage.getItem(LANGUAGE_STORAGE)||'ja';}catch(_){}
-      applyLanguage(stored);
-    })();
+    (()=>{let stored='ja';try{stored=localStorage.getItem(LANGUAGE_STORAGE)||'ja';}catch(_){}applyLanguage(stored);startI18nObserver();})();
 
     let resolveInitialAuth;
     const initialAuthReady = new Promise(resolve => { resolveInitialAuth = resolve; });
@@ -3963,7 +3956,6 @@ body.ui-redesign::after{
         document.getElementById('googleLoginBtn').style.display = user ? 'none' : 'inline-flex';
         document.getElementById('googleLogoutBtn').style.display = user ? 'inline-block' : 'none';
         document.getElementById('myListSwitchBtn').style.display = user && !currentRoomId ? 'inline-block' : 'none';
-        try{ document.dispatchEvent(new Event('shareliscore:ui-refresh')); }catch(_){}
         if (!user) { stopFriendsFeature(); closeFriendSharedList(); stopOwnFriendSharedSongs(); sharedListReadyUid=''; }
         document.getElementById('addSongHeaderBtn').style.display = 'inline-block';
         // 保存済みのニックネームを優先し、初回だけGoogleの表示名を初期値にする。
@@ -4720,6 +4712,7 @@ body.ui-redesign::after{
     const tableBodyWrapper = document.querySelector('.table-body-wrapper');
     const tableHeaderWrapper = document.querySelector('.table-header-wrapper');
     const loadingArea = document.getElementById('loadingArea');
+    let csvLoadErrorVisible = false; // エラー画面表示中は他の処理がLoadingを閉じて上書きしない
     const searchInput = document.getElementById('searchInput');
     const songCountDisplay = document.getElementById('songCountDisplay');
     const genreFilters = document.getElementById('genreFilters');
@@ -5951,6 +5944,8 @@ html, body { background: transparent !important; color: ${text} !important; }
                     } else {
                         await loadServerGenrePage(genre, 'first');
                     }
+                } catch (error) {
+                    console.warn('ジャンル切替の取得に失敗:', error);
                 } finally {
                     window.setRedesignDataBusy?.(false);
                 }
@@ -6186,6 +6181,7 @@ html, body { background: transparent !important; color: ${text} !important; }
         populateGenreButtons();
         if (!serverPagedMasterMode && signedInUser && sharedListReadyUid === signedInUser.uid) void queueFriendSharedSync(signedInUser.uid);
         if (currentRoomId) renderRoomListTabs();
+        csvLoadErrorVisible = false;
         loadingArea.style.display = 'none';
         controls.style.display = 'block';
         tableWrapper.style.display = 'flex';
@@ -6208,7 +6204,17 @@ html, body { background: transparent !important; color: ${text} !important; }
         }
     }
 
+    // エラー画面（再読み込みボタン）を表示中かどうか。表示中は他の処理がLoadingを閉じて上書きしない。
+    // 取得処理の終了時にLoadingを必ず閉じる（早期return・失敗時の「Loading......」固着対策）。
+    function finishLoadingUi() {
+        if (csvLoadErrorVisible) return;
+        loadingArea.style.display = 'none';
+        controls.style.display = 'block';
+        tableWrapper.style.display = 'flex';
+    }
+
     function showCsvLoadError(message) {
+        csvLoadErrorVisible = true;
         loadingArea.style.display = 'flex';
         controls.style.display = 'none';
         tableWrapper.style.display = 'none';
@@ -6439,6 +6445,8 @@ html, body { background: transparent !important; color: ${text} !important; }
                 searchInput.disabled = false;
                 searchInput.readOnly = false;
 
+                // 「これ以上の曲はありません」で早期returnした場合や失敗時も、Loadingを必ず閉じる。
+                finishLoadingUi();
                 if (serverPagedMasterMode && !masterLoaded && allData.length) {
                     renderTable();
                 }
@@ -6519,6 +6527,8 @@ html, body { background: transparent !important; color: ${text} !important; }
             } finally {
                 myListSongLoadPromise = null;
                 if (myListSongLoadUid === user.uid) myListSongLoadUid = '';
+                // 失敗時にスピナーが残らないようにする（別のログイン状態の読込に置き換わった場合は触らない）。
+                if (version === myListLoadVersion) finishLoadingUi();
             }
         })();
 
@@ -6609,7 +6619,8 @@ html, body { background: transparent !important; color: ${text} !important; }
             if (requestSeq === serverSearchRequestSeq) {
                 serverSearchBusy = false;
                 window.setRedesignDataBusy?.(false);
-                loadingArea.style.display='none';
+                // フォールバック取得に失敗してエラー画面(再読み込みボタン)が出ている間は閉じない。
+                if (!csvLoadErrorVisible) loadingArea.style.display='none';
                 searchInput.disabled = false;
                 searchInput.readOnly = false;
                 if (serverSearchMode && !masterLoaded) renderTable();
@@ -6730,6 +6741,8 @@ html, body { background: transparent !important; color: ${text} !important; }
 
                 // 成功済みならloadRowsIntoApp側でLoadingを閉じる。
                 // データが残っている場合は操作可能状態へ戻す。
+                // 末尾ページで取得0件のまま return した場合や失敗時も、Loadingを必ず閉じる。
+                finishLoadingUi();
                 if(serverPagedMasterMode && !masterLoaded && allData.length) renderTable();
             }
         })();
@@ -7007,7 +7020,6 @@ html, body { background: transparent !important; color: ${text} !important; }
         if (view === 'all' || view === 'mylist') {
             rememberListView(view);
             document.documentElement.classList.remove('entry-home');
-            try{ document.dispatchEvent(new Event('shareliscore:ui-refresh')); }catch(_){}
             try{
                 if(view==='mylist'){
                     if(!myListMode) await toggleMyList();
@@ -7043,7 +7055,6 @@ html, body { background: transparent !important; color: ${text} !important; }
         closeMobileMenu();
         forgetListView();
         document.documentElement.classList.add('entry-home');
-        try{ document.dispatchEvent(new Event('shareliscore:ui-refresh')); }catch(_){}
         setAppHistory('home');
         document.getElementById('homeLoadingStatus').textContent='';
         // 一度読み込んだマスターは保持。再訪時に再ダウンロードしない。
@@ -7105,13 +7116,10 @@ html, body { background: transparent !important; color: ${text} !important; }
         } else {
             await initRoomUI();
             if (!history.state?.[APP_HISTORY_KEY]) setAppHistory('home');
-            // 新UIでは起動時は必ずホームを優先する。
-            // 以前の一覧状態を自動復帰すると、ページを開いた直後にFirebase取得が始まり
-            // 「読み込みが終わらない」ように見えるため、一覧はユーザー操作で開く。
-            forgetListView();
-            document.documentElement.classList.add('entry-home');
-            try{ document.dispatchEvent(new Event('shareliscore:ui-refresh')); }catch(_){}
-            // ホーム表示の間はsongsを取得しない。
+            // F5/ブラウザー再読み込みだけ直前の一覧へ復帰。通常の新規アクセスはホーム。
+            const previousView = reloadedListView();
+            if (previousView) await openHomeDestination(previousView, true);
+            // ホーム表示の間はsongs全曲を取得しない。
         }
     });
 
@@ -7617,12 +7625,12 @@ html, body { background: transparent !important; color: ${text} !important; }
         if(serverSearchMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode) return;
 
         if(genreServerMode && serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode){
-            void loadServerGenrePage(currentGenre, direction > 0 ? 'older' : 'newer');
+            loadServerGenrePage(currentGenre, direction > 0 ? 'older' : 'newer').catch(() => {});
             return;
         }
 
         if(serverPagedMasterMode && !masterLoaded && !currentRoomId && !myListMode){
-            void loadServerMasterPage(direction > 0 ? 'older' : 'newer');
+            loadServerMasterPage(direction > 0 ? 'older' : 'newer').catch(() => {});
             return;
         }
         const nextIndex = songPageIndex + (direction > 0 ? 1 : -1);
@@ -7900,10 +7908,8 @@ html, body { background: transparent !important; color: ${text} !important; }
 
   function syncRoomQueueDockVisibility(){
     const hasRoom = redesignHasRoomContext();
-    if(document.body.classList.contains('has-room-context') !== hasRoom){
-      document.body.classList.toggle('has-room-context', hasRoom);
-    }
-    if(!hasRoom && document.body.classList.contains('room-queue-dock-collapsed')){
+    document.body.classList.toggle('has-room-context', hasRoom);
+    if(!hasRoom){
       document.body.classList.remove('room-queue-dock-collapsed');
     }
   }
@@ -8035,25 +8041,19 @@ html, body { background: transparent !important; color: ${text} !important; }
   window.redesignDataBusy = false;
   window.setRedesignDataBusy = function(busy){
     const next = !!busy;
-    if(window.redesignDataBusy === next) return;
     window.redesignDataBusy = next;
-
-    if(document.body.classList.contains('redesign-data-busy') !== next){
-      document.body.classList.toggle('redesign-data-busy', next);
-    }
+    document.body.classList.toggle('redesign-data-busy', next);
 
     if(topSearch){
-      if(topSearch.disabled !== next) topSearch.disabled = next;
-      const aria = String(next);
-      if(topSearch.getAttribute('aria-busy') !== aria) topSearch.setAttribute('aria-busy', aria);
+      topSearch.disabled = next;
+      topSearch.setAttribute('aria-busy', String(next));
     }
 
     document.querySelectorAll('#redesignGenreHost .genre-btn').forEach(btn=>{
+      // 「ジャンル読込中…」など元々disabledのボタンはそのまま。
       if(next){
-        if(!btn.disabled){
-          btn.dataset.redesignBusyDisabled = '1';
-          btn.disabled = true;
-        }
+        if(!btn.disabled) btn.dataset.redesignBusyDisabled = '1';
+        btn.disabled = true;
       }else if(btn.dataset.redesignBusyDisabled === '1'){
         btn.disabled = false;
         delete btn.dataset.redesignBusyDisabled;
@@ -8092,18 +8092,15 @@ html, body { background: transparent !important; color: ${text} !important; }
     const pretty = signed
       ? String(currentUser.displayName || currentUser.email || 'ログイン中').trim()
       : 'ゲスト';
-    const avatar = signed ? (pretty.charAt(0).toUpperCase() || 'U') : 'G';
-    const actionText = signed ? 'ログアウト' : 'Googleでログイン';
-    if(userText && userText.textContent !== pretty) userText.textContent = pretty;
-    if(userAvatar && userAvatar.textContent !== avatar) userAvatar.textContent = avatar;
-    if(loginState && loginState.textContent !== label) loginState.textContent = label;
-    if(loginActionText && loginActionText.textContent !== actionText) loginActionText.textContent = actionText;
+    userText.textContent = pretty;
+    userAvatar.textContent = signed ? (pretty.charAt(0).toUpperCase() || 'U') : 'G';
+    loginState.textContent = label;
+    loginActionText.textContent = signed ? 'ログアウト' : 'Googleでログイン';
 
     const oldAdmin = document.getElementById('adminPageLink');
     if(adminMirror && oldAdmin){
       const visible = getComputedStyle(oldAdmin).display !== 'none';
-      const desired = visible ? 'flex' : 'none';
-      if(adminMirror.style.display !== desired) adminMirror.style.display = desired;
+      adminMirror.style.display = visible ? 'flex' : 'none';
     }
   }
 
@@ -8151,56 +8148,19 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
   });
 
-  // 新UIの状態同期は body 全体のMutationObserverで監視しない。
-  // 翻訳用MutationObserverとの相互反応を避け、必要な箇所だけイベント駆動で更新する。
-  let redesignRefreshQueued = false;
-  function queueRedesignRefresh(){
-    if(redesignRefreshQueued) return;
-    redesignRefreshQueued = true;
-    requestAnimationFrame(()=>{
-      redesignRefreshQueued = false;
-      syncActiveNav();
-      syncIdentity();
-      syncRoomQueueDockVisibility();
-      syncTopSearchFromMain();
-
-      // 常時MutationObserverの代わりに、他言語を選択中の時だけ
-      // 新UIの小さい領域を必要時に翻訳する。
-      try{
-        if(typeof activeLanguage!=='undefined' && activeLanguage!=='ja' && typeof translateUiTree==='function'){
-          translateUiTree(document.getElementById('redesignSidebar'));
-          translateUiTree(document.getElementById('redesignTopbar'));
-          translateUiTree(document.getElementById('redesignTopFilterBar'));
-        }
-      }catch(_){}
-    });
-  }
-  window.redesignRefreshUI = queueRedesignRefresh;
+  const bodyObserver = new MutationObserver(()=>{
+    mountRedesignTopControls();
+    syncActiveNav();
+    syncIdentity();
+    syncRoomQueueDockVisibility();
+  });
+  bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
 
   const adminTarget = document.getElementById('adminPageLink');
-  if(adminTarget){
-    new MutationObserver(queueRedesignRefresh)
-      .observe(adminTarget,{attributes:true,attributeFilter:['style','class']});
-  }
+  if(adminTarget) new MutationObserver(syncIdentity).observe(adminTarget,{attributes:true,attributeFilter:['style','class']});
 
   const statusTarget = document.getElementById('loginStatus');
-  if(statusTarget){
-    new MutationObserver(queueRedesignRefresh)
-      .observe(statusTarget,{childList:true,subtree:true,characterData:true});
-  }
-
-  const mainSearch = document.getElementById('searchInput');
-  if(mainSearch){
-    mainSearch.addEventListener('input',syncTopSearchFromMain,{passive:true});
-    mainSearch.addEventListener('change',syncTopSearchFromMain,{passive:true});
-  }
-
-  window.addEventListener('popstate',queueRedesignRefresh,{passive:true});
-  window.addEventListener('hashchange',queueRedesignRefresh,{passive:true});
-  window.addEventListener('resize',queueRedesignRefresh,{passive:true});
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden) queueRedesignRefresh();
-  });
+  if(statusTarget) new MutationObserver(syncIdentity).observe(statusTarget,{childList:true,subtree:true,characterData:true,attributes:true});
 
   document.addEventListener('click',event=>{
     if(window.innerWidth<=820 && !sidebar.contains(event.target) && !document.getElementById('redesignMobileMenuBtn')?.contains(event.target)){
@@ -8208,43 +8168,27 @@ html, body { background: transparent !important; color: ${text} !important; }
     }
   });
 
+  setInterval(syncTopSearchFromMain,700);
   document.getElementById('roomQueueDockToggle')?.addEventListener('click',()=>toggleRoomQueueDock());
   document.querySelectorAll('#roomQueueDock .room-dock-tab').forEach(button=>{
     button.addEventListener('click',()=>selectRoomQueueDockStatus(button.dataset.roomDockStatus));
   });
   selectRoomQueueDockStatus('reserved');
 
-  // DOM移動は初期化時の1回だけ。
-  // genreFilters / songCountDisplay は同じDOMノードを再描画するため再移動は不要。
-  mountRedesignTopControls();
+  setTimeout(()=>{
+    mountRedesignTopControls();
+    syncIdentity();
+    syncActiveNav();
+    syncRoomQueueDockVisibility();
+    syncTopSearchFromMain();
+    try{
+      if(typeof translateUiTree === 'function') translateUiTree(document.getElementById('redesignSidebar'));
+      if(typeof translateUiTree === 'function') translateUiTree(document.getElementById('redesignTopbar'));
+    }catch(_){}
+  },0);
 
-  // 初期描画を先に完了させ、補助的なUI同期はアイドル時に回す。
-  if('requestIdleCallback' in window){
-    requestIdleCallback(()=>queueRedesignRefresh(),{timeout:1000});
-  }else{
-    setTimeout(queueRedesignRefresh,50);
-  }
-
-  // 既存処理から明示的に呼べる軽量フック。
-  document.addEventListener('shareliscore:ui-refresh',queueRedesignRefresh);
-})();
-</script>
-
-
-<script>
-(function(){
-  try{
-    if('PerformanceObserver' in window){
-      const po=new PerformanceObserver(list=>{
-        for(const entry of list.getEntries()){
-          if(entry.duration>=100){
-            console.warn('[ShareLiScore診断] 長時間メイン処理:',Math.round(entry.duration)+'ms',entry);
-          }
-        }
-      });
-      po.observe({type:'longtask',buffered:true});
-    }
-  }catch(_){}
+  // genreFilters / songCountDisplay は同じDOMノードを再描画して使うため、
+  // 周期的なDOM移動は行わない。必要時は body の状態変化で再マウントする。
 })();
 </script>
 
