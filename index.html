@@ -6224,7 +6224,20 @@ html, body { background: transparent !important; color: ${text} !important; }
 
     function serverPageCursor(row) {
         if (!row) return null;
-        return {id:String(row._id||''), updatedAt:Number(row._updatedAt)||0};
+        return {
+            id:String(row._id||''),
+            title:String(row['曲名']||'')
+        };
+    }
+
+    function withFirebaseTimeout(promise, ms=15000, label='Firebaseの読み込み') {
+        let timer = null;
+        const timeout = new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error(label + 'がタイムアウトしました。通信状態を確認して再読み込みしてください。')), ms);
+        });
+        return Promise.race([promise, timeout]).finally(() => {
+            if (timer) clearTimeout(timer);
+        });
     }
 
     function serverPagedNeedsFullMaster() {
@@ -6609,61 +6622,89 @@ html, body { background: transparent !important; color: ${text} !important; }
         }
         if (serverSearchBusy) return;
         if (serverPageBusy) return serverPageLoadPromise;
+
         serverPageBusy=true;
         window.setRedesignDataBusy?.(true);
         serverPagedMasterMode=true;
+
         const previousRows=allData.slice();
         const previousPage=serverPageNumber;
         const previousHasOlder=serverPageHasOlder;
+
         loadingArea.style.display='flex';
         loadingArea.innerHTML='<div class="spinner"></div><div>Loading......</div>';
 
         serverPageLoadPromise=(async()=>{
             try{
-                let query=db.ref(MASTER_DB_PATH).orderByChild('updatedAt');
+                // 現在公開中のRealtime Database Rulesでは /songs の title がindex済み。
+                // updatedAt はindexされていない環境があるため、初期100件取得では使わない。
+                // title + Firebase child key の組み合わせで安定した100件ページングを行う。
+                let query=db.ref(MASTER_DB_PATH).orderByChild('title');
                 let snapshot;
                 let rows;
-                let hasOlder=false;
+                let hasNext=false;
 
                 if(direction==='older' && allData.length){
-                    const oldest=serverPageCursor(allData[allData.length-1]);
-                    query=oldest.updatedAt
-                        ? query.endAt(oldest.updatedAt,oldest.id)
-                        : query.endAt(null,oldest.id);
-                    snapshot=await query.limitToLast(SERVER_MASTER_PAGE_SIZE+2).once('value');
+                    // 次の100件
+                    const cursor=serverPageCursor(allData[allData.length-1]);
+                    query=query.startAt(cursor.title,cursor.id);
+                    snapshot=await withFirebaseTimeout(
+                        query.limitToFirst(SERVER_MASTER_PAGE_SIZE+2).once('value'),
+                        15000,
+                        '全曲一覧の取得'
+                    );
                     rows=serverSnapshotToRawRows(snapshot);
                     let body=rows.slice(1);
-                    if(body.length && String(body[body.length-1][0])===oldest.id) body.pop();
-                    hasOlder=body.length>SERVER_MASTER_PAGE_SIZE;
-                    body=body.slice(-SERVER_MASTER_PAGE_SIZE).reverse();
+
+                    // startAtは現在行を含むため除外。
+                    const currentIndex=body.findIndex(row=>String(row[0])===cursor.id);
+                    if(currentIndex>=0) body.splice(currentIndex,1);
+
+                    hasNext=body.length>SERVER_MASTER_PAGE_SIZE;
+                    body=body.slice(0,SERVER_MASTER_PAGE_SIZE);
                     if(!body.length) return;
+
                     rows=[rows[0],...body];
                     serverPageNumber++;
                 }else if(direction==='newer' && allData.length && serverPageNumber>1){
-                    const newest=serverPageCursor(allData[0]);
-                    query=newest.updatedAt
-                        ? query.startAt(newest.updatedAt,newest.id)
-                        : query.startAt(null,newest.id);
-                    snapshot=await query.limitToFirst(SERVER_MASTER_PAGE_SIZE+2).once('value');
+                    // 前の100件
+                    const cursor=serverPageCursor(allData[0]);
+                    query=query.endAt(cursor.title,cursor.id);
+                    snapshot=await withFirebaseTimeout(
+                        query.limitToLast(SERVER_MASTER_PAGE_SIZE+2).once('value'),
+                        15000,
+                        '全曲一覧の取得'
+                    );
                     rows=serverSnapshotToRawRows(snapshot);
                     let body=rows.slice(1);
-                    if(body.length && String(body[0][0])===newest.id) body.shift();
-                    body=body.slice(0,SERVER_MASTER_PAGE_SIZE).reverse();
+
+                    // endAtは現在行を含むため除外。
+                    const currentIndex=body.findIndex(row=>String(row[0])===cursor.id);
+                    if(currentIndex>=0) body.splice(currentIndex,1);
+
+                    body=body.slice(-SERVER_MASTER_PAGE_SIZE);
                     if(!body.length) return;
+
                     rows=[rows[0],...body];
                     serverPageNumber=Math.max(1,serverPageNumber-1);
-                    hasOlder=true;
+                    hasNext=true;
                 }else{
-                    snapshot=await query.limitToLast(SERVER_MASTER_PAGE_SIZE+1).once('value');
+                    // 初回100件。titleは既存Rulesでindex済みなので高速に返る。
+                    snapshot=await withFirebaseTimeout(
+                        query.limitToFirst(SERVER_MASTER_PAGE_SIZE+1).once('value'),
+                        15000,
+                        '全曲一覧の初期取得'
+                    );
                     rows=serverSnapshotToRawRows(snapshot);
                     let body=rows.slice(1);
-                    hasOlder=body.length>SERVER_MASTER_PAGE_SIZE;
-                    body=body.slice(-SERVER_MASTER_PAGE_SIZE).reverse();
+
+                    hasNext=body.length>SERVER_MASTER_PAGE_SIZE;
+                    body=body.slice(0,SERVER_MASTER_PAGE_SIZE);
                     rows=[rows[0],...body];
                     serverPageNumber=1;
                 }
 
-                serverPageHasOlder=hasOlder;
+                serverPageHasOlder=hasNext;
                 loadRowsIntoApp(rows);
                 masterLoadNotice(`✅ 全曲一覧：Firebaseから${Math.max(0,rows.length-1)}曲だけ取得しました（${serverPageNumber}ページ目）。`);
             }catch(error){
@@ -6678,10 +6719,13 @@ html, body { background: transparent !important; color: ${text} !important; }
                 serverPageBusy=false;
                 serverPageLoadPromise=null;
                 window.setRedesignDataBusy?.(false);
-                // クエリ中はボタンを無効化しているため、完了後にもう一度描画して操作可能状態へ戻す。
+
+                // 成功済みならloadRowsIntoApp側でLoadingを閉じる。
+                // データが残っている場合は操作可能状態へ戻す。
                 if(serverPagedMasterMode && !masterLoaded && allData.length) renderTable();
             }
         })();
+
         return serverPageLoadPromise;
     }
 
