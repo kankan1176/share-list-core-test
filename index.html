@@ -2777,6 +2777,64 @@ body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal) .modal{
   }
 }
 
+
+/* ============================================================
+   2026-10-09 ROOM + MODAL PAGE TRANSITION FIX
+   Fix actual JS exception caused by removed cancel button.
+   Full-viewport canvas removes the top horizontal boundary.
+============================================================ */
+body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal){
+  top:0!important;
+  bottom:0!important;
+  left:var(--sl-side)!important;
+  right:0!important;
+  width:auto!important;
+  height:100dvh!important;
+  box-sizing:border-box!important;
+  padding:14px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#06101f!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal) .modal{
+  max-height:calc(100dvh - 28px)!important;
+  box-sizing:border-box!important;
+}
+body.sl-redesign #friendsModal.modal-overlay,
+body.sl-redesign #slHelpModal.modal-overlay{
+  background:#06101f!important;
+  border-top:0!important;
+}
+/* New song registration starts a little below the browser top, not against it. */
+body.sl-redesign.sl-add-song-open #addSongModal.sl-add-song-page-overlay{
+  top:0!important;
+  bottom:0!important;
+  padding:56px 24px 16px!important;
+  align-items:flex-start!important;
+}
+body.sl-redesign.sl-add-song-open #addSongModal .sl-add-song-page{
+  margin:0 auto!important;
+  padding:0 0 12px!important;
+}
+@media (max-height:780px) and (min-width:821px){
+  body.sl-redesign.sl-add-song-open #addSongModal.sl-add-song-page-overlay{
+    padding-top:28px!important;
+  }
+}
+@media(max-width:820px){
+  body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal){
+    left:0!important;right:0!important;
+    padding:9px!important;
+  }
+  body.sl-redesign.sl-add-song-open #addSongModal.sl-add-song-page-overlay{
+    padding:24px 9px 12px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5356,14 +5414,18 @@ body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal) .modal{
         if (currentRoomId) return;
         document.getElementById('roomCreateMessage').textContent = '';
         document.getElementById('confirmRoomCreation').disabled = false;
-        document.getElementById('cancelRoomCreation').disabled = false;
+        const cancelRoomButton = document.getElementById('cancelRoomCreation');
+        if (cancelRoomButton) cancelRoomButton.disabled = false;
         document.getElementById('roomCreateModal').style.display = 'flex';
+        document.body.classList.add('sl-room-create-open');
     }
     let roomCreationBusy = false;
     function closeRoomCreateModal(event) {
         if (event && event.target.id !== 'roomCreateModal') return;
         if (roomCreationBusy) return;
         document.getElementById('roomCreateModal').style.display = 'none';
+        document.body.classList.remove('sl-room-create-open');
+        if(typeof slRefreshNavigation==='function')slRefreshNavigation();
     }
     async function confirmCreateRoom() {
         if (roomCreationBusy || currentRoomId) return;
@@ -5372,7 +5434,7 @@ body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal) .modal{
         const cancel = document.getElementById('cancelRoomCreation');
         const status = document.getElementById('roomCreateMessage');
         button.disabled = true;
-        cancel.disabled = true;
+        if (cancel) cancel.disabled = true;
         status.textContent = 'ルームを作成しています…';
         try {
             const roomUser = await ensureRoomAuth();
@@ -5397,7 +5459,7 @@ body.sl-redesign .modal-overlay:not(#roomCreateModal):not(#addSongModal) .modal{
             console.error('ルーム作成に失敗:', error);
             status.textContent = 'ルームを作成できませんでした。通信状況とFirebaseの権限を確認し、再試行してください。';
             button.disabled = false;
-            cancel.disabled = false;
+            if (cancel) cancel.disabled = false;
         } finally {
             roomCreationBusy = false;
         }
@@ -8706,7 +8768,7 @@ html, body { background: transparent !important; color: ${text} !important; }
       if(overlay.id!==exceptId) overlay.style.display='none';
     });
     if(!exceptId){
-      document.body.classList.remove('sl-room-create-open','sl-add-song-open');
+      document.body.classList.remove('sl-room-create-open','sl-add-song-open','sl-overlay-page-open');
     }
   }
   window.slOpenExclusive=function(id){slCloseVisibleModals(id);if(typeof openModal==='function')openModal(id);}
