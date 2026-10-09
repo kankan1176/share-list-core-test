@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shareliscore App Check 診断</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
+<style>
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;max-width:760px;margin:40px auto;padding:0 18px;background:#111827;color:#f9fafb}
+.card{background:#1f2937;border:1px solid #374151;border-radius:12px;padding:18px;margin:14px 0}
+h1{font-size:24px}.ok{color:#86efac}.ng{color:#fca5a5}.wait{color:#fde68a}
+code,pre{background:#111827;border-radius:6px;padding:3px 6px;overflow-wrap:anywhere;white-space:pre-wrap}
+button{padding:10px 16px;border:0;border-radius:8px;font-weight:700;cursor:pointer}
+.small{font-size:13px;color:#cbd5e1}
+</style>
+</head>
+<body>
+<h1>Firebase App Check 診断</h1>
+
+<div class="card">
+  <div>現在のホスト: <code id="host"></code></div>
+  <div>App Check: <strong id="appcheck" class="wait">確認中…</strong></div>
+  <div>Realtime Database: <strong id="dbcheck" class="wait">待機中…</strong></div>
+</div>
+
+<div class="card">
+  <strong>診断結果</strong>
+  <pre id="detail">開始しています…</pre>
+</div>
+
+<button type="button" onclick="location.reload()">再テスト</button>
+
+<p class="small">
+このページは診断専用です。楽曲データ全体は取得せず、
+<code>masterMeta/revision</code> の小さな値だけを読み取ります。
+</p>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAidXlfliIIHzTFmr06EKDV6Fit-bSThLI",
+  authDomain: "kankan-session-room.firebaseapp.com",
+  databaseURL: "https://kankan-session-room-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kankan-session-room",
+  storageBucket: "kankan-session-room.firebasestorage.app",
+  messagingSenderId: "759342880820",
+  appId: "1:759342880820:web:9af0af755e35926a281261"
+};
+
+const APP_CHECK_SITE_KEY = "6LdkxeEtAAAAAJDWSvXbmsKHezi4oMuW88CWsvcQ";
+
+const host = document.getElementById("host");
+const appcheckEl = document.getElementById("appcheck");
+const dbcheckEl = document.getElementById("dbcheck");
+const detail = document.getElementById("detail");
+host.textContent = location.hostname;
+
+function setResult(el, ok, text){
+  el.textContent = text;
+  el.className = ok ? "ok" : "ng";
+}
+
+function errText(err){
+  if(!err) return "不明なエラー";
+  return [
+    err.code ? "code: " + err.code : "",
+    err.message ? "message: " + err.message : String(err)
+  ].filter(Boolean).join("\n");
+}
+
+(async()=>{
+  try{
+    firebase.initializeApp(firebaseConfig);
+
+    const appCheck = firebase.appCheck();
+    appCheck.activate(
+      new firebase.appCheck.ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+      true
+    );
+
+    detail.textContent = "App Checkトークンを強制取得しています…";
+
+    const tokenResult = await appCheck.getToken(true);
+    if(!tokenResult || !tokenResult.token){
+      throw new Error("App Checkトークンを取得できませんでした。");
+    }
+
+    setResult(appcheckEl, true, "成功");
+    detail.textContent =
+      "✅ App Checkトークン取得成功\n" +
+      "ホスト: " + location.hostname + "\n" +
+      "トークン長: " + tokenResult.token.length + "\n\n" +
+      "Realtime Databaseへ検証付きリクエストを送信しています…";
+
+    const db = firebase.database();
+    const snap = await db.ref("masterMeta/revision").once("value");
+
+    setResult(dbcheckEl, true, "成功");
+    detail.textContent =
+      "✅ App Checkトークン取得成功\n" +
+      "✅ Realtime Database読取成功\n" +
+      "ホスト: " + location.hostname + "\n" +
+      "revision: " + String(snap.val() ?? "(未設定)") + "\n\n" +
+      "この結果なら、Firebase App Check側で「検証済み」リクエストが発生しています。";
+  }catch(err){
+    if(appcheckEl.textContent === "確認中…"){
+      setResult(appcheckEl, false, "失敗");
+    }else if(appcheckEl.textContent === "成功"){
+      setResult(dbcheckEl, false, "失敗");
+    }
+    detail.textContent =
+      "❌ 診断に失敗しました。\n\n" +
+      errText(err) + "\n\n" +
+      "この画面のスクリーンショットを送ってください。";
+    console.error(err);
+  }
+})();
+</script>
+</body>
+</html>

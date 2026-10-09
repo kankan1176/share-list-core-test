@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KanKan Setlist for OBS</title>
+    
+    <!-- Firebase SDK (互換バージョン) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <!-- PapaParse CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: rgba(18, 18, 18, 0.88);
+            --panel-bg: rgba(26, 26, 26, 0.92);
+            --text-color: #ffffff;
+            --primary: #007bff;
+            --primary-light: #4da3ff;
+            --border-color: rgba(0, 123, 255, 0.4);
+            --item-bg: rgba(255, 255, 255, 0.06);
+            --item-hover: rgba(255, 255, 255, 0.1);
+        }
+
+        /* OBSで高さを変えても崩れないよう全体を柔軟な比率に設定 */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 8px;
+            box-sizing: border-box;
+            background: transparent !important; /* OBSで背景透過 */
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+            overflow: hidden;
+        }
+
+        /* 外枠コンテナ：高さを100%フィットさせて追従 */
+        .obs-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-sizing: border-box;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* ヘッダーエリア（固定高） */
+        .obs-header {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .obs-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .obs-counter {
+            font-size: 13px;
+            font-weight: bold;
+            background: var(--primary);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        /* セットリスト領域：幅800pxを活かして2列グリッドで15曲以上を綺麗に配置 */
+        #obsCompletedContainer {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+            grid-auto-rows: max-content;
+            align-content: start;
+            gap: 6px 12px;
+            overflow-y: auto;
+            padding-right: 4px;
+            box-sizing: border-box;
+        }
+
+        /* OBS上で目障りなスクロールバーを非表示にしつつスクロール可能に保持 */
+        #obsCompletedContainer::-webkit-scrollbar {
+            display: none;
+        }
+        #obsCompletedContainer {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 各楽曲アイテム：高さをスリム化して多数の曲を一覧表示 */
+        .obs-song-item {
+            display: flex;
+            align-items: center;
+            background: var(--item-bg);
+            padding: 5px 8px;
+            border-radius: 5px;
+            border-left: 3px solid var(--primary);
+            font-size: 13px;
+            line-height: 1.3;
+            box-sizing: border-box;
+            min-width: 0;
+            backdrop-filter: blur(2px);
+        }
+
+        .obs-song-num {
+            font-weight: bold;
+            color: var(--primary-light);
+            font-size: 12px;
+            margin-right: 6px;
+            flex-shrink: 0;
+            width: 22px;
+            text-align: right;
+        }
+
+        .obs-song-info {
+            display: flex;
+            align-items: baseline;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .obs-song-title {
+            font-weight: bold;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .obs-song-artist {
+            font-size: 11px;
+            opacity: 0.75;
+            margin-left: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 1;
+        }
+
+        .empty-notice {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #bbb;
+            padding: 30px 10px;
+            font-size: 14px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="obs-container">
+    <div class="obs-header">
+        <h2 class="obs-title">🎵 本日のセットリスト 🎵</h2>
+        <span class="obs-counter" id="songCounter">0 曲</span>
+    </div>
+    <div id="obsCompletedContainer">
+        <div class="empty-notice">データを読み込み中...</div>
+    </div>
+</div>
+
+<script>
+    // Firebase 設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyAidXlfliIIHzTFmr06EKDV6Fit-bSThLI",
+      authDomain: "kankan-session-room.firebaseapp.com",
+      databaseURL: "https://kankan-session-room-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "kankan-session-room",
+      storageBucket: "kankan-session-room.firebasestorage.app",
+      messagingSenderId: "759342880820",
+      appId: "1:759342880820:web:9af0af755e35926a281261"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const obsAuth = firebase.auth();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('room');
+
+    // OBSは公開CSVに依存せず、完了曲だけを楽曲IDでFirebaseから個別取得する。
+    // これによりマスター差し替え後も、同じ楽曲IDなら即時反映される。
+    let authReady = false;
+    let subscribed = false;
+    let latestQueueRef = null;
+    const songCache = new Map();
+    const noticeEl = document.getElementById('obsCompletedContainer');
+
+    function showObsError(message, error) {
+        if (error) console.error('[OBS]', message, error);
+        noticeEl.innerHTML = '<div class="empty-notice">' + escapeHtml(message) + '</div>';
+    }
+
+    async function fetchSongById(songId) {
+        const id = String(songId ?? '');
+        if (!id) return null;
+        if (songCache.has(id)) return songCache.get(id);
+        try {
+            const snap = await db.ref('songs/' + id).once('value');
+            const raw = snap.val();
+            if (!raw || typeof raw !== 'object' || !String(raw.title || '').trim()) {
+                songCache.set(id, null);
+                return null;
+            }
+            const song = {
+                _id: id,
+                '曲名': String(raw.title || ''),
+                'アーティスト': String(raw.artist || '')
+            };
+            songCache.set(id, song);
+            return song;
+        } catch (error) {
+            console.warn('[OBS] 楽曲取得失敗:', id, error);
+            return null;
+        }
+    }
+
+    function subscribeWhenReady() {
+        if (subscribed || !authReady || !roomId) return;
+        subscribed = true;
+        latestQueueRef = db.ref('rooms/' + roomId + '/queue');
+        latestQueueRef.on('value', async (snapshot) => {
+            const queue = snapshot.val() || {};
+            const rawCompleted = Object.values(queue)
+                .filter(item => item && item.status === 'completed')
+                .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+            const completedItems = [];
+            for (const item of rawCompleted) {
+                const songData = await fetchSongById(item.songId);
+                if (songData) completedItems.push({ ...item, songData });
+                else console.warn('[OBS] マスターで見つからない楽曲ID:', String(item.songId ?? ''));
+            }
+            renderObsList(completedItems);
+        }, (error) => {
+            subscribed = false;
+            showObsError('⚠️ ルームの読み込みに失敗しました。認証とFirebaseルールを確認してください。', error);
+        });
+    }
+
+    if (!roomId || !/^[A-Za-z0-9_-]{1,40}$/.test(roomId)) {
+        showObsError('⚠️ URLに正しい ?room=ルームID を指定してください。');
+    } else {
+        // 認証済みGoogleアカウントが復元された場合も、そのまま利用可能。
+        // OBS単体で未ログインの場合のみFirebase匿名認証を行う。
+        let anonymousSignInPending = false;
+        obsAuth.onAuthStateChanged(async (user) => {
+            if (user) {
+                authReady = true;
+                subscribeWhenReady();
+            } else if (!anonymousSignInPending) {
+                authReady = false;
+                anonymousSignInPending = true;
+                try {
+                    await obsAuth.signInAnonymously();
+                } catch (error) {
+                    showObsError('⚠️ OBSの匿名認証に失敗しました。Firebaseの匿名ログイン設定を確認してください。', error);
+                } finally {
+                    anonymousSignInPending = false;
+                }
+            }
+        }, error => showObsError('⚠️ Firebaseの認証状態を確認できません。', error));
+
+        subscribeWhenReady();
+    }
+
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function renderObsList(items) {
+        const container = document.getElementById('obsCompletedContainer');
+        const counter = document.getElementById('songCounter');
+        container.innerHTML = '';
+        counter.textContent = `${items.length} 曲`;
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-notice">まだ完了した曲はありません...</div>';
+            return;
+        }
+
+        const countMap = {};
+        const circleNumbers = ['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+
+        items.forEach((item, index) => {
+            const sId = item.songId;
+            countMap[sId] = (countMap[sId] || 0) + 1;
+            let displayTitle = escapeHtml(item.songData['曲名']);
+            if (countMap[sId] > 1) {
+                displayTitle += ` ${circleNumbers[countMap[sId]] || `(${countMap[sId]})`}`;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'obs-song-item';
+            div.innerHTML = `
+                <span class="obs-song-num">${index + 1}.</span>
+                <div class="obs-song-info">
+                    <span class="obs-song-title">${displayTitle}</span>
+                    <span class="obs-song-artist">/ ${escapeHtml(item.songData['アーティスト'])}</span>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+
+</body>
+</html>

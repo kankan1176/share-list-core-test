@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>シェアリスコア｜管理者・楽曲データ管理</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<style>
+:root{font-family:system-ui,'Noto Sans JP',sans-serif;color-scheme:dark;background:#111827;color:#f2f5fc}*{box-sizing:border-box}
+body{max-width:1100px;margin:0 auto;padding:18px}header{display:flex;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #39465a;padding-bottom:15px}h1{font-size:22px;margin:0;flex:1}h2{font-size:18px;margin:2px 0 13px}h3{font-size:15px;margin:0 0 8px}p{line-height:1.6}main{margin-top:15px}section{background:#1c2636;border:1px solid #39465a;border-radius:10px;margin:12px 0;padding:16px}button,input,textarea{font:inherit}button,a.nav{border:1px solid #607896;border-radius:7px;background:#293c55;color:white;padding:9px 13px;cursor:pointer;text-decoration:none;display:inline-block}button:hover{filter:brightness(1.17)}button:disabled{opacity:.48;cursor:not-allowed}.primary{background:#145a9a;border-color:#287bc1}.approve{background:#176443;border-color:#32875e}.reject{background:#713637;border-color:#a14949}.bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.muted{color:#aebfd4;font-size:13px}.status{white-space:pre-wrap;line-height:1.55;color:#d4e8ff}input[type=file]{max-width:100%;padding:8px;border:1px dashed #6e7b8d;border-radius:6px}#workspace{display:none}.scroll{max-height:440px;overflow:auto;border:1px solid #39465a;border-radius:6px;padding:8px;background:#131c2a}.row{padding:9px 5px;border-bottom:1px solid #39465a;overflow-wrap:anywhere}.row:last-child{border-bottom:0}.pill{font-size:12px;padding:3px 7px;border-radius:5px;background:#394c65;margin-right:5px}.warn{color:#ffcd7a}.err{color:#ff9292}.ok{color:#83d9a0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#101824;padding:10px;border-radius:5px}.request{background:#111d2b;border:1px solid #344359;padding:12px;margin:8px 0;border-radius:7px}.request-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}code{color:#c5e4ff}
+.log-card{background:#111d2b;border:1px solid #344359;padding:12px;margin:8px 0;border-radius:7px}
+.log-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.log-title{font-weight:700}
+.log-meta{font-size:12px;color:#aebfd4;overflow-wrap:anywhere}
+.log-change{margin-top:8px;padding:8px 10px;border-left:3px solid #607896;background:#101824;border-radius:4px}
+.log-field{font-weight:700;margin-bottom:3px}
+.log-values{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.log-arrow{color:#83d9a0;font-weight:700}
+@media(max-width:600px){body{padding:10px}section{padding:12px}h1{font-size:18px}}
+</style></head>
+<body>
+<header><h1>🛡️ シェアリスコア｜楽曲データ管理</h1><a class="nav" href="index.html">← アプリへ戻る</a><button id="login" class="primary">Googleで管理者ログイン</button><button id="logout" hidden>ログアウト</button></header>
+<p id="authStatus" class="status">Googleログインを確認しています…</p>
+<main id="workspace">
+ <section><h2>📦 CSVから楽曲マスターを追加・更新</h2>
+ <p class="muted">CSVの「楽曲ID」が既存UUIDなら更新、未発行なら新規UUIDを付与します。同一曲候補・重複ID・不備は保留し、CSVにない楽曲は削除しません。最大2,000件/回。取込前に必ずFirebaseをバックアップしてください。</p>
+ <div class="bar"><input type="file" id="csvFile" accept=".csv,text/csv"><button id="previewCsv" class="primary">CSVを照合する</button><button id="refreshMaster">Firebaseマスター再取得</button></div>
+ <p id="csvInfo" class="status"></p><div id="csvPreview" class="scroll" hidden></div>
+ <div class="bar" style="margin-top:10px"><button id="applyCsv" class="approve" disabled>プレビューした追加・更新を確定</button><span id="csvProgress" class="muted"></span></div>
+ </section>
+ <section><div class="bar"><h2 style="flex:1">📝 新曲登録申請</h2><button id="refreshRequests">申請を再読込</button></div><div id="addRequests" class="scroll"></div></section>
+ <section><h2>✏️ 楽曲情報の修正申請・アーティスト補完</h2><div id="editRequests" class="scroll"></div></section>
+ <section>
+  <div class="bar">
+   <h2 style="flex:1">🧾 楽曲編集履歴</h2>
+   <button id="refreshEditLogs">履歴を再読込</button>
+  </div>
+  <p class="muted">Googleログインユーザーが楽曲情報を直接編集した履歴です。直近100件を新しい順に表示します。</p>
+  <div id="editLogs" class="scroll"></div>
+ </section>
+ <section><h2>🔄 公開マスターのキャッシュ更新通知</h2>
+ <p class="muted">Firebase ConsoleからsongsへJSONを直接インポートした場合や、この管理画面以外から楽曲を修正した場合に押してください。これによりユーザー端末の古いマスターが次回閲覧時に更新されます。管理画面でCSVを確定・新曲/修正申請を承認した際は自動通知します。</p>
+ <div class="bar"><button id="bumpRevision" class="primary">公開マスターの更新を通知する</button><span id="revisionInfo" class="status"></span></div>
+   </section>
+  <section><h2>📥 楽曲マスターをCSV出力</h2>
+  <p class="muted">Firebaseの正式マスター <code>/songs</code> を最新状態で再取得し、全楽曲・全13項目をCSVで出力します。既存の楽曲UUIDを「楽曲ID」列に保持し、未設定項目は空欄にします。内部管理用の更新日時（updatedAt）はCSVには出力しません。データは変更しません。Excelで開けるUTF-8（BOM付き）形式です。</p>
+  <div class="bar"><button type="button" id="exportCsv" class="primary">📥 全楽曲マスターをCSVダウンロード</button><span id="exportCsvStatus" class="status" role="status" aria-live="polite"></span></div>
+  </section>
+  <section><h2>🌐 第3段階：公開用JSONを書き出す</h2>
+  <p class="muted">承認・CSV更新・Firebase Consoleでの変更が完了した後に実行してください。Firebaseから全曲と更新番号を再取得し、取得中に更新が入っていないか照合して書き出します。通常はGitHub Actionsが約10分ごとに <code>public/songs.json</code> を自動更新するため、ダウンロードは不要です。自動同期が止まっている場合の予備として、このファイルをGitHubの <code>public/songs.json</code> に同名でアップロードできます。管理者のユーザー情報や申請は含みません。</p>
+  <div class="bar"><button id="exportStatic" class="primary">公開用 songs.json をダウンロード</button><span id="exportStaticStatus" class="status"></span></div>
+  </section>
+  <section><h2>✅ 承認操作について</h2><p class="muted">申請内容を確認して承認すると、その曲UUIDのマスター更新と申請の承認済みステータスを同時にFirebaseへ保存します。却下の場合、マスターは変更されません。複数の管理画面を同時に開いて処理しないでください。</p></section>
+</main>
+<script>
+'use strict';
+const firebaseConfig={apiKey:'AIzaSyAidXlfliIIHzTFmr06EKDV6Fit-bSThLI',authDomain:'kankan-session-room.firebaseapp.com',databaseURL:'https://kankan-session-room-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'kankan-session-room',storageBucket:'kankan-session-room.firebasestorage.app',messagingSenderId:'759342880820',appId:'1:759342880820:web:9af0af755e35926a281261'};
+firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.database();
+const FIELDS=['id','title','artist','chordwiki','bpm','genre','genre2','genre3','tieup','search','lyrics','composition','arrangement'];
+const CSV_EXPORT_HEADERS=[
+ ['楽曲ID','id'],['曲名','title'],['アーティスト','artist'],['コードwiki','chordwiki'],
+ ['BPM','bpm'],['ジャンル①','genre'],['ジャンル②','genre2'],['ジャンル③','genre3'],
+ ['タイアップ','tieup'],['検索','search'],['作詞','lyrics'],['作曲','composition'],['編曲','arrangement']
+];
+const HEADERS={'楽曲ID':'id','曲名':'title','アーティスト':'artist','コードwiki':'chordwiki','コードWiki':'chordwiki','BPM':'bpm','ジャンル':'genre','ジャンル①':'genre','ジャンル②':'genre2','ジャンル③':'genre3','タイアップ':'tieup','タイアップ情報':'tieup','検索':'search','作詞':'lyrics','作曲':'composition','編曲':'arrangement'};
+const el=id=>document.getElementById(id);let admin=null,master={},preview=[],busy=false;
+function msg(id,t){el(id).textContent=t;}
+function humanErr(err){return String(err?.message||err||'不明なエラー');}
+function canonicalUrl(value){const raw=String(value||'').trim();if(!raw)return '';try{const u=new URL(raw);if(u.protocol!=='https:'||u.hostname!=='ja.chordwiki.org')return null;if(u.pathname==='/wiki.cgi'&&u.searchParams.get('c')==='view'&&u.searchParams.get('t'))return u.origin+'/wiki/'+encodeURIComponent(u.searchParams.get('t'));if(u.pathname.startsWith('/wiki/'))return u.origin+u.pathname;return null;}catch{return null;}}
+function blankSong(){return Object.fromEntries(FIELDS.map(f=>[f,'']));}
+function normalized(song){const x=blankSong();FIELDS.forEach(field=>x[field]=String(song?.[field]??'').trim());return x;}
+function compactSong(song){
+ const normalizedSong=normalized(song), out={};
+ for(const field of FIELDS){
+  if(field==='id')continue; // Firebase songs/{UUID} itself provides the immutable ID.
+  if(normalizedSong[field]!=='')out[field]=normalizedSong[field];
+ }
+ if(!out.title)throw Error('曲名を空欄にはできません。');
+ return out;
+}
+function sameSong(a,b){return FIELDS.every(k=>k==='id'||String(a?.[k]??'')===String(b?.[k]??''));}
+function identity(song){return [song.title.trim(),song.artist.trim(),canonicalUrl(song.chordwiki)||song.chordwiki.trim()].join('\u0001');}
+// Push key is only used as a unique revision token, not as a stored child path.
+function newMasterRevision(){return db.ref('masterMeta').push().key;}
+async function showMasterRevision(){const snap=await db.ref('masterMeta/revision').once('value');msg('revisionInfo','現在の更新番号：'+(snap.val()||'未設定'));}
+el('bumpRevision').addEventListener('click',async()=>{
+ if(!admin||busy)return;
+ if(!confirm('現在のsongsが本番の最新データであることを確認しましたか？ ユーザーのキャッシュ更新を通知します。'))return;
+ busy=true;el('bumpRevision').disabled=true;
+ try{await db.ref('masterMeta/revision').set(newMasterRevision());await showMasterRevision();msg('revisionInfo','✅ 更新通知を保存しました。');}
+ catch(error){msg('revisionInfo','⚠ 更新通知に失敗：'+humanErr(error));}
+ finally{busy=false;el('bumpRevision').disabled=false;}
+});
+
+el('exportStatic').addEventListener('click',async()=>{
+ if(!admin||busy)return;
+ busy=true;el('exportStatic').disabled=true;
+ try{
+  msg('exportStaticStatus','Firebaseの全曲を検証中…');
+  let snapshot=null,revision='';
+  for(let i=0;i<3;i++){
+   const before=(await db.ref('masterMeta/revision').once('value')).val();
+   if(typeof before!=='string'||!before)throw Error('masterMeta/revision が未設定です。先に更新通知を実行してください。');
+   snapshot=(await db.ref('songs').once('value')).val();
+   const after=(await db.ref('masterMeta/revision').once('value')).val();
+   if(before===after){revision=after;break;}
+  }
+  if(!revision)throw Error('取得中に楽曲が更新されました。操作終了後に再度実行してください。');
+  if(!snapshot||typeof snapshot!=='object'||Array.isArray(snapshot))throw Error('songs が不正です。');
+  const entries=Object.entries(snapshot);
+  if(!entries.length)throw Error('楽曲が0件です。');
+  for(const [id,song] of entries){if(!song||typeof song!=='object'||typeof song.title!=='string'||!song.title.trim()||(song.id&&song.id!==id))throw Error('楽曲データ不正: '+id);}
+  // 書き出すのは公開マスターのみ。既存UUIDは songs オブジェクトのキーをそのまま保持する。
+  const blob=new Blob([JSON.stringify({schema:3,revision,songs:snapshot})],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='songs.json';document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  msg('exportStaticStatus',`✅ ${entries.length.toLocaleString()}曲を書き出しました。自動同期が止まっている場合のみ、GitHubの public/songs.json にアップロードしてください。`);
+ }catch(error){msg('exportStaticStatus','⚠ '+humanErr(error));}
+ finally{busy=false;el('exportStatic').disabled=false;}
+});
+
+// Firebaseの正式な /songs を毎回再取得してCSV出力する。
+// 取得前後でmasterMeta/revisionが一致した場合のみ書き出し、更新途中の混在を防ぐ。
+el('exportCsv').addEventListener('click',async()=>{
+ if(!admin||busy)return;
+ const button=el('exportCsv');
+ busy=true;
+ button.disabled=true;
+ try{
+  msg('exportCsvStatus','Firebaseから最新の楽曲マスターを読み込み中…');
+  let songs=null, revision=null;
+
+  for(let attempt=0;attempt<3;attempt++){
+   const before=(await db.ref('masterMeta/revision').once('value')).val();
+   const snapshot=await db.ref('songs').once('value');
+   const after=(await db.ref('masterMeta/revision').once('value')).val();
+
+   if(before===after){
+    songs=snapshot.val();
+    revision=after;
+    break;
+   }
+  }
+
+  if(!songs||typeof songs!=='object'||Array.isArray(songs))
+   throw Error('楽曲マスターを取得できませんでした。');
+  if(revision===null)
+   throw Error('取得中にマスターが更新されました。もう一度実行してください。');
+
+  const rows=Object.entries(songs).map(([id,song])=>{
+   if(!song||typeof song!=='object'||typeof song.title!=='string'||!song.title.trim()||(song.id&&song.id!==id))
+    throw Error('不正な楽曲データ：'+id);
+   return CSV_EXPORT_HEADERS.map(([,field])=>field==='id'?id:String(song[field]??''));
+  });
+
+  if(!rows.length)throw Error('楽曲マスターが空です。');
+
+  const csv=Papa.unparse({
+   fields:CSV_EXPORT_HEADERS.map(([header])=>header),
+   data:rows
+  },{
+   newline:'\r\n',
+   quotes:true
+  });
+
+  const blob=new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  const date=new Date();
+  const stamp=[
+   date.getFullYear(),
+   String(date.getMonth()+1).padStart(2,'0'),
+   String(date.getDate()).padStart(2,'0')
+  ].join('');
+
+  link.href=url;
+  link.download='シェアリスコア_楽曲マスター_'+stamp+'.csv';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+
+  msg('exportCsvStatus',`✅ ${rows.length.toLocaleString()}曲・13項目をCSV出力しました（UUID維持）。`);
+ }catch(error){
+  msg('exportCsvStatus','⚠ CSV出力に失敗：'+humanErr(error));
+ }finally{
+  button.disabled=false;
+  busy=false;
+ }
+});
+
+async function loadMaster(){const v=await db.ref('songs').once('value');master=v.val()||{};msg('csvInfo',`Firebase公開マスター：${Object.keys(master).length.toLocaleString()}曲。CSVを選択して照合してください。`);}
+async function login(){try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());}catch(e){msg('authStatus','Googleログインに失敗：'+humanErr(e));}}
+el('login').addEventListener('click',login);el('logout').addEventListener('click',()=>auth.signOut());
+auth.onAuthStateChanged(async user=>{
+ admin=null;el('workspace').style.display='none';el('login').hidden=!!user;el('logout').hidden=!user;
+ if(!user){msg('authStatus','管理者Googleアカウントでログインしてください。');return;}
+ if(user.isAnonymous){msg('authStatus','Google認証が必要です。');return;}
+ try{const check=await db.ref('admins/'+user.uid).once('value');
+ if(auth.currentUser?.uid!==user.uid)return;
+ if(check.val()!==true){msg('authStatus','管理者権限がありません。Firebase Consoleで admins/'+user.uid+' に true を登録してください。');return;}
+ admin=user;msg('authStatus','✅ 管理者として認証しました：'+(user.displayName||user.email||user.uid));el('workspace').style.display='block';
+ await Promise.all([loadMaster(),loadRequests(),loadEditLogs(),showMasterRevision()]);}catch(e){msg('authStatus','管理者権限の確認に失敗：'+humanErr(e)+'。Realtime Databaseルールが公開済みか確認してください。');}
+});
+el('refreshMaster').addEventListener('click',async()=>{if(!admin||busy)return;try{await loadMaster();preview=[];el('applyCsv').disabled=true;el('csvPreview').hidden=true;}catch(e){msg('csvInfo',humanErr(e));}});
+el('previewCsv').addEventListener('click',async()=>{
+ if(!admin||busy)return;const file=el('csvFile').files?.[0];if(!file){msg('csvInfo','CSVファイルを選択してください。');return;}
+ if(!/\.csv$/i.test(file.name)||file.size>5*1024*1024){msg('csvInfo','CSV形式・5MB以下のファイルを使用してください。');return;}
+ el('applyCsv').disabled=true;el('csvPreview').hidden=false;el('csvPreview').replaceChildren();preview=[];
+ try{
+ const csv=await new Promise((resolve,reject)=>Papa.parse(file,{header:true,skipEmptyLines:'greedy',transformHeader:h=>String(h||'').replace(/^\uFEFF/,'').trim(),complete:resolve,error:reject}));
+ const fatal=(csv.errors||[]).filter(e=>e.code!=='UndetectableDelimiter');if(fatal.length)throw Error('CSV解析エラー：'+(fatal[0].row!=null?(fatal[0].row+2)+'行目 ':'')+fatal[0].message);
+ const headers=(csv.meta.fields||[]).map(h=>HEADERS[h]);
+ if(!headers.includes('title')||!headers.includes('artist')||!headers.includes('chordwiki'))throw Error('必須見出し：曲名・アーティスト・コードwiki');
+ const mapped=headers.filter(Boolean);const dupHeader=mapped.find((k,i)=>mapped.indexOf(k)!==i);if(dupHeader)throw Error('同じ項目に対応する見出しが複数あります：'+dupHeader+'（例：「ジャンル」と「ジャンル①」）。どちらか一方にしてください。');
+ if(csv.data.length>2000)throw Error('一度に最大2,000曲です。CSVを分割してください。');
+ const seen=new Set(),csvKeys=new Map(),knownIds=new Map();Object.entries(master).forEach(([id,song])=>{const k=identity(normalized(song));if(!knownIds.has(k))knownIds.set(k,id);else knownIds.set(k,'multiple');});
+ const counts={add:0,update:0,same:0,hold:0};
+ csv.data.forEach((raw,at)=>{
+   const song=blankSong();Object.entries(raw).forEach(([header,value])=>{const key=HEADERS[header];if(key)song[key]=String(value??'').trim();});
+   const originalId=song.id;const reason=[];song.chordwiki=canonicalUrl(song.chordwiki);
+   if(!song.title)reason.push('曲名が空欄');if(!song.artist&&!originalId)reason.push('新曲のアーティストが空欄');
+   if(song.chordwiki===null)reason.push('ChordWiki原曲URLの形式が不正');
+   const urlKey=identity({...song,chordwiki:song.chordwiki||''});
+   if(!originalId&&knownIds.has(urlKey))reason.push('同一曲候補：既存UUID '+knownIds.get(urlKey)+'。既存UUIDを指定して更新してください');
+   if(originalId&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(originalId))reason.push('既存UUIDの形式を確認');
+   if(!originalId&&csvKeys.has(urlKey))reason.push('CSV内の'+csvKeys.get(urlKey)+'行目と同一曲候補');
+   if(!originalId&&!reason.length){song.id=crypto.randomUUID();csvKeys.set(urlKey,at+2);}
+   if(seen.has(song.id)&&song.id)reason.push('CSV内でUUIDが重複');if(song.id)seen.add(song.id);
+   let type='hold';if(!reason.length){const prev=master[song.id];type=prev?(sameSong(normalized(prev),song)?'same':'update'):'add';}
+   counts[type]++;preview.push({type,song,at:at+2,reason:reason.join(' / ')});
+ });
+ msg('csvInfo',`CSV ${csv.data.length}件｜新規${counts.add}・更新${counts.update}・変更なし${counts.same}・保留${counts.hold}。未掲載の曲は削除しません。`);
+ const frag=document.createDocumentFragment();preview.slice(0,80).forEach(item=>{const div=document.createElement('div');div.className='row';const type={add:'新規',update:'更新',same:'変更なし',hold:'保留'}[item.type];div.textContent=`${item.at}行目 [${type}] ${item.song.title||'（曲名なし）'} / ${item.song.artist||'（アーティストなし）'} ｜ ${item.reason||item.song.id}`;if(item.type==='hold')div.classList.add('warn');frag.append(div);});
+ if(preview.length>80){const div=document.createElement('div');div.className='row muted';div.textContent=`表示は先頭80行まで。残り${preview.length-80}行も判定済みです。`;frag.append(div);}el('csvPreview').append(frag);
+ el('applyCsv').disabled=!(counts.add+counts.update);
+ }catch(e){msg('csvInfo','取り込み前チェックに失敗：'+humanErr(e));}
+});
+el('applyCsv').addEventListener('click',async()=>{
+ if(!admin||busy)return;const target=preview.filter(item=>item.type==='add'||item.type==='update');if(!target.length)return;
+ if(!confirm(`${target.length}曲をFirebase本番のsongsへ追加・更新します。CSVにない曲は削除しません。バックアップを取りましたか？`))return;
+ busy=true;el('applyCsv').disabled=true;el('previewCsv').disabled=true;let done=0;
+ try{for(let i=0;i<target.length;i+=50){if(auth.currentUser?.uid!==admin.uid)throw Error('途中でログインアカウントが変更されました');const chunk=target.slice(i,i+50);const updates={};chunk.forEach(item=>{const next=compactSong(item.song);next.updatedAt=firebase.database.ServerValue.TIMESTAMP;updates['songs/'+item.song.id]=next;});await db.ref().update(updates);chunk.forEach(item=>master[item.song.id]=compactSong(item.song));done+=chunk.length;msg('csvProgress',`Firebaseへ保存済み：${done}/${target.length}曲`);}msg('csvInfo',`✅ ${done}曲の保存が完了しました。既存UUIDを維持し、未掲載楽曲は削除していません。`);preview=[];el('csvPreview').hidden=true;}
+ catch(e){msg('csvInfo',`⚠ ${done}曲まで保存しました。エラー：${humanErr(e)}。再取込前にFirebaseとCSVを照合してください。`);}finally{
+  if(done>0){try{await db.ref('masterMeta/revision').set(newMasterRevision());await showMasterRevision();}catch(e){msg('csvProgress','⚠ 更新通知に失敗しました。「公開マスターの更新を通知する」を押してください：'+humanErr(e));}}
+  busy=false;el('previewCsv').disabled=false;}
+});
+el('refreshRequests').addEventListener('click',loadRequests);
+el('refreshEditLogs').addEventListener('click',loadEditLogs);
+
+const EDIT_LOG_FIELD_LABELS={
+ title:'曲名',artist:'アーティスト',chordwiki:'コードwiki',bpm:'BPM',
+ genre:'ジャンル',genre2:'ジャンル②',genre3:'ジャンル③',tieup:'タイアップ情報',
+ search:'検索',lyrics:'作詞',composition:'作曲',arrangement:'編曲'
+};
+function safeText(value){return String(value??'');}
+async function loadEditLogs(){
+ if(!admin)return;
+ msg('editLogs','読み込み中…');
+ try{
+  const snap=await db.ref('songEditLogs').orderByChild('editedAt').limitToLast(100).once('value');
+  const rows=[];
+  snap.forEach(item=>rows.push({id:item.key,data:item.val()||{}}));
+  rows.sort((a,b)=>(b.data.editedAt||0)-(a.data.editedAt||0));
+  renderEditLogs(rows);
+ }catch(err){
+  msg('editLogs','編集履歴を読めません：'+humanErr(err));
+ }
+}
+function renderEditLogs(rows){
+ const out=el('editLogs');
+ out.replaceChildren();
+ if(!rows.length){out.textContent='編集履歴はまだありません。';return;}
+ for(const row of rows){
+  const d=row.data||{},card=document.createElement('div');card.className='log-card';
+
+  const head=document.createElement('div');head.className='log-head';
+  const title=document.createElement('div');title.className='log-title';
+  title.textContent=(d.songTitleAfter||d.songTitleBefore||'曲名不明')+' ｜ '+(d.songId||'ID不明');
+  head.append(title);
+
+  const time=document.createElement('div');time.className='log-meta';
+  time.textContent=d.editedAt?new Date(d.editedAt).toLocaleString('ja-JP'):'日時不明';
+  head.append(time);
+  card.append(head);
+
+  const editor=document.createElement('div');editor.className='log-meta';
+  const name=d.editorName||'表示名なし',mail=d.editorEmail||'メールなし';
+  editor.textContent=`編集者：${name} / ${mail} ｜ UID：${d.editorUid||''}`;
+  card.append(editor);
+
+  const changes=d.changes&&typeof d.changes==='object'?d.changes:{};
+  const entries=Object.entries(changes);
+  if(!entries.length){
+   const none=document.createElement('div');none.className='muted';none.textContent='変更内容の記録がありません。';card.append(none);
+  }else{
+   for(const [field,diff] of entries){
+    const change=document.createElement('div');change.className='log-change';
+    const label=document.createElement('div');label.className='log-field';label.textContent=EDIT_LOG_FIELD_LABELS[field]||field;
+    const values=document.createElement('div');values.className='log-values';
+    const before=safeText(diff?.before)||'（空欄）',after=safeText(diff?.after)||'（空欄）';
+    values.textContent=`変更前：${before}\n変更後：${after}`;
+    change.append(label,values);card.append(change);
+   }
+  }
+  out.append(card);
+ }
+}
+
+async function loadRequests(){
+ if(!admin)return;msg('addRequests','読み込み中…');msg('editRequests','読み込み中…');
+ try{
+ const [a,e]=await Promise.all([db.ref('songAddRequests').once('value'),db.ref('songEditRequests').once('value')]);
+ const adds=[];a.forEach(owner=>owner.forEach(item=>{if(item.val()?.status==='pending')adds.push({path:`songAddRequests/${owner.key}/${item.key}`,data:item.val(),id:item.key});}));
+ const edits=[];e.forEach(song=>song.forEach(item=>{if(item.val()?.status==='pending')edits.push({path:`songEditRequests/${song.key}/${item.key}`,data:item.val(),id:item.key});}));
+ renderRequests('addRequests',adds,'add');renderRequests('editRequests',edits,'edit');
+ }catch(err){msg('addRequests','申請一覧を読めません：'+humanErr(err));msg('editRequests','申請一覧を読めません：'+humanErr(err));}
+}
+function renderRequests(id,rows,kind){const out=el(id);out.replaceChildren();if(!rows.length){out.textContent='現在、承認待ちの申請はありません。';return;}
+ rows.sort((a,b)=>(a.data.createdAt||0)-(b.data.createdAt||0));
+ rows.forEach(record=>{
+ const wrap=document.createElement('div');wrap.className='request';const heading=document.createElement('h3');heading.textContent=`${record.data.title||'曲名未入力'} / ${record.data.artist||'（アーティスト未入力）'} ｜ ${kind==='add'?'新曲申請':record.data.type==='artistFill'?'アーティスト補完':'修正申請'}`;wrap.append(heading);
+ const info=document.createElement('div');info.className='muted';info.textContent=`申請者UID：${record.data.requestedBy||''} ｜ 日時：${new Date(record.data.createdAt||0).toLocaleString('ja-JP')}`;wrap.append(info);
+ const diff=document.createElement('pre');diff.textContent=kind==='add'?JSON.stringify(Object.fromEntries(FIELDS.filter(k=>k!=='id').map(f=>[f,record.data[f]??''])),null,2):JSON.stringify(record.data.type==='artistFill'?{songId:record.data.songId,newArtist:record.data.artist,sourceUrl:record.data.sourceUrl||''}:{songId:record.data.songId,changes:record.data.changes||{}},null,2);wrap.append(diff);
+ const actions=document.createElement('div');actions.className='request-actions';
+ for(const [label,approved,className] of [['✅ 承認',true,'approve'],['✕ 却下',false,'reject']]){const button=document.createElement('button');button.className=className;button.textContent=label;button.onclick=()=>decide(record,kind,approved);actions.append(button);}wrap.append(actions);out.append(wrap);
+ });}
+async function decide(record,kind,approved){if(!admin||busy)return;const data=record.data;
+ const label=approved?'承認':'却下';if(!confirm(`${data.title||data.songId||'申請'} を${label}しますか？`))return;
+ busy=true;try{
+ if(auth.currentUser?.uid!==admin.uid)throw Error('管理者の再認証が必要です');
+ const current=(await db.ref(record.path).once('value')).val();if(!current||current.status!=='pending')throw Error('この申請はすでに処理されています。再読込してください。');
+ if(JSON.stringify(current)!==JSON.stringify(record.data))throw Error('表示後に申請内容が変更されました。再読込して内容を確認してください。');
+ const updates={[record.path+'/status']:approved?'approved':'rejected',[record.path+'/reviewedAt']:firebase.database.ServerValue.TIMESTAMP,[record.path+'/reviewedBy']:admin.uid};
+ let songId='';
+ if(approved&&kind==='add'){
+  const title=String(data.title||'').trim(),artist=String(data.artist||'').trim(),chordwiki=canonicalUrl(data.chordwiki||'');
+  if(!title||!artist||chordwiki===null)throw Error('曲名・アーティスト・ChordWiki URLを確認してください。');
+  const duplicate=Object.entries(master).find(([,item])=>item.title===title&&item.artist===artist);
+  if(duplicate)throw Error('同名・同アーティストが既に登録済み：'+duplicate[0]+'。申請は必要に応じて却下してください。');
+  let liveDuplicate=null;(await db.ref('songs').orderByChild('title').equalTo(title).once('value')).forEach(snap=>{if(!liveDuplicate&&String(snap.val()?.artist||'')===artist)liveDuplicate=snap.key;});
+  if(liveDuplicate)throw Error('同名・同アーティストが既に登録済み(最新のFirebase)：'+liveDuplicate+'。申請は必要に応じて却下してください。');
+  songId=crypto.randomUUID();const song=normalized({...data,id:songId,chordwiki});const nextSong=compactSong(song);nextSong.updatedAt=firebase.database.ServerValue.TIMESTAMP;updates['songs/'+songId]=nextSong;updates[record.path+'/approvedSongId']=songId;
+ }else if(approved&&kind==='edit'){
+  songId=String(data.songId||'');const live=(await db.ref('songs/'+songId).once('value')).val();if(!live)throw Error('対象UUIDがsongsにありません。');
+  let song=normalized(live);
+  if(data.type==='artistFill'){
+   if(song.artist.trim())throw Error('既にアーティスト情報が登録されています。内容を確認してください。');
+   song.artist=String(data.artist||'').trim();if(!song.artist)throw Error('補完アーティスト名が空欄です。');
+  }else if(data.type==='edit'){
+   const changes=data.changes||{};for(const [field,value] of Object.entries(changes)){
+    if(!FIELDS.includes(field)||field==='id'||typeof value!=='string')throw Error('許可されていない修正項目です：'+field);
+    song[field]=field==='chordwiki'?canonicalUrl(value):String(value).trim();if(song[field]===null)throw Error('ChordWiki URLが不正です。');
+   }
+   if(!song.title)throw Error('曲名を空欄にはできません。');
+  }else throw Error('不明な申請種類');
+  const nextSong=compactSong(song);nextSong.updatedAt=firebase.database.ServerValue.TIMESTAMP;updates['songs/'+songId]=nextSong;
+ }
+ if(approved&&songId)updates['masterMeta/revision']=newMasterRevision();
+ await db.ref().update(updates);
+ if(approved&&songId){master[songId]=updates['songs/'+songId];}
+ await loadRequests();
+ }catch(e){alert(label+'に失敗：'+humanErr(e));}finally{busy=false;}
+}
+</script></body></html>

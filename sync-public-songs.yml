@@ -1,0 +1,54 @@
+name: Build Firebase song search index
+
+on:
+  schedule:
+    - cron: '5,15,25,35,45,55 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: build-song-search-index
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Firebase Admin SDK
+        run: npm install --no-save --package-lock=false firebase-admin@13
+
+      - name: Build versioned search index in Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/build-search-index.mjs
+
+      - name: Open an issue when scheduled build fails
+        if: failure() && github.event_name == 'schedule'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh label create search-index-failure --color B60205 --description 'Song search index build failed' 2>/dev/null || true
+          open="$(gh issue list --label search-index-failure --state open --json number --jq 'length' || echo 0)"
+          if [ "${open}" = "0" ]; then
+            gh issue create \
+              --label search-index-failure \
+              --title '楽曲検索インデックスの自動更新に失敗しました' \
+              --body "検索インデックスのGitHub Actionsが失敗しました。ログ: ${RUN_URL}" || true
+          fi
