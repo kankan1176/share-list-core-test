@@ -1361,7 +1361,7 @@ body.sl-room-dock-collapsed #slRoomDockHandle span{display:inline-block;transfor
 .sl-dock-artist{margin-top:2px;font-size:8.5px;color:#8394b4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl-dock-actions{display:flex;gap:3px;align-items:center}
 .sl-dock-actions button{min-width:27px;height:27px;padding:3px 5px;border-radius:7px;font-size:9px;font-weight:850}
-.sl-act-back{background:#172a49!important;color:#d5e1f4!important;border-color:#354c71!important}
+.sl-act-back{background:#8fc9ff!important;color:#0f2f57!important;border-color:#5aaef5!important}
 .sl-act-ok{background:rgba(45,199,128,.17)!important;color:#70e0ac!important;border-color:rgba(61,210,144,.40)!important}
 .sl-act-delete{background:rgba(245,74,91,.15)!important;color:#ff8894!important;border-color:rgba(247,82,99,.36)!important}
 .sl-dock-arrow{text-align:center;color:#4d8fff;font-size:15px;line-height:22px}
@@ -2944,8 +2944,11 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
 #slRoomDock .sl-room-status-tabs{background:var(--sl-dock-surface)!important;border-color:var(--sl-dock-edge)!important}
 #slRoomDock .sl-room-dock-mini{font-size:19px!important;min-width:36px;min-height:36px}
 #slDockDesignPanel[hidden]{display:none!important}
-#slDockDesignPanel{position:absolute;z-index:10;top:59px;left:10px;right:10px;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #5375ae;border-radius:12px;background:#101f37;color:#edf4ff;box-shadow:0 14px 40px rgba(0,0,0,.65);font-size:13px}
-#slDockDesignPanel .sl-dock-design-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#slDockDesignPanel{position:fixed;z-index:2500;top:70px;left:20px;right:auto;width:min(310px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #5375ae;border-radius:12px;background:#101f37;color:#edf4ff;box-shadow:0 14px 40px rgba(0,0,0,.65);font-size:13px}
+#slDockDesignPanel .sl-dock-design-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:3px 0 8px;border-bottom:1px solid #344d75}
+#slDockDesignPanel.sl-design-dragging .sl-dock-design-heading{cursor:grabbing}
+#slDockDesignPanel .sl-dock-design-heading button{cursor:pointer;touch-action:auto}
+#slDockDesignPanel .sl-dock-drag-hint{font-size:10px;color:#aabbd4;line-height:1.4}
 #slDockDesignPanel .sl-dock-design-heading strong{font-size:14px}
 #slDockDesignPanel .sl-dock-design-heading button{font-size:21px;line-height:1;padding:2px 8px}
 #slDockDesignPanel label{font-size:12px;font-weight:700;color:#cddaf0}
@@ -2954,6 +2957,20 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
 #slDockDesignPanel output{float:right;font-variant-numeric:tabular-nums}
 #slDockDesignPanel small{color:#aabbd4;font-size:10px;line-height:1.4}
 #slDockDesignReset{margin-top:3px;align-self:flex-start}
+
+
+/* Room dock: persistent and easy-to-find leave action */
+#slRoomDock .sl-room-dock-top > div:first-child { min-width:0; flex:1 1 auto; }
+#slRoomDock .sl-dock-header-actions { display:flex;flex:0 0 auto;align-items:center;gap:6px; }
+#slRoomDock #slRoomLeaveBtn {
+  min-height:36px;padding:6px 10px;border-radius:10px;
+  background:#9b293e;color:#fff;border:1px solid #d45b70;
+  font-size:12px;font-weight:800;cursor:pointer;
+}
+#slRoomDock #slRoomLeaveBtn:hover:not(:disabled) { background:#b63249;color:#fff; }
+#slRoomDock #slRoomLeaveBtn:focus-visible { outline:2px solid #ff9aa9;outline-offset:2px; }
+#slRoomDock #slRoomLeaveBtn:disabled { opacity:.55;cursor:wait; }
+@media(max-width:380px) { #slRoomDock #slRoomLeaveBtn { padding:6px 7px;font-size:11px; } }
 
 </style>
 </head>
@@ -3028,11 +3045,14 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
       <small>● セッション進行</small>
       <strong id="slDockTitle">予約 → 演奏確定 → 完了</strong>
     </div>
-    <button type="button" class="sl-room-dock-mini" onclick="slToggleDockDesign()" title="右メニューのデザイン変更" aria-label="右メニューのデザイン変更" aria-expanded="false" aria-controls="slDockDesignPanel">🎨</button>
+    <div class="sl-dock-header-actions">
+      <button type="button" class="sl-room-dock-mini" onclick="slToggleDockDesign()" title="右メニューのデザイン変更" aria-label="右メニューのデザイン変更" aria-expanded="false" aria-controls="slDockDesignPanel">🎨</button>
+      <button type="button" id="slRoomLeaveBtn" onclick="slConfirmLeaveRoom()" title="現在のルームから退室" aria-label="ルームから退室">🚪 退室</button>
+    </div>
   </div>
 
   <section id="slDockDesignPanel" class="sl-dock-design-panel" aria-label="右メニューデザイン設定" hidden>
-    <div class="sl-dock-design-heading"><strong>右メニューのデザイン</strong><button type="button" onclick="slToggleDockDesign(false)" aria-label="設定を閉じる">×</button></div>
+    <div class="sl-dock-design-heading" title="ドラッグして移動できます"><strong>⠿ 右メニューのデザイン</strong><button type="button" onclick="slToggleDockDesign(false)" aria-label="設定を閉じる">×</button></div>
     <label for="slDockFontScale">文字の大きさ <output id="slDockFontOutput">標準</output></label>
     <input type="range" id="slDockFontScale" min="90" max="150" step="10" value="100" oninput="slUpdateDockDesign()">
     <label for="slDockColorSelect">配色</label>
@@ -3049,7 +3069,7 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
       <option value="relaxed">ゆったり</option>
     </select>
     <button type="button" id="slDockDesignReset" onclick="slResetDockDesign()">標準に戻す</button>
-    <small>このブラウザに保存され、右メニューだけに反映されます。</small>
+    <small>設定は即時反映され、このブラウザに保存されます。見出しをドラッグするとパネルを移動できます。</small>
   </section>
 
   <div class="sl-room-status-tabs" aria-label="セッション状況">
@@ -5612,6 +5632,22 @@ body:not(.in-room) #slRoomDockHandle {display:none!important}
         } finally {
             roomCreationBusy = false;
         }
+    }
+
+    // 右メニューからの退室は、誤操作防止のため確認してから既存の退室処理を呼ぶ。
+    let slLeavingRoom = false;
+    function slConfirmLeaveRoom() {
+        if (!currentRoomId || slLeavingRoom) return;
+        if (!window.confirm('このルームから退室しますか？\n予約・確定・完了の曲は削除されません。')) return;
+        slLeavingRoom = true;
+        const button = document.getElementById('slRoomLeaveBtn');
+        if (button) { button.disabled = true; button.textContent = '退室中…'; }
+        Promise.resolve().then(() => leaveRoom()).catch(error => {
+            console.error('ルーム退室に失敗:', error);
+            slLeavingRoom = false;
+            if (button) { button.disabled = false; button.textContent = '🚪 退室'; }
+            alert('退室できませんでした。通信状態を確認して再度お試しください。');
+        });
     }
 
     async function leaveRoom() {
@@ -9675,20 +9711,74 @@ html, body { background: transparent !important; color: ${text} !important; }
     try{localStorage.setItem(STORE,JSON.stringify(settings))}catch(e){}
   };
   window.slResetDockDesign=function(){apply(DEFAULTS);try{localStorage.removeItem(STORE)}catch(e){}};
+  // Move the panel out of the room dock so its transform/overflow cannot clip it.
+  // Keep it open when interacting with the dock to preview adjustments live.
+  let panelPositioned=false;
+  function limitPosition(x,y,panel){
+    const edge=8;
+    return {
+      x:Math.max(edge,Math.min(x,window.innerWidth-panel.offsetWidth-edge)),
+      y:Math.max(edge,Math.min(y,window.innerHeight-panel.offsetHeight-edge))
+    };
+  }
+  function setPosition(panel,x,y){
+    const next=limitPosition(x,y,panel);
+    panel.style.left=next.x+'px';panel.style.top=next.y+'px';
+  }
+  function preparePanel(){
+    const panel=get('slDockDesignPanel');
+    if(panel&&panel.parentElement!==document.body)document.body.appendChild(panel);
+    return panel;
+  }
   window.slToggleDockDesign=function(force){
     if(!document.body.classList.contains('in-room'))return;
-    const panel=get('slDockDesignPanel'),btn=document.querySelector('#slRoomDock .sl-room-dock-mini');
+    const panel=preparePanel(),btn=document.querySelector('#slRoomDock .sl-room-dock-mini');
     if(!panel)return;
     const open=typeof force==='boolean'?force:panel.hidden;
     panel.hidden=!open;
     if(btn)btn.setAttribute('aria-expanded',String(open));
+    if(open){
+      if(!panelPositioned){
+        const dock=get('slRoomDock');
+        const dockLeft=dock?.getBoundingClientRect().left??window.innerWidth;
+        const preferredX=dockLeft-panel.offsetWidth-12;
+        setPosition(panel,preferredX,Math.max(8,Math.min(70,window.innerHeight-panel.offsetHeight-8)));
+        panelPositioned=true;
+      }else{
+        setPosition(panel,parseFloat(panel.style.left)||8,parseFloat(panel.style.top)||8);
+      }
+    }
   };
-  document.addEventListener('click',function(e){
-    const panel=get('slDockDesignPanel');if(!panel||panel.hidden)return;
-    const button=document.querySelector('#slRoomDock .sl-room-dock-mini');
-    if(!panel.contains(e.target)&&!button?.contains(e.target))window.slToggleDockDesign(false);
-  });
+  // Drag from the title bar with a mouse, pen or touch (not from the close button).
+  let drag=null;
+  function initDrag(){
+    const panel=preparePanel(),heading=panel?.querySelector('.sl-dock-design-heading');
+    if(!heading)return;
+    heading.addEventListener('pointerdown',function(e){
+      if(e.button!==0||e.target.closest('button'))return;
+      const rect=panel.getBoundingClientRect();
+      drag={id:e.pointerId,startX:e.clientX,startY:e.clientY,x:rect.left,y:rect.top};
+      heading.setPointerCapture(e.pointerId);
+      panel.classList.add('sl-design-dragging');
+      e.preventDefault();
+    });
+    heading.addEventListener('pointermove',function(e){
+      if(!drag||drag.id!==e.pointerId)return;
+      setPosition(panel,drag.x+e.clientX-drag.startX,drag.y+e.clientY-drag.startY);
+    });
+    const stop=e=>{
+      if(!drag||drag.id!==e.pointerId)return;
+      drag=null;panel.classList.remove('sl-design-dragging');
+      if(heading.hasPointerCapture(e.pointerId))heading.releasePointerCapture(e.pointerId);
+    };
+    heading.addEventListener('pointerup',stop);
+    heading.addEventListener('pointercancel',stop);
+    window.addEventListener('resize',()=>{
+      if(!panel.hidden)setPosition(panel,parseFloat(panel.style.left)||8,parseFloat(panel.style.top)||8);
+    },{passive:true});
+  }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')window.slToggleDockDesign(false)});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initDrag,{once:true});else initDrag();
   let saved=DEFAULTS;
   try{saved={...DEFAULTS,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(e){}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>apply(saved),{once:true});else apply(saved);
