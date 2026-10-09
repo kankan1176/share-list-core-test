@@ -2917,6 +2917,44 @@ body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
 /* Phase 2: Firebase更新が未完了の行は再操作を防止する */
 .sl-dock-song.sl-dock-pending{opacity:.62;cursor:progress}
 .sl-dock-song.sl-dock-pending button{cursor:wait;pointer-events:none}
+
+/* RIGHT DOCK LOCAL APPEARANCE — only #slRoomDock descendants change */
+body:not(.in-room) #slRoomDock,
+body.sl-room-create-open:not(.in-room) #slRoomDock {display:none!important}
+body:not(.in-room) #slRoomDockHandle {display:none!important}
+#slRoomDock{--sl-dock-fs:1;--sl-dock-card-pad:7px;--sl-dock-card-gap:5px;--sl-dock-card-bg:#10213b;--sl-dock-surface:#0b1930;--sl-dock-foreground:#eef4ff;--sl-dock-subtle:#8394b4;--sl-dock-edge:rgba(113,145,208,.18)}
+#slRoomDock[data-dock-color="charcoal"]{background:#171b23!important;--sl-dock-card-bg:#272d39;--sl-dock-surface:#212632;--sl-dock-foreground:#f4f5f7;--sl-dock-subtle:#a6b0c0;--sl-dock-edge:#40495a}
+#slRoomDock[data-dock-color="purple"]{background:#1c1536!important;--sl-dock-card-bg:#342552;--sl-dock-surface:#281c43;--sl-dock-foreground:#f5efff;--sl-dock-subtle:#c2afd9;--sl-dock-edge:#63517d}
+#slRoomDock[data-dock-color="light"]{background:#eef3fb!important;--sl-dock-card-bg:#ffffff;--sl-dock-surface:#e6ecf8;--sl-dock-foreground:#172b48;--sl-dock-subtle:#5c6b82;--sl-dock-edge:#bdcbdf}
+#slRoomDock[data-dock-density="compact"]{--sl-dock-card-pad:4px;--sl-dock-card-gap:3px}
+#slRoomDock[data-dock-density="relaxed"]{--sl-dock-card-pad:12px;--sl-dock-card-gap:10px}
+#slRoomDock .sl-dock-song{grid-template-columns:18px minmax(0,1fr) auto!important;gap:var(--sl-dock-card-gap)!important;margin-bottom:var(--sl-dock-card-gap)!important;padding:var(--sl-dock-card-pad)!important;background:var(--sl-dock-card-bg)!important;border-color:var(--sl-dock-edge)!important}
+#slRoomDock .sl-dock-section{background:var(--sl-dock-surface)!important;border-color:var(--sl-dock-edge)!important}
+#slRoomDock .sl-room-dock-top strong,#slRoomDock .sl-dock-title,#slRoomDock .sl-dock-section header strong{color:var(--sl-dock-foreground)!important}
+#slRoomDock .sl-dock-artist,#slRoomDock .sl-dock-index,#slRoomDock .sl-dock-empty{color:var(--sl-dock-subtle)!important}
+#slRoomDock .sl-room-dock-top strong{font-size:calc(14px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-room-dock-top small{font-size:calc(10.5px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-room-status-tabs button{font-size:calc(12px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-dock-section header strong{font-size:calc(13px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-dock-title{font-size:calc(12.5px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-dock-artist,#slRoomDock .sl-dock-index{font-size:calc(10px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-dock-empty{font-size:calc(11px * var(--sl-dock-fs))!important}
+#slRoomDock .sl-dock-actions button{font-size:calc(16px * var(--sl-dock-fs))!important;width:calc(29px * max(1,var(--sl-dock-fs)))!important;min-width:29px!important;height:calc(29px * max(1,var(--sl-dock-fs)))!important;padding:0!important}
+#slRoomDock .sl-room-status-tabs button:not(.active){background:var(--sl-dock-card-bg)!important;color:var(--sl-dock-subtle)!important}
+#slRoomDock .sl-room-status-tabs{background:var(--sl-dock-surface)!important;border-color:var(--sl-dock-edge)!important}
+#slRoomDock .sl-room-dock-mini{font-size:19px!important;min-width:36px;min-height:36px}
+#slDockDesignPanel[hidden]{display:none!important}
+#slDockDesignPanel{position:absolute;z-index:10;top:59px;left:10px;right:10px;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #5375ae;border-radius:12px;background:#101f37;color:#edf4ff;box-shadow:0 14px 40px rgba(0,0,0,.65);font-size:13px}
+#slDockDesignPanel .sl-dock-design-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#slDockDesignPanel .sl-dock-design-heading strong{font-size:14px}
+#slDockDesignPanel .sl-dock-design-heading button{font-size:21px;line-height:1;padding:2px 8px}
+#slDockDesignPanel label{font-size:12px;font-weight:700;color:#cddaf0}
+#slDockDesignPanel select{width:100%;box-sizing:border-box;font-size:13px;padding:8px;border:1px solid #426390;border-radius:7px;background:#152c4b;color:#f1f6ff}
+#slDockDesignPanel input[type=range]{width:100%;accent-color:#528aff}
+#slDockDesignPanel output{float:right;font-variant-numeric:tabular-nums}
+#slDockDesignPanel small{color:#aabbd4;font-size:10px;line-height:1.4}
+#slDockDesignReset{margin-top:3px;align-self:flex-start}
+
 </style>
 </head>
 <body>
@@ -2990,8 +3028,29 @@ body.in-room.sl-room-dock-collapsed #slRoomDockHandle{pointer-events:auto}
       <small>● セッション進行</small>
       <strong id="slDockTitle">予約 → 演奏確定 → 完了</strong>
     </div>
-    <button type="button" class="sl-room-dock-mini" onclick="slOpenRoomSettings()" title="ルーム情報">⚙️</button>
+    <button type="button" class="sl-room-dock-mini" onclick="slToggleDockDesign()" title="右メニューのデザイン変更" aria-label="右メニューのデザイン変更" aria-expanded="false" aria-controls="slDockDesignPanel">🎨</button>
   </div>
+
+  <section id="slDockDesignPanel" class="sl-dock-design-panel" aria-label="右メニューデザイン設定" hidden>
+    <div class="sl-dock-design-heading"><strong>右メニューのデザイン</strong><button type="button" onclick="slToggleDockDesign(false)" aria-label="設定を閉じる">×</button></div>
+    <label for="slDockFontScale">文字の大きさ <output id="slDockFontOutput">標準</output></label>
+    <input type="range" id="slDockFontScale" min="90" max="150" step="10" value="100" oninput="slUpdateDockDesign()">
+    <label for="slDockColorSelect">配色</label>
+    <select id="slDockColorSelect" onchange="slUpdateDockDesign()">
+      <option value="navy">ネイビー（標準）</option>
+      <option value="charcoal">チャコール</option>
+      <option value="light">ライト</option>
+      <option value="purple">パープル</option>
+    </select>
+    <label for="slDockDensitySelect">カードの余白</label>
+    <select id="slDockDensitySelect" onchange="slUpdateDockDesign()">
+      <option value="normal">標準</option>
+      <option value="compact">コンパクト（曲を多く表示）</option>
+      <option value="relaxed">ゆったり</option>
+    </select>
+    <button type="button" id="slDockDesignReset" onclick="slResetDockDesign()">標準に戻す</button>
+    <small>このブラウザに保存され、右メニューだけに反映されます。</small>
+  </section>
 
   <div class="sl-room-status-tabs" aria-label="セッション状況">
     <button type="button" class="active" data-status="reserved" onclick="slSelectDockStatus('reserved')">予約 <b id="slDockReservedCount">0</b></button>
@@ -9261,17 +9320,17 @@ html, body { background: transparent !important; color: ${text} !important; }
       const actions=document.createElement('div');actions.className='sl-dock-actions';
       if(status==='reserved'){
         actions.append(
-          slActionButton('☑️','演奏確定へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'confirmed')),
-          slActionButton('❎','予約から削除','sl-act-delete',()=>slDockRemove(item.qId))
+          slActionButton('✅','演奏確定へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'confirmed')),
+          slActionButton('❌','予約から削除','sl-act-delete',()=>slDockRemove(item.qId))
         );
       }else if(status==='confirmed'){
         actions.append(
-          slActionButton('🔙','予約へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'reserved')),
+          slActionButton('⏪','予約へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'reserved')),
           slActionButton('✅','完了へ','sl-act-ok',()=>slDockChangeStatus(item.qId,'completed')),
-          slActionButton('❎','演奏確定から削除','sl-act-delete',()=>slDockRemove(item.qId))
+          slActionButton('❌','演奏確定から削除','sl-act-delete',()=>slDockRemove(item.qId))
         );
       }else{
-        actions.append(slActionButton('🔙','演奏確定へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'confirmed')));
+        actions.append(slActionButton('⏪','演奏確定へ戻す','sl-act-back',()=>slDockChangeStatus(item.qId,'confirmed')));
       }
 
       if(slDockPendingIds.has(item.qId)){
@@ -9588,5 +9647,52 @@ html, body { background: transparent !important; color: ${text} !important; }
 })();
 </script>
 
+
+<script>
+/* Right dock design preferences: independent from global theme/Firebase */
+(function(){
+  'use strict';
+  const STORE='sharelistscore_room_dock_design_v1';
+  const DEFAULTS={font:100,color:'navy',density:'normal'};
+  const allowedColors=['navy','charcoal','light','purple'];
+  const allowedDensity=['normal','compact','relaxed'];
+  function get(id){return document.getElementById(id)}
+  function apply(settings){
+    const dock=get('slRoomDock');if(!dock)return;
+    const font=Math.max(90,Math.min(150,Math.round(Number(settings.font||100)/10)*10));
+    const color=allowedColors.includes(settings.color)?settings.color:DEFAULTS.color;
+    const density=allowedDensity.includes(settings.density)?settings.density:DEFAULTS.density;
+    dock.style.setProperty('--sl-dock-fs',String(font/100));
+    dock.dataset.dockColor=color;dock.dataset.dockDensity=density;
+    if(get('slDockFontScale'))get('slDockFontScale').value=String(font);
+    if(get('slDockColorSelect'))get('slDockColorSelect').value=color;
+    if(get('slDockDensitySelect'))get('slDockDensitySelect').value=density;
+    if(get('slDockFontOutput'))get('slDockFontOutput').textContent=font===100?'標準':font+'%';
+    return {font,color,density};
+  }
+  window.slUpdateDockDesign=function(){
+    const settings=apply({font:get('slDockFontScale').value,color:get('slDockColorSelect').value,density:get('slDockDensitySelect').value});
+    try{localStorage.setItem(STORE,JSON.stringify(settings))}catch(e){}
+  };
+  window.slResetDockDesign=function(){apply(DEFAULTS);try{localStorage.removeItem(STORE)}catch(e){}};
+  window.slToggleDockDesign=function(force){
+    if(!document.body.classList.contains('in-room'))return;
+    const panel=get('slDockDesignPanel'),btn=document.querySelector('#slRoomDock .sl-room-dock-mini');
+    if(!panel)return;
+    const open=typeof force==='boolean'?force:panel.hidden;
+    panel.hidden=!open;
+    if(btn)btn.setAttribute('aria-expanded',String(open));
+  };
+  document.addEventListener('click',function(e){
+    const panel=get('slDockDesignPanel');if(!panel||panel.hidden)return;
+    const button=document.querySelector('#slRoomDock .sl-room-dock-mini');
+    if(!panel.contains(e.target)&&!button?.contains(e.target))window.slToggleDockDesign(false);
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')window.slToggleDockDesign(false)});
+  let saved=DEFAULTS;
+  try{saved={...DEFAULTS,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(e){}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>apply(saved),{once:true});else apply(saved);
+})();
+</script>
 </body>
 </html>
